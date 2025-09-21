@@ -1,0 +1,478 @@
+Documento de Especificação – Aplicativo
+Visão Geral
+O APP é uma plataforma digital que conecta pacientes internados (ou familiares) a cuidadores, acompanhantes e profissionais de enfermagem qualificados, proporcionando conforto, segurança e tranquilidade durante internações hospitalares ou em cuidados domiciliares.
+ O objetivo é facilitar a busca, avaliação e contratação desses profissionais de forma rápida, segura e transparente.
+Funcionalidades Principais
+Cadastro de usuários (familiares e profissionais de saúde).
+
+
+Catálogo de cuidadores com filtros (especialidade, preço, experiência, localização, disponibilidade).
+
+
+Perfil detalhado do profissional, com fotos, certificados, experiências, avaliações e valores.
+
+
+Sistema de contratação com agendamento de período (horas, dias, semanas).
+
+
+Mensagens diretas/chat entre familiar e cuidador.
+
+
+Pagamentos integrados via app.
+
+
+Avaliações e comentários após o serviço.
+
+
+Área de acompanhamento de contratos ativos.
+
+
+Suporte e central de ajuda.
+
+
+1. Login
+Opção de entrar como Familiar ou Profissional (Técnico de Enfermagem, Cuidador, Enfermeiro, Acompanhante).
+
+
+Acesso via e-mail, telefone ou Google.
+
+
+Recuperação de senha.
+
+
+2. Cadastro
+Familiar: nome, telefone, e-mail, senha.
+
+
+Profissional: nome, telefone, e-mail, senha, formação, certificados, experiência, preço do serviço.
+
+
+Upload de documentos e certificados (para validação).
+
+
+Aceite de termos de uso e política de privacidade.
+
+
+3. Tela Principal
+Para familiar:
+
+
+Barra de busca (“Encontre um cuidador qualificado”).
+
+
+Sugestões de cuidadores em destaque.
+
+
+Filtros (preço, certificação, experiência, disponibilidade).
+
+
+Para profissional:
+
+
+Resumo da semana (quantos acessos ao perfil, solicitações recebidas).
+
+
+Atalhos: “Editar Perfil”, “Ver Agenda”, “Mensagens”.
+
+
+4. Anúncio (Card do Profissional)
+Foto do profissional.
+Nome e função (ex.: Técnica de Enfermagem).
+
+
+Preço por hora/diária.
+
+
+Avaliação (estrelas).
+
+
+Localização ou disponibilidade.
+
+
+Botão “Ver Perfil”.
+
+
+5. Buscar
+Campo de busca por nome, especialidade ou hospital.
+
+
+Filtros:
+ ✔️ Preço
+ ✔️ Certificados
+ ✔️ Experiência
+ ✔️ Avaliação
+ ✔️ Disponibilidade (data/horário)
+
+
+6. Perfil do Profissional
+Foto e nome.
+
+
+Breve descrição.
+
+
+Lista de certificados e especializações.
+
+
+Experiência (anos, locais onde atuou).
+
+
+Serviços oferecidos.
+
+
+Preço (hora, diária, semana).
+
+
+Avaliações de outros familiares.
+
+
+Botão “Contratar”.
+
+
+7. Tela de Contratação
+Seleção de data e horário.
+
+
+Escolha do tipo de contratação: hora, turno, diária, semana.
+
+
+Resumo do valor.
+
+
+Formas de pagamento (cartão, pix, transferência).
+
+
+Confirmação da reserva.
+
+
+8. Chat
+Canal direto entre familiar e cuidador antes e durante o serviço.
+
+
+Envio de mensagens rápidas e informações importantes.
+
+
+Histórico de conversas vinculado ao contrato.
+
+
+9. Usuário
+Para familiar: acompanhamento de contratações ativas e passadas.
+
+
+Para profissional: agenda de serviços, histórico de atendimentos e ganhos.
+
+
+10. Configuração
+Editar informações pessoais.
+
+
+Definir preferências de notificação.
+
+
+Alterar senha.
+
+
+Ajuda e suporte.
+
+
+Termos de uso e política de privacidade.
+
+
+11. Minha Conta
+Para familiar:
+
+
+Dados pessoais.
+
+
+Formas de pagamento salvas.
+
+
+Contratos ativos e passados.
+
+
+Para profissional:
+
+
+Dados pessoais e profissionais.
+
+
+Certificados e formações.
+
+
+Conta bancária para recebimento.
+
+
+Histórico de serviços prestados.
+
+
+4. Fluxos do Usuário
+Familiar: login → busca de cuidador anúnciados→ análise do perfil → contratação → pagamento → acompanhamento → avaliação.
+
+
+Profissional: login → anúncios → recebe solicitações → aceita contratos → presta serviço → recebe avaliação.
+
+
+
+
+12. In  chrome
+- Verifique dispositiº  vos disponíveis: flutter devices
+- Verifique ambiente: flutter doctor -v
+
+Build de Produção
+- Android (APK): flutter build apk --release
+- Android (AppBundle): flutter build appbundle --release
+- iOS: flutter build ios --release (requer configuração de assinatura no Xcode)
+- Web: flutter build web
+
+Testes e Qualidade
+- Testes: flutter test
+- Lint: pacote flutter_lints habilitado (analysis_options.yaml). Ajuste regras conforme necessário.
+
+Tema e UI
+- Material 3 habilitado (useMaterial3: true).
+- Esquema de cores derivado de semente (teal). Ajustar em ThemeData de MyApp.
+
+Estrutura de Pastas (principal)
+- lib/ → código Dart do app
+  - screens/ → telas de UI (login, register, home_family, home_professional)
+- android/ e ios/ → projetos nativos para build
+- web/ → artefatos web (favicon, manifest)
+- test/ → testes de widget
+- pubspec.yaml → dependências, assets, fontes
+
+Gestão de Assets e Fontes
+- Para adicionar imagens/arquivos: configurar seção flutter: assets: no pubspec.yaml e executar flutter pub get.
+- Para fontes customizadas: configurar seção flutter: fonts: no pubspec.yaml.
+
+Internacionalização (Sugerido)
+- Habilitar flutter_localizations e o pacote intl para suportar múltiplos idiomas.
+- Definir localizationsDelegates e supportedLocales no MaterialApp.
+
+Gerência de Estado (Sugerido)
+- O app usa navegação básica por rotas. Para escalabilidade, considerar Provider ou Riverpod.
+- Para rotas complexas/deep links, considerar go_router.
+
+Backend e Persistência (Sugerido)
+- Autenticação e dados ainda não implementados. Opções:
+  - Firebase (Auth, Firestore/RTDB, Storage)
+  - Supabase (Postgres, Auth, Storage)
+- Pagamentos: Stripe/Mercado Pago/Flutter InAppPayments conforme disponibilidade local.
+
+Segurança e Privacidade (Sugerido)
+- Armazenar segredos fora do código (env, serviços remotos, ou flutter_dotenv sem commitar .env).
+- Atender LGPD/GDPR: termos, consentimento, política de privacidade, retenção de dados.
+
+CI/CD (Sugerido)
+- Automatizar build/test com GitHub Actions ou Bitrise.
+- Assinatura e distribuição: Play Console (Android), App Store Connect/TestFlight (iOS).
+
+Convenções de Código
+- Nomenclatura descritiva, classes e widgets com nomes claros.
+- Evitar lógica pesada em Widgets; extrair para classes/serviços quando necessário.
+- Manter arquivos de tela focados em UI; mover estado/serviços para camadas próprias.
+
+Próximos Passos Recomendados
+- Implementar autenticação (login/registro real) e gerenciamento de sessão.
+- Criar modelo de domínio para profissionais, familiares, contratos e avaliações.
+- Implementar listagem/filtragem de profissionais e perfil detalhado.
+- Implementar fluxo de contratação, agenda e pagamentos.
+- Adicionar i18n, acessibilidade e testes de UI.
+
+Links Úteis
+- Docs Flutter: https://docs.flutter.dev/
+- Cookbook: https://docs.flutter.dev/cookbook
+- Guia de Navegação: https://docs.flutter.dev/ui/navigation
+- Internacionalização: https://docs.flutter.dev/ui/accessibility-and-internationalization/internationalization
+
+13. Telas do Protótipo (Figma)
+
+Link do protótipo: [Prototipo-APP (Figma)](https://www.figma.com/design/F6bdHN7SxdFTFdBTZk1W2Y/Prototipo-APP?node-id=9-17&t=Q4wboTWEXyfHqWLV-1)
+
+Estrutura e Objetivo
+- Esta seção descreve as telas observadas no protótipo e como se conectam aos fluxos já definidos (familiar e profissional). Detalha objetivos, componentes principais, navegação, estados e validações esperadas.
+
+Tela: Splash / Abertura (se presente)
+- Objetivo: exibir identidade visual e preparar ambiente.
+- Componentes: logotipo, possível carregamento.
+- Navegação: segue para Login.
+- Estados: carregando.
+
+Tela: Login
+- Objetivo: autenticar usuário (Familiar ou Profissional).
+- Componentes: seleção de perfil, e-mail/telefone, senha, botão Entrar, link Registrar, recuperação de senha, login social (Google).
+- Navegação: para Home Familiar ou Home Profissional após sucesso; para Registro via atalho.
+- Estados: erro de credenciais, carregando ao submeter.
+- Validações: campos obrigatórios, formato de e-mail/telefone.
+
+Tela: Registro
+- Objetivo: cadastrar novo usuário.
+- Componentes: alternância de tipo (Familiar/Profissional), nome, telefone, e-mail, senha, confirmação de senha, campos adicionais de profissional (formação, certificados, experiência, preço), upload de documentos, aceite de termos/política.
+- Navegação: volta ao Login; após sucesso, pode redirecionar à tela inicial correspondente.
+- Estados: validação de campos, upload em progresso, erro de duplicidade.
+- Validações: senha mínima, formatos, obrigatoriedade, aceite de termos.
+
+Tela: Home – Familiar
+- Objetivo: ponto de partida para familiares.
+- Componentes: barra de busca (“Encontre um cuidador qualificado”), carrossel/lista de profissionais em destaque, atalhos para filtros.
+- Navegação: para Buscar, Perfil do Profissional, Mensagens, Contratos.
+
+Tela: Home – Profissional
+- Objetivo: visão rápida do profissional.
+- Componentes: resumo da semana (acessos, solicitações), atalhos “Editar Perfil”, “Ver Agenda”, “Mensagens”.
+- Navegação: para Agenda/Contratos, Perfil do Profissional (auto), Mensagens.
+
+Tela: Buscar Profissional
+- Objetivo: encontrar profissionais por nome, especialidade, hospital ou localização.
+- Componentes: campo de busca, filtros (preço, certificações, experiência, avaliação, disponibilidade), resultado em lista.
+- Navegação: para Perfil do Profissional; abrir modal/filtro avançado.
+- Estados: sem resultados, carregando resultados.
+
+Tela: Filtros
+- Objetivo: refinar a busca.
+- Componentes: sliders (preço), seletores (certificados, experiência), notas (avaliação), calendário (disponibilidade), aplicar/limpar.
+- Navegação: retorna à lista com filtros aplicados.
+
+Tela: Lista/Cartão de Profissional
+- Objetivo: exibir profissionais de forma resumida.
+- Componentes: foto, nome e função, preço por hora/diária, avaliação (estrelas), localização/disponibilidade, botão “Ver Perfil”.
+- Navegação: para Perfil do Profissional.
+
+Tela: Perfil do Profissional
+- Objetivo: detalhar qualificações e serviços.
+- Componentes: fotos, descrição, certificados/especializações, experiência (anos, locais), serviços, preços (hora/diária/semana), avaliações de clientes, botão “Contratar”.
+- Navegação: para Contratação/Agendamento; para Chat (pré-serviço, se habilitado).
+- Estados: carregando avaliações, erro ao carregar.
+
+Tela: Contratação / Agendamento
+- Objetivo: configurar a contratação.
+- Componentes: seleção de data/horário, tipo (hora/turno/diária/semana), resumo do valor, formas de pagamento (cartão, pix, transferência), botão confirmar.
+- Navegação: para Pagamento/Confirmação; para Chat após confirmação (se fluxo permitir).
+- Validações: disponibilidade, horários válidos, regras mínimas de contratação.
+
+Tela: Pagamento
+- Objetivo: processar pagamento.
+- Componentes: seleção/método de pagamento, formulário de cartão (se aplicável), resumo de valores, confirmação.
+- Navegação: para Confirmação/Contrato Ativo.
+- Estados: processamento, erro de pagamento, sucesso.
+
+Tela: Chat
+- Objetivo: comunicação entre familiar e profissional.
+- Componentes: lista de conversas, tela de mensagens, envio de texto/anexos (se previsto).
+- Navegação: de/para contratos vinculados; acesso por atalhos em Home e Contratos.
+- Estados: entregue/lido, offline/online.
+
+Tela: Contratos (Ativos e Passados)
+- Objetivo: acompanhar status e histórico.
+- Componentes: lista com status, detalhes do contrato, ações (cancelar, avaliar, recontratar), para profissional: agenda/ganhos.
+- Navegação: para detalhes do contrato, avaliação, recibos.
+
+Tela: Avaliação
+- Objetivo: avaliar o serviço prestado.
+- Componentes: estrelas/notas, comentário opcional.
+- Navegação: retorna ao histórico/contratos.
+
+Tela: Configurações
+- Objetivo: gerenciar preferências do app.
+- Componentes: notificação, idioma (i18n sugerido), tema, segurança.
+
+Tela: Minha Conta
+- Objetivo: dados pessoais e financeiros.
+- Componentes (Familiar): dados pessoais, formas de pagamento salvas, contratos.
+- Componentes (Profissional): dados pessoais e profissionais, certificados/formaçõs, conta bancária, histórico de serviços.
+
+Tela: Suporte / Ajuda
+- Objetivo: suporte ao usuário.
+- Componentes: FAQ, abertura de chamado, links para termos e privacidade.
+
+Tela: Termos e Privacidade
+- Objetivo: conformidade e consentimento.
+- Componentes: textos legais, botões de aceite (onde pertinente).
+
+Observações de Design
+- Consistência Material 3, uso de ColorScheme do tema.
+- Componentes reutilizáveis sugeridos: cartão de profissional, chips de filtro, cards de contrato, células de lista de mensagens.
+- Acessibilidade: contraste adequado, tamanhos de toque, suporte a leitores de tela.
+
+14. Backlog Técnico (Epics e Tarefas)
+
+Fonte: [Prototipo-APP (Figma)](https://www.figma.com/design/F6bdHN7SxdFTFdBTZk1W2Y/Prototipo-APP?node-id=9-17&t=Q4wboTWEXyfHqWLV-1)
+
+Epic: Autenticação e Onboarding
+- Criar Splash/Abertura (rotear para Login)
+- Implementar Login (email/telefone + senha, Google opcional)
+- Implementar Registro (Familiar/Profissional, upload de documentos)
+- Recuperação de Senha
+
+Epic: Descoberta de Profissionais
+- Tela de Buscar (query + filtros)
+- Tela de Filtros (preço, certificações, experiência, avaliação, disponibilidade)
+- Lista de Profissionais (cartões)
+- Perfil do Profissional (detalhado, avaliações, preços)
+
+Epic: Contratação e Agenda
+- Fluxo de Agendamento (data/horário, tipo de contratação)
+- Pagamento (cartão, pix, transferência)
+- Confirmação de Reserva
+- Contratos (ativos e passados)
+
+Epic: Comunicação
+- Lista de Conversas
+- Chat (mensagens, anexos se aplicável)
+
+Epic: Conta e Configurações
+- Minha Conta (dados pessoais, formas de pagamento / conta bancária)
+- Configurações (notificações, idioma, tema)
+- Suporte/Ajuda (FAQ, contato)
+- Termos e Privacidade (exibição e aceite)
+
+Epic: Qualidade e Infra
+- Internacionalização (pt-BR, es, en) com intl
+- Acessibilidade (labels, contraste, navegação por teclado/leitores)
+- Testes (unit, widget, integração)
+- Observabilidade (logs, crashlytics/monitoramento)
+
+Critérios de Aceite Gerais
+- Navegação consistente via rotas nomeadas
+- Estados de carregamento/erro definidos
+- Validações de formulário e feedback ao usuário
+- Responsividade (mobile e web)
+
+15. Fluxo de Sessão (Simulado)
+
+Serviço: `lib/services/session_service.dart`
+- Armazena estado em memória: `isLoggedIn` e `isProfessional`.
+- Métodos: `loginAsFamily()`, `loginAsProfessional()`, `logout()`.
+
+Entrada: `lib/screens/splash_screen.dart`
+- Verifica sessão e redireciona:
+  - Não logado → `/login`
+  - Profissional → `/home_professional`
+  - Familiar → `/home_family`
+
+Login/Registro
+- `login_screen.dart`: ações configuram sessão e navegam para a home.
+- `register_screen.dart`: botões de registro simulam criação e navegam.
+
+Botão “Sair”
+- Em `home_family_screen.dart` e `home_professional_screen.dart` chama `logout()` e retorna ao `/login`.
+
+16. Migração para Backend Real (Resumo)
+
+Opção A — Firebase
+- Auth: adicionar `firebase_core` e `firebase_auth`; inicializar no `main()`.
+- Dados: `cloud_firestore` para perfis, anúncios, contratos, mensagens.
+- Storage: certificados e fotos com `firebase_storage`.
+- Push: `firebase_messaging` para notificações.
+- Pagamentos: integrar Stripe/Mercado Pago (funções Cloud se necessário).
+
+Opção B — Supabase
+- Auth e Postgres: `supabase_flutter` (tabelas: users, professionals, listings, contracts, messages, reviews).
+- Storage: arquivos e imagens.
+- Realtime: presença/chat.
+
+Passos Gerais
+- Substituir `SessionService` por provedor de sessão com tokens.
+- Criar camada de repositórios (auth, professionals, bookings, payments).
+- Proteger rotas (guards) conforme sessão/perfil.
+- Variáveis sensíveis em `.env` (não versionar).
