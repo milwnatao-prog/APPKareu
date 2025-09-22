@@ -104,8 +104,8 @@ class _UserTypeSelectionScreenState extends State<UserTypeSelectionScreen> {
                     height: 64,
                     child: ElevatedButton(
                       onPressed: () {
-                        // Navegar para tela de registro como familiar
-                        Navigator.pushNamed(context, '/register', arguments: UserType.needCaregiver);
+                        // Navegar para o fluxo de cadastro do paciente
+                        Navigator.pushNamed(context, '/family-address');
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF4D64C8),
@@ -141,6 +141,7 @@ class _UserTypeSelectionScreenState extends State<UserTypeSelectionScreen> {
                   Container(
                     margin: EdgeInsets.symmetric(horizontal: screenWidth * 0.09),
                     width: screenWidth * 0.82,
+                    height: 64,
                     child: ElevatedButton(
                       onPressed: () {
                         // Navegar para tela de cadastro profissional
@@ -157,7 +158,7 @@ class _UserTypeSelectionScreenState extends State<UserTypeSelectionScreen> {
                           borderRadius: BorderRadius.circular(8),
                         ),
                         elevation: 0,
-                        padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 18),
+                        padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 10),
                       ),
                       child: Row(
                         children: [

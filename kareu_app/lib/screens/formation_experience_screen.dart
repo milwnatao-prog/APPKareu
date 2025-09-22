@@ -225,7 +225,7 @@ class _FormationExperienceScreenState extends State<FormationExperienceScreen> {
           ),
           decoration: BoxDecoration(
             color: isSelected 
-              ? AppDesignSystem.primaryColor.withOpacity(0.1)
+              ? AppDesignSystem.primaryColor.withValues(alpha: 0.1)
               : AppDesignSystem.surfaceColor,
             borderRadius: BorderRadius.circular(AppDesignSystem.spaceS),
             border: Border.all(

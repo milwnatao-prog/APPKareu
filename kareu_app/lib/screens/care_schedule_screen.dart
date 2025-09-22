@@ -1,20 +1,19 @@
-
 import 'package:flutter/material.dart';
-import 'preferences_specialties_screen.dart';
+import '../constants/app_design_system.dart';
 
-class AvailabilityScreen extends StatefulWidget {
-  const AvailabilityScreen({super.key});
+class CareScheduleScreen extends StatefulWidget {
+  const CareScheduleScreen({super.key});
 
   @override
-  State<AvailabilityScreen> createState() => _AvailabilityScreenState();
+  State<CareScheduleScreen> createState() => _CareScheduleScreenState();
 }
 
-class _AvailabilityScreenState extends State<AvailabilityScreen> {
-  Set<String> selectedDays = {};
-  Set<String> selectedShifts = {};
-  Set<String> selectedLocations = {};
+class _CareScheduleScreenState extends State<CareScheduleScreen> {
+  final Set<String> _diasSelecionados = {};
+  final Set<String> _turnosSelecionados = {};
+  final Set<String> _locaisSelecionados = {};
 
-  final List<Map<String, String>> weekDays = [
+  final List<Map<String, String>> _diasSemana = [
     {'full': 'Segunda-feira', 'short': 'SEG'},
     {'full': 'Terça-feira', 'short': 'TER'},
     {'full': 'Quarta-feira', 'short': 'QUA'},
@@ -24,19 +23,83 @@ class _AvailabilityScreenState extends State<AvailabilityScreen> {
     {'full': 'Domingo', 'short': 'DOM'},
   ];
 
-  final List<Map<String, String>> shifts = [
+  final List<Map<String, String>> _turnos = [
     {'name': 'Manhã', 'time': '06:00 - 12:00'},
     {'name': 'Tarde', 'time': '12:00 - 18:00'},
     {'name': 'Noite', 'time': '18:00 - 00:00'},
-    {'name': '12h', 'time': '12 horas'},
-    {'name': '6h', 'time': '6 horas'},
+    {'name': 'Integral', 'time': '24 horas'},
+    {'name': 'Plantão de 12h', 'time': '12 horas'},
   ];
 
-  final List<Map<String, String>> locations = [
-    {'name': 'Hospitalar', 'description': 'Atendimento em hospitais'},
-    {'name': 'Domicílio', 'description': 'Atendimento domiciliar'},
-    {'name': 'Viagens curtas', 'description': 'Acompanhamento em viagens'},
+  final List<Map<String, String>> _locais = [
+    {'name': 'Hospital', 'description': 'Atendimento hospitalar'},
+    {'name': 'Residência', 'description': 'Atendimento domiciliar'},
+    {'name': 'Viagem curta', 'description': 'Acompanhamento em viagens'},
   ];
+
+  void _toggleDia(String dia) {
+    setState(() {
+      if (_diasSelecionados.contains(dia)) {
+        _diasSelecionados.remove(dia);
+      } else {
+        _diasSelecionados.add(dia);
+      }
+    });
+  }
+
+  void _toggleTurno(String turno) {
+    setState(() {
+      if (_turnosSelecionados.contains(turno)) {
+        _turnosSelecionados.remove(turno);
+      } else {
+        _turnosSelecionados.add(turno);
+      }
+    });
+  }
+
+  void _toggleLocal(String local) {
+    setState(() {
+      if (_locaisSelecionados.contains(local)) {
+        _locaisSelecionados.remove(local);
+      } else {
+        _locaisSelecionados.add(local);
+      }
+    });
+  }
+
+  IconData _getLocationIcon(String locationName) {
+    switch (locationName) {
+      case 'Hospital':
+        return Icons.local_hospital;
+      case 'Residência':
+        return Icons.home;
+      case 'Viagem curta':
+        return Icons.directions_car;
+      default:
+        return Icons.location_on;
+    }
+  }
+
+  void _onNextPressed() {
+    if (_diasSelecionados.isEmpty || _turnosSelecionados.isEmpty || _locaisSelecionados.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Por favor, selecione pelo menos um item em cada seção'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Agendamento configurado: ${_diasSelecionados.length} dias, ${_turnosSelecionados.length} turnos, ${_locaisSelecionados.length} locais'),
+        backgroundColor: AppDesignSystem.primaryColor,
+      ),
+    );
+    
+    Navigator.pushNamed(context, '/family-description-intro');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -47,24 +110,12 @@ class _AvailabilityScreenState extends State<AvailabilityScreen> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(
-            Icons.arrow_back,
+            Icons.arrow_back_ios,
             color: Colors.black,
-            size: 24,
+            size: 20,
           ),
-          onPressed: () {
-            Navigator.pop(context);
-          },
+          onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
-          'Disponibilidade',
-          style: TextStyle(
-            fontFamily: 'Poppins',
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-            color: Colors.black,
-          ),
-        ),
-        centerTitle: false,
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -74,7 +125,7 @@ class _AvailabilityScreenState extends State<AvailabilityScreen> {
             children: [
               // Título principal
               const Text(
-                'Disponibilidade de Trabalho',
+                'Em quais dias você precisa de ajuda?',
                 style: TextStyle(
                   fontFamily: 'Poppins',
                   fontSize: 15,
@@ -114,7 +165,7 @@ class _AvailabilityScreenState extends State<AvailabilityScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          'Dias disponíveis',
+          'Dias da semana',
           style: TextStyle(
             fontFamily: 'Poppins',
             fontSize: 14,
@@ -128,25 +179,17 @@ class _AvailabilityScreenState extends State<AvailabilityScreen> {
         Wrap(
           spacing: 8,
           runSpacing: 8,
-          children: weekDays.map((day) => _buildDayChip(day)).toList(),
+          children: _diasSemana.map((day) => _buildDayChip(day)).toList(),
         ),
       ],
     );
   }
 
   Widget _buildDayChip(Map<String, String> day) {
-    bool isSelected = selectedDays.contains(day['full']);
+    bool isSelected = _diasSelecionados.contains(day['full']);
     
     return GestureDetector(
-      onTap: () {
-        setState(() {
-          if (isSelected) {
-            selectedDays.remove(day['full']);
-          } else {
-            selectedDays.add(day['full']!);
-          }
-        });
-      },
+      onTap: () => _toggleDia(day['full']!),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
@@ -190,7 +233,7 @@ class _AvailabilityScreenState extends State<AvailabilityScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Text(
-          'Turnos disponíveis',
+          'Turnos necessários',
           style: TextStyle(
             fontFamily: 'Poppins',
             fontSize: 14,
@@ -202,27 +245,19 @@ class _AvailabilityScreenState extends State<AvailabilityScreen> {
         
         // Lista de turnos
         Column(
-          children: shifts.map((shift) => _buildShiftCard(shift)).toList(),
+          children: _turnos.map((shift) => _buildShiftCard(shift)).toList(),
         ),
       ],
     );
   }
 
   Widget _buildShiftCard(Map<String, String> shift) {
-    bool isSelected = selectedShifts.contains(shift['name']);
+    bool isSelected = _turnosSelecionados.contains(shift['name']);
     
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       child: GestureDetector(
-        onTap: () {
-          setState(() {
-            if (isSelected) {
-              selectedShifts.remove(shift['name']);
-            } else {
-              selectedShifts.add(shift['name']!);
-            }
-          });
-        },
+        onTap: () => _toggleTurno(shift['name']!),
         child: Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
@@ -305,27 +340,19 @@ class _AvailabilityScreenState extends State<AvailabilityScreen> {
         
         // Lista de locais
         Column(
-          children: locations.map((location) => _buildLocationCard(location)).toList(),
+          children: _locais.map((location) => _buildLocationCard(location)).toList(),
         ),
       ],
     );
   }
 
   Widget _buildLocationCard(Map<String, String> location) {
-    bool isSelected = selectedLocations.contains(location['name']);
+    bool isSelected = _locaisSelecionados.contains(location['name']);
     
     return Container(
       margin: const EdgeInsets.only(bottom: 8),
       child: GestureDetector(
-        onTap: () {
-          setState(() {
-            if (isSelected) {
-              selectedLocations.remove(location['name']);
-            } else {
-              selectedLocations.add(location['name']!);
-            }
-          });
-        },
+        onTap: () => _toggleLocal(location['name']!),
         child: Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
@@ -396,19 +423,6 @@ class _AvailabilityScreenState extends State<AvailabilityScreen> {
     );
   }
 
-  IconData _getLocationIcon(String locationName) {
-    switch (locationName) {
-      case 'Hospitalar':
-        return Icons.local_hospital;
-      case 'Domicílio':
-        return Icons.home;
-      case 'Viagens curtas':
-        return Icons.directions_car;
-      default:
-        return Icons.location_on;
-    }
-  }
-
   Widget _buildNextButton() {
     return Container(
       width: double.infinity,
@@ -417,26 +431,7 @@ class _AvailabilityScreenState extends State<AvailabilityScreen> {
         borderRadius: BorderRadius.circular(8),
       ),
       child: ElevatedButton(
-        onPressed: () {
-          // Validar se pelo menos uma opção foi selecionada em cada categoria
-          if (selectedDays.isEmpty || selectedShifts.isEmpty || selectedLocations.isEmpty) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Por favor, selecione pelo menos uma opção em cada categoria'),
-                backgroundColor: Colors.red,
-              ),
-            );
-            return;
-          }
-
-          // Navegar diretamente para a próxima tela
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) => const PreferencesSpecialtiesScreen(),
-            ),
-          );
-        },
+        onPressed: _onNextPressed,
         style: ElevatedButton.styleFrom(
           backgroundColor: const Color(0xFF4D64C8),
           foregroundColor: Colors.white,

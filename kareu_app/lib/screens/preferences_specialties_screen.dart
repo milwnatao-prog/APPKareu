@@ -118,7 +118,7 @@ class _PreferencesSpecialtiesScreenState extends State<PreferencesSpecialtiesScr
           ),
           decoration: BoxDecoration(
             color: isSelected 
-              ? AppDesignSystem.primaryColor.withOpacity(0.1)
+              ? AppDesignSystem.primaryColor.withValues(alpha: 0.1)
               : AppDesignSystem.surfaceColor,
             borderRadius: BorderRadius.circular(AppDesignSystem.spaceS),
             border: Border.all(
@@ -236,7 +236,7 @@ class _PreferencesSpecialtiesScreenState extends State<PreferencesSpecialtiesScr
                   activeTrackColor: AppDesignSystem.primaryColor,
                   inactiveTrackColor: AppDesignSystem.borderColor,
                   thumbColor: AppDesignSystem.primaryColor,
-                  overlayColor: AppDesignSystem.primaryColor.withOpacity(0.2),
+                  overlayColor: AppDesignSystem.primaryColor.withValues(alpha: 0.2),
                   thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 12),
                   trackHeight: 4,
                 ),

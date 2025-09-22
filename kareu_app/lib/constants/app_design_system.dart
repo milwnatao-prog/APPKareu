@@ -150,25 +150,96 @@ class AppDesignSystem {
   static const TextStyle placeholderStyle = TextStyle(
     fontFamily: 'Poppins',
     fontSize: fontSizeBodySmall,
-    fontWeight: FontWeight.w300,
+    fontWeight: FontWeight.w400,
     height: 1.4,
-    color: Color(0xFFA8A2A2),
+    color: textSecondaryColor,
+  );
+  
+  /// Estilo para AppBar
+  static const TextStyle appBarStyle = TextStyle(
+    fontFamily: 'Poppins',
+    fontSize: fontSizeH3,
+    fontWeight: FontWeight.w600,
+    height: 1.3,
+    color: textPrimaryColor,
+  );
+  
+  /// Estilo para seções/categorias
+  static const TextStyle sectionTitleStyle = TextStyle(
+    fontFamily: 'Poppins',
+    fontSize: fontSizeH3,
+    fontWeight: FontWeight.w700,
+    height: 1.3,
+    color: textPrimaryColor,
+  );
+  
+  /// Estilo para cards
+  static const TextStyle cardTitleStyle = TextStyle(
+    fontFamily: 'Poppins',
+    fontSize: fontSizeBody,
+    fontWeight: FontWeight.w600,
+    height: 1.3,
+    color: textPrimaryColor,
+  );
+  
+  /// Estilo para subtítulos de cards
+  static const TextStyle cardSubtitleStyle = TextStyle(
+    fontFamily: 'Poppins',
+    fontSize: fontSizeBodySmall,
+    fontWeight: FontWeight.w500,
+    height: 1.3,
+    color: primaryColor,
+  );
+  
+  /// Estilo para informações secundárias
+  static const TextStyle infoStyle = TextStyle(
+    fontFamily: 'Poppins',
+    fontSize: fontSizeCaption,
+    fontWeight: FontWeight.w400,
+    height: 1.4,
+    color: textSecondaryColor,
+  );
+  
+  /// Estilo para preços/valores
+  static const TextStyle priceStyle = TextStyle(
+    fontFamily: 'Poppins',
+    fontSize: fontSizeBodySmall,
+    fontWeight: FontWeight.w700,
+    height: 1.3,
+    color: successColor,
   );
   
   // ============================================================================
   // CORES DO APLICATIVO
   // ============================================================================
   
+  // Cores principais
   static const Color primaryColor = Color(0xFF4D64C8);
   static const Color secondaryColor = Color(0xFFFFAD00);
+  static const Color accentColor = Color(0xFF353B7E);
+  
+  // Cores de fundo
   static const Color backgroundColor = Colors.white;
-  static const Color surfaceColor = Color(0xFFF4F4F4);
-  static const Color borderColor = Color(0xFFE0E0E0);
-  static const Color textPrimaryColor = Colors.black;
-  static const Color textSecondaryColor = Color(0xFF666666);
-  static const Color textHintColor = Color(0xFFA8A2A2);
-  static const Color errorColor = Colors.red;
-  static const Color successColor = Colors.green;
+  static const Color surfaceColor = Color(0xFFF8F9FA);
+  static const Color cardColor = Colors.white;
+  static const Color overlayColor = Color(0xFFF5F5F5);
+  
+  // Cores de borda
+  static const Color borderColor = Color(0xFFE1E5E9);
+  static const Color borderLightColor = Color(0xFFF1F3F4);
+  static const Color borderDarkColor = Color(0xFFD1D5DB);
+  
+  // Cores de texto
+  static const Color textPrimaryColor = Color(0xFF1F2937);
+  static const Color textSecondaryColor = Color(0xFF6B7280);
+  static const Color textTertiaryColor = Color(0xFF9CA3AF);
+  static const Color textHintColor = Color(0xFFD1D5DB);
+  
+  // Cores de estado
+  static const Color errorColor = Color(0xFFEF4444);
+  static const Color successColor = Color(0xFF10B981);
+  static const Color warningColor = Color(0xFFF59E0B);
+  static const Color infoColor = Color(0xFF3B82F6);
   
   // Aliases para compatibilidade
   static const Color textColor = textPrimaryColor;
@@ -225,16 +296,178 @@ class AppDesignSystem {
     required Widget child,
     EdgeInsets? padding,
     EdgeInsets? margin,
+    Color? color,
   }) {
     return Container(
       margin: margin ?? const EdgeInsets.symmetric(vertical: spaceSM),
       padding: padding ?? cardPadding,
       decoration: BoxDecoration(
-        color: surfaceColor,
-        borderRadius: BorderRadius.circular(borderRadius),
-        border: Border.all(color: borderColor),
+        color: color ?? cardColor,
+        borderRadius: BorderRadius.circular(borderRadiusLarge),
+        border: Border.all(color: borderColor, width: 1),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            offset: const Offset(0, 2),
+            blurRadius: 8,
+          ),
+        ],
       ),
       child: child,
+    );
+  }
+  
+  /// Retorna um AppBar padronizado
+  static AppBar styledAppBar({
+    required String title,
+    bool centerTitle = true,
+    List<Widget>? actions,
+    Widget? leading,
+    VoidCallback? onBackPressed,
+  }) {
+    return AppBar(
+      backgroundColor: backgroundColor,
+      elevation: 0,
+      centerTitle: centerTitle,
+      leading: leading ?? (onBackPressed != null 
+        ? IconButton(
+            icon: const Icon(
+              Icons.arrow_back_ios,
+              color: textPrimaryColor,
+              size: 20,
+            ),
+            onPressed: onBackPressed,
+          )
+        : null),
+      title: Text(title, style: appBarStyle),
+      actions: actions,
+    );
+  }
+  
+  /// Retorna um botão primário padronizado
+  static Widget primaryButton({
+    required String text,
+    required VoidCallback onPressed,
+    bool isLoading = false,
+    double? width,
+    double height = 56,
+  }) {
+    return SizedBox(
+      width: width,
+      height: height,
+      child: ElevatedButton(
+        onPressed: isLoading ? null : onPressed,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: primaryColor,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(borderRadiusLarge),
+          ),
+          elevation: 0,
+        ),
+        child: isLoading
+          ? const SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(
+                color: Colors.white,
+                strokeWidth: 2,
+              ),
+            )
+          : Text(text, style: buttonStyle),
+      ),
+    );
+  }
+  
+  /// Retorna um botão secundário padronizado
+  static Widget secondaryButton({
+    required String text,
+    required VoidCallback onPressed,
+    bool isLoading = false,
+    double? width,
+    double height = 56,
+  }) {
+    return SizedBox(
+      width: width,
+      height: height,
+      child: OutlinedButton(
+        onPressed: isLoading ? null : onPressed,
+        style: OutlinedButton.styleFrom(
+          side: const BorderSide(color: primaryColor, width: 1),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(borderRadiusLarge),
+          ),
+        ),
+        child: isLoading
+          ? const SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(
+                color: primaryColor,
+                strokeWidth: 2,
+              ),
+            )
+          : Text(
+              text, 
+              style: buttonStyle.copyWith(color: primaryColor),
+            ),
+      ),
+    );
+  }
+  
+  /// Retorna um campo de entrada padronizado
+  static Widget styledTextField({
+    required String label,
+    String? hint,
+    TextEditingController? controller,
+    bool obscureText = false,
+    TextInputType? keyboardType,
+    String? Function(String?)? validator,
+    void Function(String)? onChanged,
+    Widget? suffixIcon,
+    int maxLines = 1,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: labelStyle),
+        const SizedBox(height: spaceSM),
+        TextFormField(
+          controller: controller,
+          obscureText: obscureText,
+          keyboardType: keyboardType,
+          validator: validator,
+          onChanged: onChanged,
+          maxLines: maxLines,
+          style: bodyStyle,
+          decoration: InputDecoration(
+            hintText: hint,
+            hintStyle: placeholderStyle,
+            suffixIcon: suffixIcon,
+            filled: true,
+            fillColor: surfaceColor,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(borderRadiusLarge),
+              borderSide: const BorderSide(color: borderColor, width: 1),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(borderRadiusLarge),
+              borderSide: const BorderSide(color: borderColor, width: 1),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(borderRadiusLarge),
+              borderSide: const BorderSide(color: primaryColor, width: 2),
+            ),
+            errorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(borderRadiusLarge),
+              borderSide: const BorderSide(color: errorColor, width: 1),
+            ),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: spaceLG,
+              vertical: spaceLG,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

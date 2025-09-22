@@ -58,6 +58,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 ),
                 child: const Text('Ver Tela de Formação (Demo)'),
               ),
+            if (userType == UserType.needCaregiver)
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.pushNamed(context, '/family-address');
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF4D64C8),
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                ),
+                child: const Text('Cadastrar Endereço'),
+              ),
           ],
         ),
       ),

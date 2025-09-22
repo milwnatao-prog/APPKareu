@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../constants/app_design_system.dart';
+import 'home_professional_screen.dart';
 
 class TermsConfirmationScreen extends StatefulWidget {
   const TermsConfirmationScreen({super.key});
@@ -131,7 +132,7 @@ class _TermsConfirmationScreenState extends State<TermsConfirmationScreen> {
         ),
         decoration: BoxDecoration(
           color: isChecked 
-            ? AppDesignSystem.primaryColor.withOpacity(0.1)
+            ? AppDesignSystem.primaryColor.withValues(alpha: 0.1)
             : AppDesignSystem.surfaceColor,
           borderRadius: BorderRadius.circular(AppDesignSystem.spaceS),
           border: Border.all(
@@ -199,7 +200,7 @@ class _TermsConfirmationScreenState extends State<TermsConfirmationScreen> {
           ),
           content: SingleChildScrollView(
             child: Text(
-              'Seu cadastro foi enviado com sucesso. Você receberá um e-mail de confirmação em breve.',
+              'Seu cadastro foi enviado com sucesso! Bem-vindo(a) à Kareu. Agora você pode acessar sua área profissional.',
               style: AppDesignSystem.bodySmallStyle,
               textAlign: TextAlign.center,
             ),
@@ -211,9 +212,11 @@ class _TermsConfirmationScreenState extends State<TermsConfirmationScreen> {
               child: ElevatedButton(
                 onPressed: () {
                   Navigator.of(context).pop(); // Fecha o dialog
-                  // Navegar para a tela inicial ou login
-                  Navigator.of(context).pushNamedAndRemoveUntil(
-                    '/login',
+                  // Navegar para a tela de usuário profissional
+                  Navigator.of(context).pushAndRemoveUntil(
+                    MaterialPageRoute(
+                      builder: (context) => const HomeProfessionalScreen(),
+                    ),
                     (route) => false,
                   );
                 },
@@ -226,7 +229,7 @@ class _TermsConfirmationScreenState extends State<TermsConfirmationScreen> {
                   ),
                 ),
                 child: Text(
-                  'OK',
+                  'Acessar Área Profissional',
                   style: AppDesignSystem.buttonStyle,
                 ),
               ),

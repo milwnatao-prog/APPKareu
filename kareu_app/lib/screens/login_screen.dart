@@ -18,6 +18,44 @@ class _LoginScreenState extends State<LoginScreen> {
   final _passCtrl = TextEditingController();
   bool _obscure = true;
 
+  void _performLogin() {
+    // Validação básica dos campos
+    if (_emailCtrl.text.trim().isEmpty || _passCtrl.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Por favor, preencha todos os campos'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    // Simular login bem-sucedido e navegar baseado no tipo de usuário
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Login realizado com sucesso como ${_selected == Role.familiar ? 'Paciente' : 'Profissional'}!'),
+        backgroundColor: AppDesignSystem.primaryColor,
+      ),
+    );
+
+    // Navegar para a tela apropriada baseada no tipo de usuário
+    if (_selected == Role.familiar) {
+      // Usuário logou como paciente/familiar
+      Navigator.pushNamedAndRemoveUntil(
+        context,
+        '/home-patient',
+        (route) => false,
+      );
+    } else {
+      // Usuário logou como profissional
+      Navigator.pushNamedAndRemoveUntil(
+        context,
+        '/home-professional',
+        (route) => false,
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final screenSize = MediaQuery.of(context).size;
@@ -197,7 +235,9 @@ class _LoginScreenState extends State<LoginScreen> {
                           width: double.infinity,
                           height: 46,
                           child: ElevatedButton(
-                            onPressed: () {},
+                            onPressed: () {
+                              _performLogin();
+                            },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: const Color(0xFF4D64C8),
                               shape: RoundedRectangleBorder(

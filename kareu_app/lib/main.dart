@@ -1,9 +1,30 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'screens/login_screen.dart';
 import 'screens/user_type_selection_screen.dart';
 import 'screens/register_screen.dart';
 import 'screens/formation_experience_screen.dart';
 import 'screens/availability_screen.dart';
+import 'screens/home_professional_screen.dart';
+import 'screens/professional_chat_screen.dart';
+import 'screens/patient_chat_screen.dart';
+import 'screens/caregiver_chat_screen.dart';
+import 'screens/patient_profile_screen.dart';
+import 'screens/patients_list_screen.dart';
+import 'screens/account_settings_screen.dart';
+import 'screens/caregiver_profile_screen.dart';
+import 'screens/family_address_screen.dart';
+
+
+import 'screens/add_family_member_screen.dart';
+import 'screens/family_member_form_screen.dart';
+import 'screens/care_needs_screen.dart';
+import 'screens/care_schedule_screen.dart';
+import 'screens/family_description_intro_screen.dart';
+import 'screens/engagement_plans_screen.dart';
+import 'screens/home_patient_screen.dart';
+import 'screens/search_screen.dart';
+import 'screens/filters_screen.dart';
 
 void main() {
   runApp(const KareuApp());
@@ -17,6 +38,16 @@ class KareuApp extends StatelessWidget {
     return MaterialApp(
       title: 'Kareu',
       debugShowCheckedModeBanner: false,
+      locale: const Locale('pt', 'BR'),
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('pt', 'BR'),
+        Locale('en', 'US'),
+      ],
       theme: ThemeData(
         useMaterial3: true,
         primaryColor: _KareuColors.primaryBlue,
@@ -44,10 +75,29 @@ class KareuApp extends StatelessWidget {
       ),
       home: const LoginScreen(),
       routes: {
+        '/login': (context) => const LoginScreen(),
         '/user-type-selection': (context) => const UserTypeSelectionScreen(),
         '/register': (context) => const RegisterScreen(),
         '/formation-experience': (context) => const FormationExperienceScreen(),
         '/availability': (context) => const AvailabilityScreen(),
+        '/home-professional': (context) => const HomeProfessionalScreen(),
+        '/chat': (context) => const ProfessionalChatScreen(),
+        '/patient-chat': (context) => const PatientChatScreen(),
+        '/caregiver-chat': (context) => const CaregiverChatScreen(),
+        '/patient-profile': (context) => const PatientProfileScreen(),
+        '/patients-list': (context) => const PatientsListScreen(),
+        '/account-settings': (context) => const AccountSettingsScreen(),
+        '/caregiver-profile': (context) => const CaregiverProfileScreen(),
+        '/family-address': (context) => const FamilyAddressScreen(),
+        '/add-family-member': (context) => const AddFamilyMemberScreen(),
+        '/family-member-form': (context) => const FamilyMemberFormScreen(),
+        '/care-needs': (context) => const CareNeedsScreen(),
+        '/care-schedule': (context) => const CareScheduleScreen(),
+        '/family-description-intro': (context) => const FamilyDescriptionIntroScreen(),
+          '/engagement-plans': (context) => const EngagementPlansScreen(),
+          '/home-patient': (context) => const HomePatientScreen(),
+          '/search': (context) => const SearchScreen(),
+          '/filters': (context) => const FiltersScreen(),
       },
     );
   }
