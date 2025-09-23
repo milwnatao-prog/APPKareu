@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../constants/app_design_system.dart';
+import '../services/user_service.dart';
 
 class PatientChatScreen extends StatefulWidget {
   const PatientChatScreen({super.key});
@@ -9,7 +10,6 @@ class PatientChatScreen extends StatefulWidget {
 }
 
 class _PatientChatScreenState extends State<PatientChatScreen> {
-  int _selectedTabIndex = 1; // Chat está selecionado
   
   // Lista de conversas para pacientes (com cuidadores)
   final List<PatientChatItem> _chats = [
@@ -501,11 +501,11 @@ class _PatientChatScreenState extends State<PatientChatScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          _buildNavItem(Icons.home_outlined, 'Início', 0),
-          _buildNavItem(Icons.search, 'Buscar', 1),
-          _buildNavItem(Icons.chat_bubble_outline, 'Chat', 2, isSelected: true),
-          _buildNavItem(Icons.favorite_outline, 'Favoritos', 3),
-          _buildNavItem(Icons.person_outline, 'Perfil', 4),
+          _buildNavItem(Icons.home, 'Início', 0),
+          _buildNavItem(Icons.chat_bubble_outline, 'Chat', 1, isSelected: true),
+          _buildNavItem(Icons.assignment, 'Contratos', 2),
+          _buildNavItem(Icons.calendar_today, 'Agenda', 3),
+          _buildNavItem(Icons.account_circle_outlined, 'Perfil', 4),
         ],
       ),
     );
@@ -594,34 +594,36 @@ class _PatientChatScreenState extends State<PatientChatScreen> {
   }
 
   void _onTabSelected(int index) {
-    setState(() {
-      _selectedTabIndex = index;
-    });
-    
     switch (index) {
       case 0:
+        // Navegar para Home
         Navigator.pushReplacementNamed(context, '/home-patient');
         break;
       case 1:
-        Navigator.pushNamed(context, '/search');
+        // Já estamos na tela de chat
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Você já está na tela de chat'),
+            duration: Duration(seconds: 1),
+          ),
+        );
         break;
       case 2:
-        // Já estamos na tela de chat
+        // Navegar para Contratos
+        Navigator.pushNamed(context, '/contracts');
         break;
       case 3:
-        // Navegar para favoritos (implementar se necessário)
+        // Navegar para Agenda
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Tela de favoritos será implementada em breve',
-              style: AppDesignSystem.bodySmallStyle.copyWith(color: Colors.white),
-            ),
+          const SnackBar(
+            content: Text('Tela de agenda será implementada em breve'),
             backgroundColor: AppDesignSystem.infoColor,
           ),
         );
         break;
       case 4:
-        Navigator.pushNamed(context, '/account-settings');
+        // Navegar para Perfil
+        Navigator.pushNamed(context, UserService.getAccountRoute());
         break;
     }
   }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:kareu_app/constants/app_design_system.dart';
+import '../services/user_service.dart';
 
 class HomePatientScreen extends StatefulWidget {
   const HomePatientScreen({super.key});
@@ -9,41 +10,43 @@ class HomePatientScreen extends StatefulWidget {
 }
 
 class _HomePatientScreenState extends State<HomePatientScreen> {
-  int _selectedTabIndex = 0;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFFFAFBFC),
       body: SafeArea(
         child: Column(
           children: [
+            // Header com saudação
+            _buildHeader(),
+            
             Expanded(
               child: SingleChildScrollView(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const SizedBox(height: 16),
-                    
-                    // Search Bar
-                    _buildSearchBar(),
-                    
                     const SizedBox(height: 24),
                     
-                    // Filters
-                    _buildFilters(),
+                    // Search Bar com filtro integrado
+                    _buildEnhancedSearchBar(),
                     
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 32),
+                    
+                    // Quick Actions
+                    _buildQuickActions(),
+                    
+                    const SizedBox(height: 32),
                     
                     // Cities Section
                     _buildCitiesSection(),
                     
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 32),
                     
                     // Services Section
                     _buildServicesSection(),
                     
-                    const SizedBox(height: 24),
+                    const SizedBox(height: 32),
                     
                     // Publish Ad Button
                     _buildPublishAdButton(),
@@ -62,27 +65,86 @@ class _HomePatientScreenState extends State<HomePatientScreen> {
     );
   }
 
-  Widget _buildSearchBar() {
+  Widget _buildHeader() {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(24, 16, 24, 16),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Color(0x0A000000),
+            offset: Offset(0, 1),
+            blurRadius: 3,
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Olá! 👋',
+                  style: TextStyle(
+                    fontFamily: 'Poppins',
+                    fontSize: 24,
+                    fontWeight: FontWeight.w700,
+                    color: const Color(0xFF1F2937),
+                    height: 1.2,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Encontre o cuidador ideal para sua família',
+                  style: TextStyle(
+                    fontFamily: 'Poppins',
+                    fontSize: 14,
+                    fontWeight: FontWeight.w400,
+                    color: const Color(0xFF6B7280),
+                    height: 1.4,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF3F4F6),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Icon(
+              Icons.notifications_outlined,
+              color: Color(0xFF6B7280),
+              size: 24,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEnhancedSearchBar() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24),
       child: GestureDetector(
         onTap: () {
           Navigator.pushNamed(context, '/search');
         },
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
+        child: Container(
           height: 56,
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 16),
           decoration: BoxDecoration(
-            color: const Color(0xFFF8F9FA),
-            borderRadius: BorderRadius.circular(12),
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: const Color(0xFFE1E5E9),
+              color: const Color(0xFFE5E7EB),
               width: 1,
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: 0.04),
+                color: Colors.black.withValues(alpha: 0.05),
                 offset: const Offset(0, 2),
                 blurRadius: 8,
               ),
@@ -90,24 +152,39 @@ class _HomePatientScreenState extends State<HomePatientScreen> {
           ),
           child: Row(
             children: [
-              Container(
-                padding: const EdgeInsets.all(2),
-                child: const Icon(
-                  Icons.search,
-                  size: 20,
-                  color: Color(0xFF6B7280),
-                ),
+              const Icon(
+                Icons.search,
+                size: 22,
+                color: Color(0xFF9CA3AF),
               ),
               const SizedBox(width: 12),
               const Expanded(
                 child: Text(
-                  'Encontre cuidadores em sua região',
+                  'Buscar cuidadores, especialidades...',
                   style: TextStyle(
                     fontFamily: 'Poppins',
-                    fontSize: 14,
+                    fontSize: 15,
                     fontWeight: FontWeight.w400,
-                    color: Color(0xFF6B7280),
+                    color: Color(0xFF9CA3AF),
                     height: 1.4,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 12),
+              GestureDetector(
+                onTap: () {
+                  Navigator.pushNamed(context, '/filters');
+                },
+                child: Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF4D64C8),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: const Icon(
+                    Icons.tune,
+                    color: Colors.white,
+                    size: 20,
                   ),
                 ),
               ),
@@ -118,76 +195,14 @@ class _HomePatientScreenState extends State<HomePatientScreen> {
     );
   }
 
-  Widget _buildFilters() {
+  Widget _buildQuickActions() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24),
-      child: GestureDetector(
-        onTap: () {
-          Navigator.pushNamed(context, '/filters');
-        },
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(
-              color: const Color(0xFFE1E5E9),
-              width: 1,
-            ),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.04),
-                offset: const Offset(0, 1),
-                blurRadius: 4,
-              ),
-            ],
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              SizedBox(
-                width: 18,
-                height: 18,
-                child: CustomPaint(
-                  painter: FilterIconPainter(),
-                ),
-              ),
-              const SizedBox(width: 8),
-              const Text(
-                'FILTROS',
-                style: TextStyle(
-                  fontFamily: 'Poppins',
-                  fontSize: 11,
-                  fontWeight: FontWeight.w600,
-                  color: Color(0xFF374151),
-                  height: 1.5,
-                  letterSpacing: 0.5,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildCitiesSection() {
-    final cities = [
-      {'name': 'Natal', 'image': 'assets/images/natal.jpg'},
-      {'name': 'João Pessoa', 'image': 'assets/images/joao_pessoa.jpg'},
-      {'name': 'São Paulo', 'image': 'assets/images/sao_paulo.jpg'},
-      {'name': 'Curitiba', 'image': 'assets/images/curitiba.jpg'},
-      {'name': 'Recife', 'image': 'assets/images/recife.jpg'},
-      {'name': 'Fortaleza', 'image': 'assets/images/fortaleza.jpg'},
-    ];
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 24),
-          child: Text(
-            'Cidades',
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            'Ações Rápidas',
             style: TextStyle(
               fontFamily: 'Poppins',
               fontSize: 18,
@@ -196,10 +211,169 @@ class _HomePatientScreenState extends State<HomePatientScreen> {
               height: 1.3,
             ),
           ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: _buildQuickActionCard(
+                  'Emergência',
+                  'Encontrar agora',
+                  Icons.emergency,
+                  const Color(0xFFEF4444),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _buildQuickActionCard(
+                  'Favoritos',
+                  'Seus salvos',
+                  Icons.favorite_outline,
+                  const Color(0xFF8B5CF6),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: _buildQuickActionCard(
+                  'Histórico',
+                  'Suas buscas',
+                  Icons.history,
+                  const Color(0xFF10B981),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildQuickActionCard(String title, String subtitle, IconData icon, Color color) {
+    return GestureDetector(
+      onTap: () {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('$title será implementado em breve'),
+            backgroundColor: color,
+          ),
+        );
+      },
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: const Color(0xFFE5E7EB),
+            width: 1,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.03),
+              offset: const Offset(0, 1),
+              blurRadius: 3,
+            ),
+          ],
+        ),
+        child: Column(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(
+                icon,
+                color: color,
+                size: 20,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              title,
+              style: const TextStyle(
+                fontFamily: 'Poppins',
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF374151),
+                height: 1.2,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 2),
+            Text(
+              subtitle,
+              style: const TextStyle(
+                fontFamily: 'Poppins',
+                fontSize: 10,
+                fontWeight: FontWeight.w400,
+                color: Color(0xFF9CA3AF),
+                height: 1.2,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+
+
+  Widget _buildCitiesSection() {
+    final cities = [
+      {'name': 'Natal', 'professionals': '120+'},
+      {'name': 'João Pessoa', 'professionals': '85+'},
+      {'name': 'São Paulo', 'professionals': '300+'},
+      {'name': 'Curitiba', 'professionals': '95+'},
+      {'name': 'Recife', 'professionals': '110+'},
+      {'name': 'Fortaleza', 'professionals': '75+'},
+    ];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'Principais Cidades',
+                style: TextStyle(
+                  fontFamily: 'Poppins',
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF1F2937),
+                  height: 1.3,
+                ),
+              ),
+              GestureDetector(
+                onTap: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Ver todas as cidades será implementado em breve'),
+                      backgroundColor: Color(0xFF4D64C8),
+                    ),
+                  );
+                },
+                child: const Text(
+                  'Ver todas',
+                  style: TextStyle(
+                    fontFamily: 'Poppins',
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF4D64C8),
+                    height: 1.3,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
         const SizedBox(height: 16),
         SizedBox(
-          height: 140,
+          height: 85,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -207,7 +381,10 @@ class _HomePatientScreenState extends State<HomePatientScreen> {
             itemBuilder: (context, index) {
               return Padding(
                 padding: EdgeInsets.only(right: index == cities.length - 1 ? 0 : 16),
-                child: _buildCityCard(cities[index]['name']!, cities[index]['image']!),
+                child: _buildModernCityCard(
+                  cities[index]['name']!, 
+                  cities[index]['professionals']!,
+                ),
               );
             },
           ),
@@ -216,38 +393,17 @@ class _HomePatientScreenState extends State<HomePatientScreen> {
     );
   }
 
-  Widget _buildCityCard(String cityName, String imagePath) {
-    // Paleta de cores personalizada: #4D64C8, #FFAD00, #8FB2FF, #8A63D2, #FFFFFF
+  Widget _buildModernCityCard(String cityName, String professionals) {
     final List<Color> colorPalette = [
       const Color(0xFF4D64C8), // Azul principal
-      const Color(0xFFFFAD00), // Amarelo/laranja
-      const Color(0xFF8FB2FF), // Azul claro
-      const Color(0xFF8A63D2), // Roxo/violeta
+      const Color(0xFF10B981), // Verde
+      const Color(0xFF8B5CF6), // Roxo
+      const Color(0xFFEF4444), // Vermelho
+      const Color(0xFFF59E0B), // Amarelo
+      const Color(0xFF06B6D4), // Ciano
     ];
     
-    Color cityColor;
-    switch (cityName) {
-      case 'Natal':
-        cityColor = colorPalette[0]; // #4D64C8
-        break;
-      case 'João Pessoa':
-        cityColor = colorPalette[1]; // #FFAD00
-        break;
-      case 'São Paulo':
-        cityColor = colorPalette[2]; // #8FB2FF
-        break;
-      case 'Curitiba':
-        cityColor = colorPalette[3]; // #8A63D2
-        break;
-      case 'Recife':
-        cityColor = colorPalette[0]; // #4D64C8
-        break;
-      case 'Fortaleza':
-        cityColor = colorPalette[1]; // #FFAD00
-        break;
-      default:
-        cityColor = colorPalette[0]; // #4D64C8 como padrão
-    }
+    Color cityColor = colorPalette[cityName.hashCode % colorPalette.length];
 
     return GestureDetector(
       onTap: () {
@@ -258,79 +414,88 @@ class _HomePatientScreenState extends State<HomePatientScreen> {
           ),
         );
       },
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        width: 160,
-        height: 140,
+      child: Container(
+        width: 110,
+        height: 85,
+        padding: const EdgeInsets.all(10),
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
-          color: cityColor,
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: const Color(0xFFE5E7EB),
+            width: 1,
+          ),
           boxShadow: [
             BoxShadow(
-              color: cityColor.withValues(alpha: 0.3),
-              offset: const Offset(0, 4),
-              blurRadius: 12,
+              color: Colors.black.withValues(alpha: 0.05),
+              offset: const Offset(0, 2),
+              blurRadius: 8,
             ),
           ],
         ),
-        child: Stack(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          mainAxisSize: MainAxisSize.min,
           children: [
-            // Gradient overlay
-            Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16),
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Colors.transparent,
-                    Colors.black.withValues(alpha: 0.4),
-                  ],
-                ),
-              ),
-            ),
-            // City name
-            Positioned(
-              left: 0,
-              right: 0,
-              bottom: 16,
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Text(
-                  cityName,
-                  style: const TextStyle(
-                    fontFamily: 'Poppins',
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                    color: Colors.white,
-                    height: 1.2,
-                    shadows: [
-                      Shadow(
-                        offset: Offset(0, 2),
-                        blurRadius: 8,
-                        color: Color.fromRGBO(0, 0, 0, 0.5),
-                      ),
-                    ],
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: cityColor.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(4),
                   ),
-                  textAlign: TextAlign.center,
+                  child: Icon(
+                    Icons.location_city,
+                    color: cityColor,
+                    size: 12,
+                  ),
                 ),
-              ),
+                Flexible(
+                  child: Text(
+                    professionals,
+                    style: const TextStyle(
+                      fontFamily: 'Poppins',
+                      fontSize: 9,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF6B7280),
+                      height: 1.0,
+                    ),
+                  ),
+                ),
+              ],
             ),
-            // Decorative icon
-            Positioned(
-              top: 16,
-              right: 16,
-              child: Container(
-                padding: const EdgeInsets.all(8),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: const Icon(
-                  Icons.location_city,
-                  color: Colors.white,
-                  size: 20,
-                ),
+            const SizedBox(height: 4),
+            Flexible(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    cityName,
+                    style: const TextStyle(
+                      fontFamily: 'Poppins',
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF1F2937),
+                      height: 1.0,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const Text(
+                    'profissionais',
+                    style: TextStyle(
+                      fontFamily: 'Poppins',
+                      fontSize: 8,
+                      fontWeight: FontWeight.w400,
+                      color: Color(0xFF9CA3AF),
+                      height: 1.0,
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
@@ -339,31 +504,77 @@ class _HomePatientScreenState extends State<HomePatientScreen> {
     );
   }
 
+
   Widget _buildServicesSection() {
     final services = [
-      {'name': 'Cuidadores', 'image': 'assets/images/cuidadores.jpg', 'icon': Icons.favorite},
-      {'name': 'Acompanhantes hospitalar', 'image': 'assets/images/acompanhantes_hospitalar.jpg', 'icon': Icons.local_hospital},
-      {'name': 'Técnicos de enfermagem', 'image': 'assets/images/tecnicos_enfermagem.jpg', 'icon': Icons.medical_services},
-      {'name': 'Acompanhante domiciliar', 'image': 'assets/images/acompanhante_domiciliar.jpg', 'icon': Icons.home},
+      {
+        'name': 'Cuidadores',
+        'description': 'Cuidado especializado',
+        'icon': Icons.favorite,
+        'available': '45+'
+      },
+      {
+        'name': 'Acompanhantes',
+        'description': 'Hospitalar e domiciliar',
+        'icon': Icons.local_hospital,
+        'available': '32+'
+      },
+      {
+        'name': 'Enfermagem',
+        'description': 'Técnicos qualificados',
+        'icon': Icons.medical_services,
+        'available': '28+'
+      },
+      {
+        'name': 'Fisioterapia',
+        'description': 'Reabilitação domiciliar',
+        'icon': Icons.accessibility_new,
+        'available': '15+'
+      },
     ];
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 24),
-          child: Text(
-            'Do que você precisa?',
-            style: TextStyle(
-              fontFamily: 'Poppins',
-              fontSize: 18,
-              fontWeight: FontWeight.w700,
-              color: Color(0xFF1F2937),
-              height: 1.3,
-            ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'Serviços Disponíveis',
+                style: TextStyle(
+                  fontFamily: 'Poppins',
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF1F2937),
+                  height: 1.3,
+                ),
+              ),
+              GestureDetector(
+                onTap: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Ver todos os serviços será implementado em breve'),
+                      backgroundColor: Color(0xFF4D64C8),
+                    ),
+                  );
+                },
+                child: const Text(
+                  'Ver todos',
+                  style: TextStyle(
+                    fontFamily: 'Poppins',
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF4D64C8),
+                    height: 1.3,
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
-        const SizedBox(height: 20),
+        const SizedBox(height: 16),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 24),
           child: GridView.builder(
@@ -373,14 +584,15 @@ class _HomePatientScreenState extends State<HomePatientScreen> {
               crossAxisCount: 2,
               crossAxisSpacing: 16,
               mainAxisSpacing: 16,
-              childAspectRatio: 0.85,
+              childAspectRatio: 1.1,
             ),
             itemCount: services.length,
             itemBuilder: (context, index) {
-              return _buildServiceCard(
+              return _buildModernServiceCard(
                 services[index]['name'] as String,
-                services[index]['image'] as String,
+                services[index]['description'] as String,
                 services[index]['icon'] as IconData,
+                services[index]['available'] as String,
               );
             },
           ),
@@ -389,32 +601,15 @@ class _HomePatientScreenState extends State<HomePatientScreen> {
     );
   }
 
-  Widget _buildServiceCard(String serviceName, String imagePath, IconData icon) {
-    // Paleta de cores personalizada: #4D64C8, #FFAD00, #8FB2FF, #8A63D2, #FFFFFF
+  Widget _buildModernServiceCard(String serviceName, String description, IconData icon, String available) {
     final List<Color> colorPalette = [
       const Color(0xFF4D64C8), // Azul principal
-      const Color(0xFFFFAD00), // Amarelo/laranja
-      const Color(0xFF8FB2FF), // Azul claro
-      const Color(0xFF8A63D2), // Roxo/violeta
+      const Color(0xFF10B981), // Verde
+      const Color(0xFF8B5CF6), // Roxo
+      const Color(0xFFEF4444), // Vermelho
     ];
     
-    Color serviceColor;
-    switch (serviceName) {
-      case 'Cuidadores':
-        serviceColor = colorPalette[0]; // #4D64C8
-        break;
-      case 'Acompanhantes hospitalar':
-        serviceColor = colorPalette[1]; // #FFAD00
-        break;
-      case 'Técnicos de enfermagem':
-        serviceColor = colorPalette[2]; // #8FB2FF
-        break;
-      case 'Acompanhante domiciliar':
-        serviceColor = colorPalette[3]; // #8A63D2
-        break;
-      default:
-        serviceColor = colorPalette[0]; // #4D64C8 como padrão
-    }
+    Color serviceColor = colorPalette[serviceName.hashCode % colorPalette.length];
 
     return GestureDetector(
       onTap: () {
@@ -425,76 +620,79 @@ class _HomePatientScreenState extends State<HomePatientScreen> {
           ),
         );
       },
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
+      child: Container(
+        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
+          color: Colors.white,
           borderRadius: BorderRadius.circular(16),
-          color: serviceColor,
+          border: Border.all(
+            color: const Color(0xFFE5E7EB),
+            width: 1,
+          ),
           boxShadow: [
             BoxShadow(
-              color: serviceColor.withValues(alpha: 0.3),
-              offset: const Offset(0, 4),
-              blurRadius: 12,
+              color: Colors.black.withValues(alpha: 0.05),
+              offset: const Offset(0, 2),
+              blurRadius: 8,
             ),
           ],
         ),
-        child: Stack(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Gradient overlay
-            Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(16),
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Colors.transparent,
-                    Colors.black.withValues(alpha: 0.4),
-                  ],
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: serviceColor.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(
+                    icon,
+                    color: serviceColor,
+                    size: 20,
+                  ),
                 ),
-              ),
-            ),
-            // Icon
-            Positioned(
-              top: 20,
-              left: 20,
-              child: Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Icon(
-                  icon,
-                  color: Colors.white,
-                  size: 24,
-                ),
-              ),
-            ),
-            // Service name
-            Positioned(
-              left: 16,
-              right: 16,
-              bottom: 16,
-              child: Text(
-                serviceName,
-                style: const TextStyle(
-                  fontFamily: 'Poppins',
-                  fontSize: 14,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.white,
-                  height: 1.2,
-                  shadows: [
-                    Shadow(
-                      offset: Offset(0, 2),
-                      blurRadius: 8,
-                      color: Color.fromRGBO(0, 0, 0, 0.5),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF3F4F6),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    available,
+                    style: const TextStyle(
+                      fontFamily: 'Poppins',
+                      fontSize: 10,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF6B7280),
                     ),
-                  ],
+                  ),
                 ),
-                textAlign: TextAlign.center,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
+              ],
+            ),
+            const SizedBox(height: 12),
+            Text(
+              serviceName,
+              style: const TextStyle(
+                fontFamily: 'Poppins',
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF1F2937),
+                height: 1.2,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              description,
+              style: const TextStyle(
+                fontFamily: 'Poppins',
+                fontSize: 12,
+                fontWeight: FontWeight.w400,
+                color: Color(0xFF6B7280),
+                height: 1.3,
               ),
             ),
           ],
@@ -503,65 +701,115 @@ class _HomePatientScreenState extends State<HomePatientScreen> {
     );
   }
 
+
   Widget _buildPublishAdButton() {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24),
-      child: GestureDetector(
-        onTap: () {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Funcionalidade de publicar anúncio em desenvolvimento'),
-              backgroundColor: Color(0xFF353B7E),
-            ),
-          );
-        },
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          width: double.infinity,
-          height: 56,
-          decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              colors: [Color(0xFF353B7E), Color(0xFF4D64C8)],
-              begin: Alignment.centerLeft,
-              end: Alignment.centerRight,
-            ),
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: const Color(0xFF353B7E).withValues(alpha: 0.3),
-                offset: const Offset(0, 4),
-                blurRadius: 12,
-              ),
-            ],
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [Color(0xFF4D64C8), Color(0xFF8B5CF6)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
           ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(6),
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: const Color(0xFF4D64C8).withValues(alpha: 0.3),
+              offset: const Offset(0, 8),
+              blurRadius: 24,
+            ),
+          ],
+        ),
+        child: Column(
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.2),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(
+                    Icons.campaign,
+                    color: Colors.white,
+                    size: 24,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                const Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Precisa de um cuidador?',
+                        style: TextStyle(
+                          fontFamily: 'Poppins',
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white,
+                          height: 1.2,
+                        ),
+                      ),
+                      SizedBox(height: 4),
+                      Text(
+                        'Publique sua necessidade e receba propostas',
+                        style: TextStyle(
+                          fontFamily: 'Poppins',
+                          fontSize: 12,
+                          fontWeight: FontWeight.w400,
+                          color: Colors.white,
+                          height: 1.3,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            GestureDetector(
+              onTap: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Funcionalidade de publicar anúncio em desenvolvimento'),
+                    backgroundColor: Color(0xFF4D64C8),
+                  ),
+                );
+              },
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(vertical: 12),
                 decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: const Icon(
-                  Icons.add,
                   color: Colors.white,
-                  size: 20,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.add_circle_outline,
+                      color: Color(0xFF4D64C8),
+                      size: 20,
+                    ),
+                    SizedBox(width: 8),
+                    Text(
+                      'Publicar Anúncio',
+                      style: TextStyle(
+                        fontFamily: 'Poppins',
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFF4D64C8),
+                        height: 1.2,
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(width: 12),
-              const Text(
-                'Publicar um anúncio',
-                style: TextStyle(
-                  fontFamily: 'Poppins',
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white,
-                  height: 1.2,
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -569,67 +817,55 @@ class _HomePatientScreenState extends State<HomePatientScreen> {
 
   Widget _buildBottomNavigation() {
     return Container(
-      height: 72,
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      padding: const EdgeInsets.all(AppDesignSystem.spaceLG),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(24),
+        color: AppDesignSystem.surfaceColor,
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.1),
-            offset: const Offset(0, 4),
-            blurRadius: 20,
+            blurRadius: 4,
+            offset: const Offset(0, -2),
           ),
         ],
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          _buildNavItem(Icons.search, 'Buscar', 0),
+          _buildNavItem(Icons.home, 'Início', 0, isSelected: true),
           _buildNavItem(Icons.chat_bubble_outline, 'Chat', 1),
-          _buildNavItem(Icons.favorite_border, 'Favoritos', 2),
-          _buildNavItem(Icons.account_circle_outlined, 'Perfil', 3),
+          _buildNavItem(Icons.assignment, 'Contratos', 2),
+          _buildNavItem(Icons.calendar_today, 'Agenda', 3),
+          _buildNavItem(Icons.account_circle_outlined, 'Perfil', 4),
         ],
       ),
     );
   }
 
-  Widget _buildNavItem(IconData icon, String label, int index) {
-    bool isSelected = _selectedTabIndex == index;
+  Widget _buildNavItem(IconData icon, String label, int index, {bool isSelected = false}) {
     return GestureDetector(
       onTap: () => _onTabSelected(index),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        decoration: BoxDecoration(
-          color: isSelected ? AppDesignSystem.primaryColor.withValues(alpha: 0.1) : Colors.transparent,
-          borderRadius: BorderRadius.circular(16),
+      child: Container(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppDesignSystem.spaceMD,
+          vertical: AppDesignSystem.spaceSM,
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 200),
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: isSelected ? AppDesignSystem.primaryColor : Colors.transparent,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Icon(
-                icon,
-                color: isSelected ? Colors.white : const Color(0xFF6B7280),
-                size: 20,
-              ),
+            Icon(
+              icon,
+              color: isSelected 
+                ? AppDesignSystem.primaryColor 
+                : AppDesignSystem.textSecondaryColor,
+              size: 24,
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: AppDesignSystem.spaceXS),
             Text(
               label,
-              style: TextStyle(
-                fontFamily: 'Poppins',
-                fontSize: 10,
-                fontWeight: FontWeight.w500,
-                color: isSelected ? AppDesignSystem.primaryColor : const Color(0xFF6B7280),
-                height: 1.2,
+              style: AppDesignSystem.captionStyle.copyWith(
+                color: isSelected 
+                  ? AppDesignSystem.primaryColor 
+                  : AppDesignSystem.textSecondaryColor,
               ),
             ),
           ],
@@ -639,36 +875,37 @@ class _HomePatientScreenState extends State<HomePatientScreen> {
   }
 
   void _onTabSelected(int index) {
-    setState(() {
-      _selectedTabIndex = index;
-    });
-
-    String section = '';
     switch (index) {
       case 0:
-        section = 'Busca';
+        // Já estamos na tela inicial
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Você já está na tela inicial'),
+            duration: Duration(seconds: 1),
+          ),
+        );
         break;
       case 1:
-        section = 'Chat';
+        // Navegar para Chat de Paciente
         Navigator.pushNamed(context, '/patient-chat');
         break;
       case 2:
-        section = 'Favoritos';
+        // Navegar para Contratos
+        Navigator.pushNamed(context, '/contracts');
         break;
       case 3:
-        section = 'Perfil';
-        Navigator.pushNamed(context, '/patient-profile');
+        // Navegar para Agenda (implementar se necessário)
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Tela de agenda será implementada em breve'),
+            backgroundColor: AppDesignSystem.infoColor,
+          ),
+        );
         break;
-    }
-
-    if (section.isNotEmpty && index != 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Navegando para $section'),
-          duration: const Duration(seconds: 1),
-          backgroundColor: AppDesignSystem.primaryColor,
-        ),
-      );
+      case 4:
+        // Navegar para Perfil
+        Navigator.pushNamed(context, UserService.getAccountRoute());
+        break;
     }
   }
 }

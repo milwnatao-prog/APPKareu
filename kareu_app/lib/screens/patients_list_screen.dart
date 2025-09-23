@@ -81,13 +81,14 @@ class _PatientsListScreenState extends State<PatientsListScreen> {
       backgroundColor: AppDesignSystem.backgroundColor,
       appBar: AppDesignSystem.styledAppBar(
         title: 'Meus Pacientes',
+        context: context,
         actions: [
           IconButton(
-            icon: const Icon(Icons.search, color: Colors.white),
+            icon: const Icon(Icons.search, color: AppDesignSystem.textPrimaryColor),
             onPressed: _showSearchFilter,
           ),
           IconButton(
-            icon: const Icon(Icons.filter_list, color: Colors.white),
+            icon: const Icon(Icons.filter_list, color: AppDesignSystem.textPrimaryColor),
             onPressed: _showFilterOptions,
           ),
         ],
@@ -103,6 +104,7 @@ class _PatientsListScreenState extends State<PatientsListScreen> {
           ),
         ],
       ),
+      bottomNavigationBar: _buildBottomNavigation(),
     );
   }
 
@@ -532,6 +534,95 @@ class _PatientsListScreenState extends State<PatientsListScreen> {
               leading: const Icon(Icons.location_on),
               title: const Text('Por Localização'),
               onTap: () => Navigator.pop(context),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _onTabSelected(int index) {
+    switch (index) {
+      case 0:
+        // Navegar para Home
+        Navigator.pushReplacementNamed(context, '/home-professional');
+        break;
+      case 1:
+        // Navegar para Chat do Cuidador
+        Navigator.pushNamed(context, '/caregiver-chat');
+        break;
+      case 2:
+        // Já estamos na tela de pacientes
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Você já está na tela de clientes'),
+            duration: Duration(seconds: 1),
+          ),
+        );
+        break;
+      case 3:
+        // Navegar para Agenda
+        Navigator.pushNamed(context, '/caregiver-schedule');
+        break;
+      case 4:
+        // Navegar para Configurações da Conta
+        Navigator.pushNamed(context, '/account-settings');
+        break;
+    }
+  }
+
+  Widget _buildBottomNavigation() {
+    return Container(
+      padding: const EdgeInsets.all(AppDesignSystem.spaceLG),
+      decoration: BoxDecoration(
+        color: AppDesignSystem.surfaceColor,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.1),
+            blurRadius: 4,
+            offset: const Offset(0, -2),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          _buildNavItem(Icons.home, 'Início', 0),
+          _buildNavItem(Icons.chat_bubble_outline, 'Chat', 1),
+          _buildNavItem(Icons.people_outline, 'Clientes', 2, isSelected: true),
+          _buildNavItem(Icons.calendar_today, 'Agenda', 3),
+          _buildNavItem(Icons.account_circle_outlined, 'Perfil', 4),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNavItem(IconData icon, String label, int index, {bool isSelected = false}) {
+    return GestureDetector(
+      onTap: () => _onTabSelected(index),
+      child: Container(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppDesignSystem.spaceMD,
+          vertical: AppDesignSystem.spaceSM,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              color: isSelected 
+                ? AppDesignSystem.primaryColor 
+                : AppDesignSystem.textSecondaryColor,
+              size: 24,
+            ),
+            const SizedBox(height: AppDesignSystem.spaceXS),
+            Text(
+              label,
+              style: AppDesignSystem.captionStyle.copyWith(
+                color: isSelected 
+                  ? AppDesignSystem.primaryColor 
+                  : AppDesignSystem.textSecondaryColor,
+              ),
             ),
           ],
         ),

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'dart:ui';
 import '../constants/app_design_system.dart';
 
@@ -373,6 +372,18 @@ class _FormField extends StatelessWidget {
   final bool obscureText;
   final VoidCallback? onToggleVisibility;
 
+  IconData _getIconFromPath(String path) {
+    if (path.contains('user-icon')) {
+      return Icons.person_outline;
+    } else if (path.contains('lock-icon')) {
+      return Icons.lock_outline;
+    } else if (path.contains('briefcase-icon')) {
+      return Icons.work_outline;
+    } else {
+      return Icons.help_outline;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -416,11 +427,10 @@ class _FormField extends StatelessWidget {
                 width: 40,
                 height: 45.58,
                 alignment: Alignment.center,
-                child: SvgPicture.asset(
-                  prefixIcon,
-                  width: 16,
-                  height: 16,
-                  colorFilter: const ColorFilter.mode(Color(0xFF666666), BlendMode.srcIn),
+                child: Icon(
+                  _getIconFromPath(prefixIcon),
+                  size: 16,
+                  color: const Color(0xFF666666),
                 ),
               ),
               suffixIcon: isPassword
@@ -497,13 +507,10 @@ class _RoleToggle extends StatelessWidget {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        SizedBox(
-                          width: 18,
-                          height: 18,
-                          child: SvgPicture.asset(
-                            'assets/images/briefcase-icon-combined.svg',
-                            colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
-                          ),
+                        const Icon(
+                          Icons.work_outline,
+                          size: 18,
+                          color: Colors.white,
                         ),
                         const SizedBox(width: 8),
                         const Text(
@@ -531,13 +538,10 @@ class _RoleToggle extends StatelessWidget {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        SizedBox(
-                          width: 18,
-                          height: 18,
-                          child: SvgPicture.asset(
-                            'assets/images/user-tab-icon-combined.svg',
-                            colorFilter: const ColorFilter.mode(Colors.white, BlendMode.srcIn),
-                          ),
+                        const Icon(
+                          Icons.family_restroom,
+                          size: 18,
+                          color: Colors.white,
                         ),
                         const SizedBox(width: 8),
                         const Text(

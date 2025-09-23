@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../services/session_service.dart';
-import 'professional_chat_screen.dart';
+import '../constants/app_design_system.dart';
+import 'caregiver_chat_screen.dart';
 
 class HomeProfessionalScreen extends StatefulWidget {
   const HomeProfessionalScreen({super.key});
@@ -9,87 +9,87 @@ class HomeProfessionalScreen extends StatefulWidget {
   State<HomeProfessionalScreen> createState() => _HomeProfessionalScreenState();
 }
 
-class _HomeProfessionalScreenState extends State<HomeProfessionalScreen> {
-  int _selectedTabIndex = 0;
-  final Set<String> _patientsScheduledDays = {'2', '5'}; // Dias com pacientes agendados
+class _HomeProfessionalScreenState extends State<HomeProfessionalScreen> 
+    with AutomaticKeepAliveClientMixin {
+  
+  @override
+  bool get wantKeepAlive => true; // Otimização: manter estado vivo
+  
+  // Dados sincronizados com o chat do cuidador
+  final List<PatientData> _patients = [
+    PatientData(
+      name: 'Família Silva',
+      info: 'Dona Maria, 78 anos',
+      service: 'Acompanhamento domiciliar',
+      nextAppointment: 'Hoje às 14:30',
+      status: PatientStatus.active,
+      hasUnreadMessages: true,
+      rating: 4.8,
+      totalHours: 45,
+      isFamily: true,
+    ),
+    PatientData(
+      name: 'João Santos',
+      info: '65 anos - Acompanhamento',
+      service: 'Cuidados especializados',
+      nextAppointment: 'Amanhã às 09:00',
+      status: PatientStatus.active,
+      hasUnreadMessages: true,
+      rating: 4.9,
+      totalHours: 32,
+      isFamily: false,
+    ),
+    PatientData(
+      name: 'Família Costa',
+      info: 'Sr. Pedro, 82 anos',
+      service: 'Fisioterapia domiciliar',
+      nextAppointment: 'Segunda às 10:00',
+      status: PatientStatus.scheduled,
+      hasUnreadMessages: false,
+      rating: 4.7,
+      totalHours: 28,
+      isFamily: true,
+    ),
+    PatientData(
+      name: 'Ana Oliveira',
+      info: '70 anos - Fisioterapia',
+      service: 'Exercícios terapêuticos',
+      nextAppointment: 'Terça às 15:00',
+      status: PatientStatus.completed,
+      hasUnreadMessages: false,
+      rating: 5.0,
+      totalHours: 18,
+      isFamily: false,
+    ),
+  ];
 
-  void _logout(BuildContext context) {
-    SessionService.instance.logout();
-    Navigator.of(context).pushReplacementNamed('/login');
+  // Estatísticas calculadas dinamicamente
+  late Map<String, dynamic> _statistics;
+
+  @override
+  void initState() {
+    super.initState();
+    _calculateStatistics();
   }
 
-  void _onEngagePressed() {
-    Navigator.pushNamed(context, '/engagement-plans');
-  }
-
-  void _onPatientCardTapped(String patient) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Detalhes do Paciente'),
-          content: Text('Visualizando detalhes de $patient'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('Fechar'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void _onCalendarDayTapped(String day) {
-    if (day.isNotEmpty) {
-      if (_patientsScheduledDays.contains(day)) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Dia $day - Paciente agendado'),
-            backgroundColor: const Color(0xFF4D64C8),
-            duration: const Duration(seconds: 2),
-          ),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Dia $day - Sem agendamentos'),
-            duration: const Duration(seconds: 1),
-          ),
-        );
-      }
-    }
-  }
-
-  void _onStatisticCardTapped(String type) {
-    String message;
-    switch (type) {
-      case 'ratings':
-        message = 'Visualizando suas avaliações detalhadas...';
-        break;
-      case 'patients':
-        message = 'Visualizando histórico de pacientes atendidos...';
-        break;
-      case 'hours':
-        message = 'Visualizando relatório de horas trabalhadas...';
-        break;
-      default:
-        message = 'Carregando detalhes...';
-    }
+  void _calculateStatistics() {
+    final activePatients = _patients.where((p) => p.status == PatientStatus.active).length;
+    final totalHours = _patients.fold(0, (sum, p) => sum + p.totalHours);
+    final averageRating = _patients.fold(0.0, (sum, p) => sum + p.rating) / _patients.length;
+    final unreadMessages = _patients.where((p) => p.hasUnreadMessages).length;
     
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: const Color(0xFF4D64C8),
-      ),
-    );
+    _statistics = {
+      'activePatients': activePatients,
+      'totalHours': totalHours,
+      'averageRating': averageRating,
+      'unreadMessages': unreadMessages,
+      'weeklyEarnings': (totalHours * 25.0), // R$ 25/hora estimado
+      'completedServices': _patients.where((p) => p.status == PatientStatus.completed).length,
+    };
   }
+
 
   void _onTabSelected(int index) {
-    setState(() {
-      _selectedTabIndex = index;
-    });
-    
     switch (index) {
       case 0:
         // Já estamos na tela inicial
@@ -101,11 +101,11 @@ class _HomeProfessionalScreenState extends State<HomeProfessionalScreen> {
         );
         break;
       case 1:
-        // Navegar para Chat
+        // Navegar para Chat do Cuidador
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => const ProfessionalChatScreen(),
+            builder: (context) => const CaregiverChatScreen(),
           ),
         );
         break;
@@ -114,13 +114,7 @@ class _HomeProfessionalScreenState extends State<HomeProfessionalScreen> {
         Navigator.pushNamed(context, '/patients-list');
         break;
       case 3:
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Navegando para Agenda'),
-            duration: Duration(seconds: 1),
-            backgroundColor: Color(0xFF4D64C8),
-          ),
-        );
+        Navigator.pushNamed(context, '/caregiver-schedule');
         break;
       case 4:
         // Navegar para Configurações da Conta
@@ -131,50 +125,46 @@ class _HomeProfessionalScreenState extends State<HomeProfessionalScreen> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context); // Chamada obrigatória para AutomaticKeepAliveClientMixin
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppDesignSystem.backgroundColor,
       body: SafeArea(
         child: Column(
           children: [
-            // Status Bar Space
-            const SizedBox(height: 8),
-            
-            // Header Section
+            // Header
             _buildHeader(),
             
             // Main Content
             Expanded(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 24),
+                padding: const EdgeInsets.all(AppDesignSystem.space2XL),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const SizedBox(height: 24),
+                    // Welcome Section
+                    _buildWelcomeSection(),
                     
-                    // Profile Section
-                    _buildProfileSection(),
+                    AppDesignSystem.verticalSpace(2),
                     
-                    const SizedBox(height: 24),
+                    // Quick Stats
+                    _buildQuickStats(),
                     
-                    // Statistics Cards
-                    _buildStatisticsSection(),
+                    AppDesignSystem.verticalSpace(2),
                     
-                    const SizedBox(height: 24),
+                    // Today's Schedule
+                    _buildTodaySchedule(),
                     
-                    // Engagement Banner
-                    _buildEngagementBanner(),
+                    AppDesignSystem.verticalSpace(2),
                     
-                    const SizedBox(height: 24),
+                    // Active Patients
+                    _buildActivePatients(),
                     
-                    // Next Patients Section
-                    _buildNextPatientsSection(),
+                    AppDesignSystem.verticalSpace(2),
                     
-                    const SizedBox(height: 24),
+                    // Quick Actions
+                    _buildQuickActions(),
                     
-                    // Calendar Section
-                    _buildCalendarSection(),
-                    
-                    const SizedBox(height: 100), // Space for bottom navigation
+                    AppDesignSystem.verticalSpace(4),
                   ],
                 ),
               ),
@@ -187,47 +177,130 @@ class _HomeProfessionalScreenState extends State<HomeProfessionalScreen> {
   }
 
   Widget _buildHeader() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8),
-      child: Column(
+    return Padding(
+      padding: const EdgeInsets.all(AppDesignSystem.spaceLG),
+      child: Row(
         children: [
-          // Logo centralizado
-          const Text(
-            'Kareu',
-            style: TextStyle(
-              fontFamily: 'Poppins',
-              fontSize: 40,
-              fontWeight: FontWeight.w700,
-              color: Color(0xFF4D64C8),
-              height: 0.37,
-              letterSpacing: -0.43,
+          // Profile Avatar
+          Container(
+            width: 50,
+            height: 50,
+            decoration: BoxDecoration(
+              color: AppDesignSystem.primaryColor.withValues(alpha: 0.1),
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: AppDesignSystem.primaryColor.withValues(alpha: 0.3),
+                width: 2,
+              ),
+            ),
+            child: Icon(
+              Icons.person,
+              color: AppDesignSystem.primaryColor,
+              size: 28,
             ),
           ),
           
-          const SizedBox(height: 16),
+          AppDesignSystem.horizontalSpace(1),
           
-          // Profile Image centralizada
-          Center(
-            child: Container(
-              width: 100,
-              height: 100,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: const Color(0xFF4D64C8).withValues(alpha: 0.1),
-                border: Border.all(
-                  color: const Color(0xFF4D64C8),
-                  width: 3,
+          // User Info
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Olá, Cuidador!',
+                  style: AppDesignSystem.h3Style.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
-              ),
-              child: const CircleAvatar(
-                radius: 45,
-                backgroundColor: Colors.transparent,
+                Text(
+                  'Tenha um ótimo dia de trabalho',
+                  style: AppDesignSystem.captionStyle.copyWith(
+                    color: AppDesignSystem.textSecondaryColor,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          
+          // Notifications
+          Stack(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(AppDesignSystem.spaceSM),
+                decoration: BoxDecoration(
+                  color: AppDesignSystem.surfaceColor,
+                  borderRadius: BorderRadius.circular(AppDesignSystem.borderRadius),
+                ),
                 child: Icon(
-                  Icons.person,
-                  size: 50,
-                  color: Color(0xFF4D64C8),
+                  Icons.notifications_outlined,
+                  color: AppDesignSystem.textPrimaryColor,
+                  size: 24,
                 ),
               ),
+              if (_statistics['unreadMessages'] > 0)
+                Positioned(
+                  top: 6,
+                  right: 6,
+                  child: Container(
+                    width: 12,
+                    height: 12,
+                    decoration: const BoxDecoration(
+                      color: AppDesignSystem.errorColor,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildWelcomeSection() {
+    final now = DateTime.now();
+    final greeting = now.hour < 12 ? 'Bom dia' : now.hour < 18 ? 'Boa tarde' : 'Boa noite';
+    
+    return AppDesignSystem.styledCard(
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '$greeting!',
+                  style: AppDesignSystem.h2Style.copyWith(
+                    color: AppDesignSystem.primaryColor,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+                AppDesignSystem.verticalSpace(0.5),
+                Text(
+                  'Você tem ${_statistics['activePatients']} pacientes ativos hoje',
+                  style: AppDesignSystem.bodyStyle,
+                ),
+                AppDesignSystem.verticalSpace(0.5),
+                Text(
+                  'Próximo atendimento em 2 horas',
+                  style: AppDesignSystem.bodySmallStyle.copyWith(
+                    color: AppDesignSystem.textSecondaryColor,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.all(AppDesignSystem.spaceLG),
+            decoration: BoxDecoration(
+              color: AppDesignSystem.primaryColor.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(AppDesignSystem.borderRadiusLarge),
+            ),
+            child: Icon(
+              Icons.medical_services,
+              color: AppDesignSystem.primaryColor,
+              size: 32,
             ),
           ),
         ],
@@ -235,70 +308,60 @@ class _HomeProfessionalScreenState extends State<HomeProfessionalScreen> {
     );
   }
 
-  Widget _buildProfileSection() {
+  Widget _buildQuickStats() {
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Greeting
-        RichText(
-          textAlign: TextAlign.center,
-          text: const TextSpan(
-            style: TextStyle(
-              fontFamily: 'Poppins',
-              fontSize: 15.69,
-              fontWeight: FontWeight.w600,
-              color: Colors.black,
-              height: 1.5,
-            ),
-            children: [
-              TextSpan(text: 'Olá,\n'),
-              TextSpan(text: 'Maria Souza, 29'),
-            ],
+        Text(
+          'Resumo do Mês',
+          style: AppDesignSystem.h3Style.copyWith(
+            fontWeight: FontWeight.w600,
           ),
         ),
-        
-        const SizedBox(height: 8),
-        
-        // Welcome back
-        const Text(
-          'Bem-vinda de volta',
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontFamily: 'Poppins',
-            fontSize: 13,
-            fontWeight: FontWeight.w300,
-            color: Colors.black,
-            height: 1.5,
-          ),
-        ),
-        
-        const SizedBox(height: 16),
-        
-        // Verification Badge
+        AppDesignSystem.verticalSpace(1),
         Row(
           children: [
-            Container(
-              width: 18,
-              height: 18,
-              decoration: const BoxDecoration(
-                color: Color(0xFF0088FF),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.check,
-                color: Colors.white,
-                size: 12,
+            Expanded(
+              child: _buildStatCard(
+                'Horas Trabalhadas',
+                '${_statistics['totalHours']}h',
+                Icons.access_time,
+                AppDesignSystem.infoColor,
+                () => _showStatDetails('hours'),
               ),
             ),
-            const SizedBox(width: 6),
-            const Text(
-              'Profissional verificado Kareu',
-              style: TextStyle(
-                fontFamily: 'Poppins',
-                fontSize: 11,
-                fontWeight: FontWeight.w500,
-                color: Colors.black,
-                height: 1.5,
+            AppDesignSystem.horizontalSpace(1),
+            Expanded(
+              child: _buildStatCard(
+                'Avaliação Média',
+                '${_statistics['averageRating'].toStringAsFixed(1)}⭐',
+                Icons.star,
+                AppDesignSystem.warningColor,
+                () => _showStatDetails('rating'),
+              ),
+            ),
+          ],
+        ),
+        AppDesignSystem.verticalSpace(1),
+        Row(
+          children: [
+            Expanded(
+              child: _buildStatCard(
+                'Ganhos Estimados',
+                'R\$ ${_statistics['weeklyEarnings'].toStringAsFixed(0)}',
+                Icons.attach_money,
+                AppDesignSystem.successColor,
+                () => _showStatDetails('earnings'),
+              ),
+            ),
+            AppDesignSystem.horizontalSpace(1),
+            Expanded(
+              child: _buildStatCard(
+                'Serviços Concluídos',
+                '${_statistics['completedServices']}',
+                Icons.check_circle,
+                AppDesignSystem.primaryColor,
+                () => _showStatDetails('completed'),
               ),
             ),
           ],
@@ -307,563 +370,449 @@ class _HomeProfessionalScreenState extends State<HomeProfessionalScreen> {
     );
   }
 
-  Widget _buildStatisticsSection() {
-    return Row(
-      children: [
-        // Ratings Card
-        Expanded(
-          child: GestureDetector(
-            onTap: () => _onStatisticCardTapped('ratings'),
-            child: Container(
-              height: 107,
-              padding: const EdgeInsets.symmetric(vertical: 21, horizontal: 8),
-              decoration: BoxDecoration(
-                color: const Color(0xFF4D64C8),
-                borderRadius: BorderRadius.circular(8),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.25),
-                    offset: const Offset(0, 4),
-                    blurRadius: 4,
-                  ),
-                ],
-              ),
-              child: const Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    '4,9',
-                    style: TextStyle(
-                      fontFamily: 'Poppins',
-                      fontSize: 24,
-                      fontWeight: FontWeight.w800,
-                      color: Colors.white,
-                      height: 1,
-                    ),
-                  ),
-                  SizedBox(height: 10),
-                  Text(
-                    'Avaliações',
-                    style: TextStyle(
-                      fontFamily: 'Poppins',
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.white,
-                      height: 1,
-                    ),
-                  ),
-                ],
+  Widget _buildStatCard(String title, String value, IconData icon, Color color, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AppDesignSystem.styledCard(
+        child: Column(
+          children: [
+            Icon(
+              icon,
+              color: color,
+              size: 24,
+            ),
+            AppDesignSystem.verticalSpace(0.5),
+            Text(
+              value,
+              style: AppDesignSystem.h3Style.copyWith(
+                color: color,
+                fontWeight: FontWeight.w700,
               ),
             ),
-          ),
+            AppDesignSystem.verticalSpace(0.25),
+            Text(
+              title,
+              style: AppDesignSystem.captionStyle.copyWith(
+                color: AppDesignSystem.textSecondaryColor,
+              ),
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
         ),
-        
-        const SizedBox(width: 10),
-        
-        // Patients Card
-        Expanded(
-          child: GestureDetector(
-            onTap: () => _onStatisticCardTapped('patients'),
-            child: Container(
-              height: 107,
-              padding: const EdgeInsets.symmetric(vertical: 13, horizontal: 11),
-              decoration: BoxDecoration(
-                color: const Color(0xFF4D64C8),
-                borderRadius: BorderRadius.circular(8),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.25),
-                    offset: const Offset(0, 4),
-                    blurRadius: 4,
-                  ),
-                ],
-              ),
-              child: const Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    '12',
-                    style: TextStyle(
-                      fontFamily: 'Poppins',
-                      fontSize: 24,
-                      fontWeight: FontWeight.w800,
-                      color: Colors.white,
-                      height: 1,
-                    ),
-                  ),
-                  SizedBox(height: 10),
-                  Text(
-                    'Pacientes\natendidos',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontFamily: 'Poppins',
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.white,
-                      height: 1,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-        
-        const SizedBox(width: 10),
-        
-        // Hours Card
-        Expanded(
-          child: GestureDetector(
-            onTap: () => _onStatisticCardTapped('hours'),
-            child: Container(
-              height: 107,
-              padding: const EdgeInsets.symmetric(vertical: 11, horizontal: 3),
-              decoration: BoxDecoration(
-                color: const Color(0xFF4D64C8),
-                borderRadius: BorderRadius.circular(8),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.25),
-                    offset: const Offset(0, 4),
-                    blurRadius: 4,
-                  ),
-                ],
-              ),
-              child: const Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    '120h',
-                    style: TextStyle(
-                      fontFamily: 'Poppins',
-                      fontSize: 24,
-                      fontWeight: FontWeight.w800,
-                      color: Color(0xFFFFFFFF),
-                      height: 1,
-                    ),
-                  ),
-                  SizedBox(height: 10),
-                  Text(
-                    'Horas\ntrabalhadas',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontFamily: 'Poppins',
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                      color: Color(0xFFFFFFFF),
-                      height: 1,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildEngagementBanner() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: const Color(0xFFFFF47E),
-        borderRadius: BorderRadius.circular(8),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.25),
-            offset: const Offset(0, 1),
-            blurRadius: 1,
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          const Expanded(
-            child: Text(
-              'Seu perfil perfil recebeu 2 visitas hoje, engaje seu perfil e atraia mais clientes.',
-              style: TextStyle(
-                fontFamily: 'Poppins',
-                fontSize: 12,
-                fontWeight: FontWeight.w400,
-                color: Colors.black,
-                height: 1.5,
-              ),
-            ),
-          ),
-          const SizedBox(width: 16),
-          GestureDetector(
-            onTap: _onEngagePressed,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 7),
-              decoration: BoxDecoration(
-                color: const Color(0xFFFFBB00),
-                borderRadius: BorderRadius.circular(50),
-                border: Border.all(color: Colors.transparent),
-              ),
-              child: const Text(
-                'Engajar',
-                style: TextStyle(
-                  fontFamily: 'SF Pro',
-                  fontSize: 11,
-                  fontWeight: FontWeight.w700,
-                  color: Colors.white,
-                  height: 1.19,
-                ),
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }
 
-  Widget _buildNextPatientsSection() {
+  Widget _buildTodaySchedule() {
+    final todayPatients = _patients.where((p) => 
+      p.nextAppointment.contains('Hoje') || p.nextAppointment.contains('Amanhã')
+    ).toList();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
-          'Próximos pacientes',
-          style: TextStyle(
-            fontFamily: 'Poppins',
-            fontSize: 12,
-            fontWeight: FontWeight.w600,
-            color: Colors.black,
-            height: 1.5,
-          ),
+        Row(
+          children: [
+            Text(
+              'Agenda de Hoje',
+              style: AppDesignSystem.h3Style.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const Spacer(),
+            GestureDetector(
+              onTap: () => Navigator.pushNamed(context, '/caregiver-schedule'),
+              child: Text(
+                'Ver agenda completa',
+                style: AppDesignSystem.bodySmallStyle.copyWith(
+                  color: AppDesignSystem.primaryColor,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
         ),
-        
-        const SizedBox(height: 16),
-        
-        // Patient Card 1
-        GestureDetector(
-          onTap: () => _onPatientCardTapped('Francisca - Hospital São Lucas'),
-          child: _buildPatientCard(
-            date: '02/11/25',
-            time: '10:00 às 18:00',
-            patient: 'Francisca - Hospital São Lucas',
-            color: const Color(0xFF6B73FF),
-          ),
-        ),
-        
-        const SizedBox(height: 8),
-        
-        // Patient Card 2
-        GestureDetector(
-          onTap: () => _onPatientCardTapped('Narciso - Domicílio'),
-          child: _buildPatientCard(
-            date: '05/11/25',
-            time: '07:00 às 19:00',
-            patient: 'Narciso - Domicílio',
-            color: const Color(0xFFFF6B6B),
-          ),
-        ),
+        AppDesignSystem.verticalSpace(1),
+        if (todayPatients.isEmpty)
+          AppDesignSystem.styledCard(
+            child: Column(
+              children: [
+                Icon(
+                  Icons.event_available,
+                  color: AppDesignSystem.successColor,
+                  size: 48,
+                ),
+                AppDesignSystem.verticalSpace(1),
+                Text(
+                  'Nenhum agendamento hoje',
+                  style: AppDesignSystem.bodyStyle.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                AppDesignSystem.verticalSpace(0.5),
+                Text(
+                  'Aproveite para descansar ou buscar novos clientes',
+                  style: AppDesignSystem.bodySmallStyle.copyWith(
+                    color: AppDesignSystem.textSecondaryColor,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          )
+        else
+          ...todayPatients.map((patient) => _buildScheduleCard(patient)).toList(),
       ],
     );
   }
 
-  Widget _buildPatientCard({
-    required String date,
-    required String time,
-    required String patient,
-    required Color color,
-  }) {
+  Widget _buildScheduleCard(PatientData patient) {
     return Container(
-      height: 63,
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.25),
-            offset: const Offset(0, 1),
-            blurRadius: 1,
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          // Color indicator
-          Container(
-            width: 65,
-            height: 63,
-            decoration: BoxDecoration(
-              color: color,
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(8),
-                bottomLeft: Radius.circular(8),
+      margin: const EdgeInsets.only(bottom: AppDesignSystem.spaceSM),
+      child: AppDesignSystem.styledCard(
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(AppDesignSystem.spaceMD),
+              decoration: BoxDecoration(
+                color: patient.isFamily 
+                  ? AppDesignSystem.warningColor.withValues(alpha: 0.1)
+                  : AppDesignSystem.primaryColor.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(AppDesignSystem.borderRadius),
+              ),
+              child: Icon(
+                patient.isFamily ? Icons.family_restroom : Icons.person,
+                color: patient.isFamily 
+                  ? AppDesignSystem.warningColor
+                  : AppDesignSystem.primaryColor,
+                size: 24,
               ),
             ),
-          ),
-          
-          // Content
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            
+            AppDesignSystem.horizontalSpace(1),
+            
+            Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
-                mainAxisSize: MainAxisSize.min,
                 children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        date,
-                        style: const TextStyle(
-                          fontFamily: 'Poppins',
-                          fontSize: 12,
-                          fontWeight: FontWeight.w400,
-                          color: Colors.black,
-                          height: 1.5,
+                  Text(
+                    patient.name,
+                    style: AppDesignSystem.cardTitleStyle,
+                  ),
+                  AppDesignSystem.verticalSpace(0.25),
+                  Text(
+                    patient.service,
+                    style: AppDesignSystem.bodySmallStyle.copyWith(
+                      color: AppDesignSystem.textSecondaryColor,
+                    ),
+                  ),
+                  AppDesignSystem.verticalSpace(0.25),
+                  Text(
+                    patient.nextAppointment,
+                    style: AppDesignSystem.bodySmallStyle.copyWith(
+                      color: AppDesignSystem.primaryColor,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            
+            GestureDetector(
+              onTap: () => _openPatientChat(patient),
+              child: Container(
+                padding: const EdgeInsets.all(AppDesignSystem.spaceSM),
+                decoration: BoxDecoration(
+                  color: AppDesignSystem.primaryColor,
+                  borderRadius: BorderRadius.circular(AppDesignSystem.borderRadius),
+                ),
+                child: const Icon(
+                  Icons.chat,
+                  color: Colors.white,
+                  size: 16,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildActivePatients() {
+    final activePatients = _patients.where((p) => p.status == PatientStatus.active).toList();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Text(
+              'Pacientes Ativos',
+              style: AppDesignSystem.h3Style.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const Spacer(),
+            GestureDetector(
+              onTap: () => Navigator.pushNamed(context, '/chat'),
+              child: Text(
+                'Ver todos',
+                style: AppDesignSystem.bodySmallStyle.copyWith(
+                  color: AppDesignSystem.primaryColor,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+          ],
+        ),
+        AppDesignSystem.verticalSpace(1),
+        ...activePatients.take(3).map((patient) => _buildPatientCard(patient)).toList(),
+      ],
+    );
+  }
+
+  Widget _buildPatientCard(PatientData patient) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: AppDesignSystem.spaceSM),
+      child: AppDesignSystem.styledCard(
+        child: Row(
+          children: [
+            // Avatar with status
+            Stack(
+              children: [
+                Container(
+                  width: 50,
+                  height: 50,
+                  decoration: BoxDecoration(
+                    color: patient.isFamily 
+                      ? AppDesignSystem.warningColor.withValues(alpha: 0.1)
+                      : AppDesignSystem.primaryColor.withValues(alpha: 0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(
+                    patient.isFamily ? Icons.family_restroom : Icons.person,
+                    color: patient.isFamily 
+                      ? AppDesignSystem.warningColor
+                      : AppDesignSystem.primaryColor,
+                    size: 24,
+                  ),
+                ),
+                if (patient.hasUnreadMessages)
+                  Positioned(
+                    top: 0,
+                    right: 0,
+                    child: Container(
+                      width: 16,
+                      height: 16,
+                      decoration: const BoxDecoration(
+                        color: AppDesignSystem.errorColor,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Center(
+                        child: Text(
+                          '!',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
-                      Text(
-                        time,
-                        style: const TextStyle(
-                          fontFamily: 'Poppins',
-                          fontSize: 12,
-                          fontWeight: FontWeight.w400,
-                          color: Colors.black,
-                          height: 1.5,
+                    ),
+                  ),
+              ],
+            ),
+            
+            AppDesignSystem.horizontalSpace(1),
+            
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          patient.name,
+                          style: AppDesignSystem.cardTitleStyle,
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppDesignSystem.spaceXS,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: _getStatusColor(patient.status).withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          _getStatusText(patient.status),
+                          style: AppDesignSystem.captionStyle.copyWith(
+                            color: _getStatusColor(patient.status),
+                            fontWeight: FontWeight.w600,
+                            fontSize: 9,
+                          ),
                         ),
                       ),
                     ],
                   ),
+                  AppDesignSystem.verticalSpace(0.25),
                   Text(
-                    patient,
-                    style: const TextStyle(
-                      fontFamily: 'Poppins',
-                      fontSize: 12,
-                      fontWeight: FontWeight.w400,
-                      color: Colors.black,
-                      height: 1.5,
+                    patient.info,
+                    style: AppDesignSystem.bodySmallStyle.copyWith(
+                      color: AppDesignSystem.textSecondaryColor,
                     ),
                   ),
-                ],
-              ),
-            ),
-          ),
-          
-          // Arrow
-          const Padding(
-            padding: EdgeInsets.only(right: 16),
-            child: Icon(
-              Icons.chevron_right,
-              color: Color(0xFF3B55C4),
-              size: 24,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCalendarSection() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(8),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.25),
-            offset: const Offset(0, 1),
-            blurRadius: 1,
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              const Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Agenda',
-                    style: TextStyle(
-                      fontFamily: 'Poppins',
-                      fontSize: 12,
-                      fontWeight: FontWeight.w400,
-                      color: Colors.black,
-                      height: 1.25,
-                    ),
-                  ),
-                  Text(
-                    'Ver agenda completa',
-                    style: TextStyle(
-                      fontFamily: 'Poppins',
-                      fontSize: 12,
-                      fontWeight: FontWeight.w400,
-                      color: Colors.black,
-                      height: 1.25,
-                    ),
-                  ),
-                ],
-              ),
-              // Removido o horário 9:41 AM
-            ],
-          ),
-          
-          const SizedBox(height: 16),
-          
-          // Simplified Calendar
-          _buildSimplifiedCalendar(),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSimplifiedCalendar() {
-    return Container(
-      padding: const EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.6),
-        borderRadius: BorderRadius.circular(7),
-      ),
-      child: Column(
-        children: [
-          // Header
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Row(
-                children: [
-                  const Text(
-                    'Nov 2025',
-                    style: TextStyle(
-                      fontFamily: 'SF Pro',
-                      fontSize: 17,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.black,
-                      height: 1.29,
-                    ),
-                  ),
-                  const SizedBox(width: 4),
-                  Icon(
-                    Icons.keyboard_arrow_down,
-                    color: const Color(0xFF3B55C4),
-                    size: 16,
-                  ),
-                ],
-              ),
-              Row(
-                children: [
-                  Icon(
-                    Icons.chevron_left,
-                    color: const Color(0xFF3B55C4),
-                    size: 16,
-                  ),
-                  const SizedBox(width: 15),
-                  Icon(
-                    Icons.chevron_right,
-                    color: const Color(0xFF3B55C4),
-                    size: 16,
-                  ),
-                ],
-              ),
-            ],
-          ),
-          
-          const SizedBox(height: 16),
-          
-          // Days of week
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: ['SUN', 'MON', 'WED', 'THU', 'FRI', 'SAT', 'SUN']
-                .map((day) => Text(
-                      day,
-                      style: TextStyle(
-                        fontFamily: 'SF Pro',
-                        fontSize: 7,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.black.withValues(alpha: 0.35),
-                        height: 1.38,
+                  AppDesignSystem.verticalSpace(0.25),
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.star,
+                        size: 12,
+                        color: AppDesignSystem.warningColor,
                       ),
-                    ))
-                .toList(),
-          ),
-          
-          const SizedBox(height: 8),
-          
-          // Calendar grid (simplified)
-          Column(
-            children: [
-              _buildCalendarWeek(['', '', '1', '2', '3', '4', '5']),
-              _buildCalendarWeek(['6', '7', '8', '9', '10', '11', '12']),
-              _buildCalendarWeek(['13', '14', '15', '16', '17', '18', '19']),
-              _buildCalendarWeek(['20', '21', '22', '23', '24', '25', '26']),
-              _buildCalendarWeek(['27', '28', '29', '30', '', '', '']),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildCalendarWeek(List<String> days) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 2),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: days.map((day) {
-          bool hasPatient = _patientsScheduledDays.contains(day);
-          bool isCurrent = day == '1';
-          
-          return GestureDetector(
-            onTap: () => _onCalendarDayTapped(day),
-            child: Container(
-              width: 24,
-              height: 24,
-              decoration: BoxDecoration(
-                color: hasPatient 
-                    ? const Color(0xFF4D64C8).withValues(alpha: 0.15)
-                    : Colors.transparent,
-                shape: BoxShape.circle,
-                border: hasPatient 
-                    ? Border.all(color: const Color(0xFF4D64C8), width: 2)
-                    : null,
-              ),
-              child: Center(
-                child: day.isEmpty
-                    ? const SizedBox()
-                    : Text(
-                        day,
-                        style: TextStyle(
-                          fontFamily: 'SF Pro',
-                          fontSize: isCurrent ? 20 : 16,
-                          fontWeight: hasPatient 
-                              ? FontWeight.w700 
-                              : FontWeight.w400,
-                          color: hasPatient 
-                              ? const Color(0xFF4D64C8)
-                              : Colors.black,
-                          height: 1.25,
+                      AppDesignSystem.horizontalSpace(0.25),
+                      Text(
+                        patient.rating.toString(),
+                        style: AppDesignSystem.captionStyle.copyWith(
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
+                      AppDesignSystem.horizontalSpace(1),
+                      Text(
+                        '${patient.totalHours}h trabalhadas',
+                        style: AppDesignSystem.captionStyle.copyWith(
+                          color: AppDesignSystem.textSecondaryColor,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
               ),
             ),
-          );
-        }).toList(),
+            
+            GestureDetector(
+              onTap: () => _openPatientChat(patient),
+              child: Container(
+                padding: const EdgeInsets.all(AppDesignSystem.spaceSM),
+                decoration: BoxDecoration(
+                  color: AppDesignSystem.primaryColor,
+                  borderRadius: BorderRadius.circular(AppDesignSystem.borderRadius),
+                ),
+                child: const Icon(
+                  Icons.chat,
+                  color: Colors.white,
+                  size: 16,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildQuickActions() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Ações Rápidas',
+          style: AppDesignSystem.h3Style.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        AppDesignSystem.verticalSpace(1),
+        Row(
+          children: [
+            Expanded(
+              child: _buildActionCard(
+                'Assinatura Premium',
+                'Acesse recursos exclusivos',
+                Icons.workspace_premium,
+                AppDesignSystem.warningColor,
+                () => Navigator.pushNamed(context, '/caregiver-payment'),
+              ),
+            ),
+            AppDesignSystem.horizontalSpace(1),
+            Expanded(
+              child: _buildActionCard(
+                'Nova Agenda',
+                'Configurar disponibilidade',
+                Icons.calendar_today,
+                AppDesignSystem.infoColor,
+                () => Navigator.pushNamed(context, '/caregiver-schedule'),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildActionCard(String title, String subtitle, IconData icon, Color color, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AppDesignSystem.styledCard(
+        child: Column(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(AppDesignSystem.spaceMD),
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(AppDesignSystem.borderRadius),
+              ),
+              child: Icon(
+                icon,
+                color: color,
+                size: 28,
+              ),
+            ),
+            AppDesignSystem.verticalSpace(1),
+            Text(
+              title,
+              style: AppDesignSystem.bodyStyle.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            AppDesignSystem.verticalSpace(0.25),
+            Text(
+              subtitle,
+              style: AppDesignSystem.captionStyle.copyWith(
+                color: AppDesignSystem.textSecondaryColor,
+              ),
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildBottomNavigation() {
     return Container(
-      height: 73,
-      padding: const EdgeInsets.symmetric(horizontal: 13),
-      decoration: const BoxDecoration(
-        color: Color(0xFFF5F5F5),
+      padding: const EdgeInsets.all(AppDesignSystem.spaceLG),
+      decoration: BoxDecoration(
+        color: AppDesignSystem.surfaceColor,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.1),
+            blurRadius: 4,
+            offset: const Offset(0, -2),
+          ),
+        ],
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          _buildNavItem(Icons.home, 'Início', 0),
+          _buildNavItem(Icons.home, 'Início', 0, isSelected: true),
           _buildNavItem(Icons.chat_bubble_outline, 'Chat', 1),
           _buildNavItem(Icons.people_outline, 'Clientes', 2),
           _buildNavItem(Icons.calendar_today, 'Agenda', 3),
@@ -873,34 +822,31 @@ class _HomeProfessionalScreenState extends State<HomeProfessionalScreen> {
     );
   }
 
-  Widget _buildNavItem(IconData icon, String label, int index) {
-    
+  Widget _buildNavItem(IconData icon, String label, int index, {bool isSelected = false}) {
     return GestureDetector(
       onTap: () => _onTabSelected(index),
       child: Container(
-        width: 55,
-        height: 55,
-        decoration: BoxDecoration(
-          color: const Color(0xFFF5F5F5),
-          borderRadius: BorderRadius.circular(100),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppDesignSystem.spaceMD,
+          vertical: AppDesignSystem.spaceSM,
         ),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
               icon,
-              color: const Color(0xFF49454F),
+              color: isSelected 
+                ? AppDesignSystem.primaryColor 
+                : AppDesignSystem.textSecondaryColor,
               size: 24,
             ),
-            const SizedBox(height: 2),
+            const SizedBox(height: AppDesignSystem.spaceXS),
             Text(
               label,
-              style: const TextStyle(
-                fontFamily: 'Poppins',
-                fontSize: 10,
-                fontWeight: FontWeight.w400,
-                color: Color(0xFF49454F),
-                height: 1.5,
+              style: AppDesignSystem.captionStyle.copyWith(
+                color: isSelected 
+                  ? AppDesignSystem.primaryColor 
+                  : AppDesignSystem.textSecondaryColor,
               ),
             ),
           ],
@@ -908,6 +854,110 @@ class _HomeProfessionalScreenState extends State<HomeProfessionalScreen> {
       ),
     );
   }
+
+  // Métodos auxiliares
+  Color _getStatusColor(PatientStatus status) {
+    switch (status) {
+      case PatientStatus.active:
+        return AppDesignSystem.successColor;
+      case PatientStatus.scheduled:
+        return AppDesignSystem.infoColor;
+      case PatientStatus.completed:
+        return AppDesignSystem.textSecondaryColor;
+    }
+  }
+
+  String _getStatusText(PatientStatus status) {
+    switch (status) {
+      case PatientStatus.active:
+        return 'ATIVO';
+      case PatientStatus.scheduled:
+        return 'AGENDADO';
+      case PatientStatus.completed:
+        return 'CONCLUÍDO';
+    }
+  }
+
+  void _openPatientChat(PatientData patient) {
+    Navigator.pushNamed(context, '/chat');
+  }
+
+  void _showStatDetails(String type) {
+    String title;
+    String content;
+    
+    switch (type) {
+      case 'hours':
+        title = 'Horas Trabalhadas';
+        content = 'Total de ${_statistics['totalHours']} horas trabalhadas este mês.\n\nMédia de ${(_statistics['totalHours'] / 30).toStringAsFixed(1)} horas por dia.';
+        break;
+      case 'rating':
+        title = 'Avaliação Média';
+        content = 'Sua avaliação média é ${_statistics['averageRating'].toStringAsFixed(1)} estrelas.\n\nBaseado em avaliações de ${_patients.length} pacientes.';
+        break;
+      case 'earnings':
+        title = 'Ganhos Estimados';
+        content = 'Ganhos estimados: R\$ ${_statistics['weeklyEarnings'].toStringAsFixed(2)}\n\nBaseado em ${_statistics['totalHours']} horas × R\$ 25,00/hora.';
+        break;
+      case 'completed':
+        title = 'Serviços Concluídos';
+        content = '${_statistics['completedServices']} serviços concluídos com sucesso.\n\nTaxa de conclusão: 100%';
+        break;
+      default:
+        title = 'Detalhes';
+        content = 'Informações detalhadas não disponíveis.';
+    }
+    
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: AppDesignSystem.cardColor,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppDesignSystem.borderRadiusLarge),
+          ),
+          title: Text(title, style: AppDesignSystem.h3Style),
+          content: Text(content, style: AppDesignSystem.bodyStyle),
+          actions: [
+            AppDesignSystem.primaryButton(
+              text: 'Fechar',
+              onPressed: () => Navigator.of(context).pop(),
+              height: 40,
+            ),
+          ],
+        );
+      },
+    );
+  }
 }
 
+// Classes de modelo
+enum PatientStatus {
+  active,
+  scheduled,
+  completed,
+}
 
+class PatientData {
+  final String name;
+  final String info;
+  final String service;
+  final String nextAppointment;
+  final PatientStatus status;
+  final bool hasUnreadMessages;
+  final double rating;
+  final int totalHours;
+  final bool isFamily;
+
+  PatientData({
+    required this.name,
+    required this.info,
+    required this.service,
+    required this.nextAppointment,
+    required this.status,
+    required this.hasUnreadMessages,
+    required this.rating,
+    required this.totalHours,
+    required this.isFamily,
+  });
+}

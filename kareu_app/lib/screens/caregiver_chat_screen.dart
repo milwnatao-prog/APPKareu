@@ -8,171 +8,807 @@ class CaregiverChatScreen extends StatefulWidget {
   State<CaregiverChatScreen> createState() => _CaregiverChatScreenState();
 }
 
-class _CaregiverChatScreenState extends State<CaregiverChatScreen> {
-  final TextEditingController _messageController = TextEditingController();
-  final ScrollController _scrollController = ScrollController();
+class _CaregiverChatScreenState extends State<CaregiverChatScreen> 
+    with AutomaticKeepAliveClientMixin {
   
-  Map<String, dynamic>? patientData;
-  List<Map<String, dynamic>> messages = [];
+  @override
+  bool get wantKeepAlive => true; // Otimização: manter estado vivo
+  
+  // Lista de conversas para cuidadores (com pacientes/famílias)
+  final List<CaregiverChatItem> _chats = [
+    CaregiverChatItem(
+      patientName: 'Família Silva',
+      patientInfo: 'Dona Maria, 78 anos',
+      lastMessage: 'Obrigada pelo cuidado de hoje. A mãe ficou muito bem!',
+      time: '14:30',
+      hasProfileImage: false,
+      isOnline: true,
+      unreadCount: 1,
+      chatType: 'family',
+    ),
+    CaregiverChatItem(
+      patientName: 'João Santos',
+      patientInfo: '65 anos - Acompanhamento',
+      lastMessage: 'Pode confirmar o horário de amanhã?',
+      time: '12:15',
+      hasProfileImage: true,
+      profileImagePath: 'assets/images/Login.jpg',
+      isOnline: true,
+      unreadCount: 2,
+      chatType: 'patient',
+    ),
+    CaregiverChatItem(
+      patientName: 'Família Costa',
+      patientInfo: 'Sr. Pedro, 82 anos',
+      lastMessage: 'Perfeito! Nos vemos na segunda-feira então.',
+      time: '10:45',
+      hasProfileImage: false,
+      isOnline: false,
+      unreadCount: 0,
+      chatType: 'family',
+    ),
+    CaregiverChatItem(
+      patientName: 'Ana Oliveira',
+      patientInfo: '70 anos - Fisioterapia',
+      lastMessage: 'Muito obrigada pelos exercícios. Me sinto melhor!',
+      time: '09:20',
+      hasProfileImage: false,
+      isOnline: false,
+      unreadCount: 0,
+      chatType: 'patient',
+    ),
+  ];
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
+  Widget build(BuildContext context) {
+    super.build(context); // Chamada obrigatória para AutomaticKeepAliveClientMixin
+    return Scaffold(
+      backgroundColor: AppDesignSystem.backgroundColor,
+      body: SafeArea(
+        child: Column(
+          children: [
+            // Header
+            _buildHeader(),
+            
+            // Search Bar
+            _buildSearchBar(),
+            
+            // Online Patients
+            _buildOnlinePatients(),
+            
+            // Chat List
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(AppDesignSystem.spaceLG),
+                    child: Row(
+                      children: [
+                        Text(
+                          'Conversas',
+                          style: AppDesignSystem.h3Style,
+                        ),
+                        const Spacer(),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: AppDesignSystem.spaceSM,
+                            vertical: AppDesignSystem.spaceXS,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppDesignSystem.primaryColor.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            '${_chats.where((chat) => chat.unreadCount > 0).length} não lidas',
+                            style: AppDesignSystem.captionStyle.copyWith(
+                              color: AppDesignSystem.primaryColor,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  
+                  // Chat items
+                  Expanded(
+                    child: ListView.builder(
+                      padding: const EdgeInsets.symmetric(horizontal: AppDesignSystem.spaceLG),
+                      itemCount: _chats.length,
+                      itemBuilder: (context, index) {
+                        return _buildChatItem(_chats[index]);
+                      },
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            
+            // Bottom Navigation for Professional
+            _buildProfessionalBottomNavigation(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildHeader() {
+    return Padding(
+      padding: const EdgeInsets.all(AppDesignSystem.spaceLG),
+      child: Row(
+        children: [
+          GestureDetector(
+            onTap: () => Navigator.pop(context),
+            child: Container(
+              padding: const EdgeInsets.all(AppDesignSystem.spaceSM),
+              decoration: BoxDecoration(
+                color: AppDesignSystem.surfaceColor,
+                borderRadius: BorderRadius.circular(AppDesignSystem.borderRadius),
+              ),
+              child: Icon(
+                Icons.arrow_back_ios,
+                color: AppDesignSystem.textPrimaryColor,
+                size: 20,
+              ),
+            ),
+          ),
+          
+          const SizedBox(width: AppDesignSystem.spaceLG),
+          
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Mensagens',
+                  style: AppDesignSystem.h2Style,
+                ),
+                Text(
+                  'Converse com seus pacientes e famílias',
+                  style: AppDesignSystem.captionStyle.copyWith(
+                    color: AppDesignSystem.textSecondaryColor,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          
+          // New message button
+          GestureDetector(
+            onTap: _showNewChatDialog,
+            child: Container(
+              padding: const EdgeInsets.all(AppDesignSystem.spaceSM),
+              decoration: BoxDecoration(
+                color: AppDesignSystem.primaryColor,
+                borderRadius: BorderRadius.circular(AppDesignSystem.borderRadius),
+              ),
+              child: const Icon(
+                Icons.add,
+                color: Colors.white,
+                size: 20,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSearchBar() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: AppDesignSystem.spaceLG),
+      child: Container(
+        height: 48,
+        decoration: BoxDecoration(
+          color: AppDesignSystem.surfaceColor,
+          borderRadius: BorderRadius.circular(AppDesignSystem.borderRadiusLarge),
+          border: Border.all(
+            color: AppDesignSystem.borderColor,
+            width: 1,
+          ),
+        ),
+        child: TextField(
+          decoration: InputDecoration(
+            hintText: 'Buscar conversas...',
+            hintStyle: AppDesignSystem.placeholderStyle,
+            prefixIcon: Icon(
+              Icons.search,
+              color: AppDesignSystem.textSecondaryColor,
+              size: 20,
+            ),
+            border: InputBorder.none,
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: AppDesignSystem.spaceLG, 
+              vertical: AppDesignSystem.spaceMD,
+            ),
+          ),
+          style: AppDesignSystem.bodySmallStyle,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildOnlinePatients() {
+    final onlinePatients = _chats.where((chat) => chat.isOnline).toList();
     
-    // Receber dados do paciente via argumentos da rota
-    final args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
-    if (args != null) {
-      patientData = args;
-      _loadMessages();
+    if (onlinePatients.isEmpty) {
+      return const SizedBox.shrink();
+    }
+    
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(AppDesignSystem.spaceLG),
+          child: Row(
+            children: [
+              Container(
+                width: 8,
+                height: 8,
+                decoration: const BoxDecoration(
+                  color: AppDesignSystem.successColor,
+                  shape: BoxShape.circle,
+                ),
+              ),
+              const SizedBox(width: AppDesignSystem.spaceXS),
+              Text(
+                'Online agora (${onlinePatients.length})',
+                style: AppDesignSystem.bodySmallStyle.copyWith(
+                  fontWeight: FontWeight.w600,
+                  color: AppDesignSystem.successColor,
+                ),
+              ),
+            ],
+          ),
+        ),
+        
+        SizedBox(
+          height: 80,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: AppDesignSystem.spaceLG),
+            itemCount: onlinePatients.length,
+            itemBuilder: (context, index) {
+              final patient = onlinePatients[index];
+              return _buildOnlinePatientAvatar(patient);
+            },
+          ),
+        ),
+        
+        AppDesignSystem.verticalSpace(1),
+      ],
+    );
+  }
+
+  Widget _buildOnlinePatientAvatar(CaregiverChatItem patient) {
+    return GestureDetector(
+      onTap: () => _openChat(patient),
+      child: Container(
+        margin: const EdgeInsets.only(right: AppDesignSystem.spaceMD),
+        child: Column(
+          children: [
+            Stack(
+              children: [
+                Container(
+                  width: 50,
+                  height: 50,
+                  decoration: BoxDecoration(
+                    color: patient.chatType == 'family' 
+                      ? AppDesignSystem.warningColor.withValues(alpha: 0.1)
+                      : AppDesignSystem.primaryColor.withValues(alpha: 0.1),
+                    shape: BoxShape.circle,
+                    border: Border.all(
+                      color: patient.chatType == 'family' 
+                        ? AppDesignSystem.warningColor.withValues(alpha: 0.2)
+                        : AppDesignSystem.primaryColor.withValues(alpha: 0.2),
+                      width: 2,
+                    ),
+                  ),
+                  child: patient.hasProfileImage
+                    ? ClipOval(
+                        child: Image.asset(
+                          patient.profileImagePath!,
+                          fit: BoxFit.cover,
+                        ),
+                      )
+                    : Icon(
+                        patient.chatType == 'family' ? Icons.family_restroom : Icons.person,
+                        color: patient.chatType == 'family' 
+                          ? AppDesignSystem.warningColor
+                          : AppDesignSystem.primaryColor,
+                        size: 24,
+                      ),
+                ),
+                
+                // Online indicator
+                Positioned(
+                  bottom: 2,
+                  right: 2,
+                  child: Container(
+                    width: 12,
+                    height: 12,
+                    decoration: BoxDecoration(
+                      color: AppDesignSystem.successColor,
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: Colors.white,
+                        width: 2,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            
+            const SizedBox(height: AppDesignSystem.spaceXS),
+            
+            SizedBox(
+              width: 60,
+              child: Text(
+                patient.patientName.split(' ').first,
+                style: AppDesignSystem.captionStyle,
+                textAlign: TextAlign.center,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildChatItem(CaregiverChatItem chat) {
+    return GestureDetector(
+      onTap: () => _openChat(chat),
+      child: Container(
+        margin: const EdgeInsets.only(bottom: AppDesignSystem.spaceSM),
+        child: AppDesignSystem.styledCard(
+          padding: const EdgeInsets.all(AppDesignSystem.spaceLG),
+          child: Row(
+            children: [
+              // Profile Avatar with online status
+              Stack(
+                children: [
+                  Container(
+                    width: 55,
+                    height: 55,
+                    decoration: BoxDecoration(
+                      color: chat.chatType == 'family' 
+                        ? AppDesignSystem.warningColor.withValues(alpha: 0.1)
+                        : AppDesignSystem.primaryColor.withValues(alpha: 0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: chat.hasProfileImage
+                      ? ClipOval(
+                          child: Image.asset(
+                            chat.profileImagePath!,
+                            fit: BoxFit.cover,
+                          ),
+                        )
+                      : Icon(
+                          chat.chatType == 'family' ? Icons.family_restroom : Icons.person,
+                          color: chat.chatType == 'family' 
+                            ? AppDesignSystem.warningColor
+                            : AppDesignSystem.primaryColor,
+                          size: 28,
+                        ),
+                  ),
+                  
+                  // Online status indicator
+                  if (chat.isOnline)
+                    Positioned(
+                      bottom: 2,
+                      right: 2,
+                      child: Container(
+                        width: 14,
+                        height: 14,
+                        decoration: BoxDecoration(
+                          color: AppDesignSystem.successColor,
+                          shape: BoxShape.circle,
+                          border: Border.all(
+                            color: Colors.white,
+                            width: 2,
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+              
+              const SizedBox(width: AppDesignSystem.spaceLG),
+              
+              // Chat content
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            chat.patientName,
+                            style: AppDesignSystem.cardTitleStyle,
+                          ),
+                        ),
+                        Text(
+                          chat.time,
+                          style: AppDesignSystem.captionStyle.copyWith(
+                            color: AppDesignSystem.textSecondaryColor,
+                          ),
+                        ),
+                      ],
+                    ),
+                    
+                    const SizedBox(height: AppDesignSystem.spaceXS),
+                    
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: AppDesignSystem.spaceXS,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: chat.chatType == 'family' 
+                              ? AppDesignSystem.warningColor.withValues(alpha: 0.1)
+                              : AppDesignSystem.primaryColor.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            chat.chatType == 'family' ? 'FAMÍLIA' : 'PACIENTE',
+                            style: AppDesignSystem.captionStyle.copyWith(
+                              color: chat.chatType == 'family' 
+                                ? AppDesignSystem.warningColor
+                                : AppDesignSystem.primaryColor,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 9,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: AppDesignSystem.spaceXS),
+                        Expanded(
+                          child: Text(
+                            chat.patientInfo,
+                            style: AppDesignSystem.captionStyle.copyWith(
+                              color: AppDesignSystem.textSecondaryColor,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    
+                    const SizedBox(height: AppDesignSystem.spaceXS),
+                    
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text(
+                            chat.lastMessage,
+                            style: AppDesignSystem.bodySmallStyle.copyWith(
+                              color: chat.unreadCount > 0 
+                                ? AppDesignSystem.textPrimaryColor
+                                : AppDesignSystem.textSecondaryColor,
+                              fontWeight: chat.unreadCount > 0 
+                                ? FontWeight.w500 
+                                : FontWeight.w400,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                        
+                        // Unread count badge
+                        if (chat.unreadCount > 0)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: AppDesignSystem.spaceXS,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppDesignSystem.primaryColor,
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Text(
+                              chat.unreadCount.toString(),
+                              style: AppDesignSystem.captionStyle.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 10,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildProfessionalBottomNavigation() {
+    return Container(
+      padding: const EdgeInsets.all(AppDesignSystem.spaceLG),
+      decoration: BoxDecoration(
+        color: AppDesignSystem.surfaceColor,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.1),
+            blurRadius: 4,
+            offset: const Offset(0, -2),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        children: [
+          _buildNavItem(Icons.home_outlined, 'Início', 0),
+          _buildNavItem(Icons.chat_bubble_outline, 'Chat', 1, isSelected: true),
+          _buildNavItem(Icons.people_outline, 'Clientes', 2),
+          _buildNavItem(Icons.calendar_today, 'Agenda', 3),
+          _buildNavItem(Icons.account_circle_outlined, 'Perfil', 4),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNavItem(IconData icon, String label, int index, {bool isSelected = false}) {
+    return GestureDetector(
+      onTap: () => _onTabSelected(index),
+      child: Container(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppDesignSystem.spaceMD,
+          vertical: AppDesignSystem.spaceSM,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              color: isSelected 
+                ? AppDesignSystem.primaryColor 
+                : AppDesignSystem.textSecondaryColor,
+              size: 24,
+            ),
+            const SizedBox(height: AppDesignSystem.spaceXS),
+            Text(
+              label,
+              style: AppDesignSystem.captionStyle.copyWith(
+                color: isSelected 
+                  ? AppDesignSystem.primaryColor 
+                  : AppDesignSystem.textSecondaryColor,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _openChat(CaregiverChatItem chat) {
+    // Marcar mensagens como lidas
+    setState(() {
+      chat.unreadCount = 0;
+    });
+    
+    // Navegar para conversa individual
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => CaregiverConversationScreen(patient: chat),
+      ),
+    );
+  }
+
+  void _showNewChatDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: AppDesignSystem.cardColor,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppDesignSystem.borderRadiusLarge),
+          ),
+          title: Text('Nova Conversa', style: AppDesignSystem.h3Style),
+          content: Text(
+            'Para iniciar uma nova conversa, aguarde que um paciente ou família entre em contato através do seu perfil.',
+            style: AppDesignSystem.bodyStyle,
+          ),
+          actions: [
+            AppDesignSystem.primaryButton(
+              text: 'Entendi',
+              onPressed: () => Navigator.of(context).pop(),
+              height: 40,
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _onTabSelected(int index) {
+    switch (index) {
+      case 0:
+        Navigator.pushReplacementNamed(context, '/home-professional');
+        break;
+      case 1:
+        // Já estamos na tela de chat
+        break;
+      case 2:
+        Navigator.pushNamed(context, '/patients-list');
+        break;
+      case 3:
+        Navigator.pushNamed(context, '/caregiver-schedule');
+        break;
+      case 4:
+        Navigator.pushNamed(context, '/account-settings');
+        break;
     }
   }
 
-  void _loadMessages() {
-    // Simular mensagens do chat
-    messages = [
-      {
-        'id': '1',
-        'text': 'Olá! Gostaria de saber mais sobre os cuidados necessários.',
-        'isFromMe': false,
-        'timestamp': DateTime.now().subtract(const Duration(hours: 2)),
-        'senderName': patientData?['patientName'] ?? 'Paciente',
-      },
-      {
-        'id': '2',
-        'text': 'Olá! Claro, ficarei feliz em ajudar. Pode me contar um pouco sobre as necessidades específicas?',
-        'isFromMe': true,
-        'timestamp': DateTime.now().subtract(const Duration(hours: 1, minutes: 45)),
-        'senderName': 'Você',
-      },
-      {
-        'id': '3',
-        'text': 'Preciso de alguém para cuidar da minha mãe durante o dia. Ela tem 78 anos e precisa de ajuda com medicamentos.',
-        'isFromMe': false,
-        'timestamp': DateTime.now().subtract(const Duration(hours: 1, minutes: 30)),
-        'senderName': patientData?['patientName'] ?? 'Paciente',
-      },
-      {
-        'id': '4',
-        'text': 'Entendo perfeitamente. Tenho experiência com cuidados de idosos e administração de medicamentos. Podemos agendar uma conversa para discutir os detalhes?',
-        'isFromMe': true,
-        'timestamp': DateTime.now().subtract(const Duration(minutes: 30)),
-        'senderName': 'Você',
-      },
-    ];
+}
+
+class CaregiverChatItem {
+  final String patientName;
+  final String patientInfo;
+  final String lastMessage;
+  final String time;
+  final bool hasProfileImage;
+  final String? profileImagePath;
+  final bool isOnline;
+  int unreadCount;
+  final String chatType; // 'patient' or 'family'
+
+  CaregiverChatItem({
+    required this.patientName,
+    required this.patientInfo,
+    required this.lastMessage,
+    required this.time,
+    this.hasProfileImage = false,
+    this.profileImagePath,
+    this.isOnline = false,
+    this.unreadCount = 0,
+    required this.chatType,
+  });
+}
+
+// Tela de conversa individual
+class CaregiverConversationScreen extends StatefulWidget {
+  final CaregiverChatItem patient;
+
+  const CaregiverConversationScreen({
+    super.key,
+    required this.patient,
+  });
+
+  @override
+  State<CaregiverConversationScreen> createState() => _CaregiverConversationScreenState();
+}
+
+class _CaregiverConversationScreenState extends State<CaregiverConversationScreen> {
+  final TextEditingController _messageController = TextEditingController();
+  final List<ChatMessage> _messages = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadInitialMessages();
+  }
+
+  void _loadInitialMessages() {
+    _messages.addAll([
+      ChatMessage(
+        text: widget.patient.lastMessage,
+        isFromCaregiver: false,
+        timestamp: DateTime.now().subtract(const Duration(hours: 2)),
+      ),
+      ChatMessage(
+        text: 'Obrigado pela mensagem! Estou aqui para ajudar.',
+        isFromCaregiver: true,
+        timestamp: DateTime.now().subtract(const Duration(hours: 1)),
+      ),
+      ChatMessage(
+        text: 'Perfeito! Quando podemos conversar melhor sobre os cuidados?',
+        isFromCaregiver: false,
+        timestamp: DateTime.now().subtract(const Duration(minutes: 30)),
+      ),
+    ]);
   }
 
   @override
   Widget build(BuildContext context) {
-    if (patientData == null) {
-      return const Scaffold(
-        body: Center(
-          child: CircularProgressIndicator(),
-        ),
-      );
-    }
-
     return Scaffold(
       backgroundColor: AppDesignSystem.backgroundColor,
       appBar: AppBar(
-        backgroundColor: AppDesignSystem.primaryColor,
+        backgroundColor: AppDesignSystem.backgroundColor,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.white),
-          onPressed: () => Navigator.pop(context),
+          onPressed: () => Navigator.of(context).pop(),
+          icon: Icon(
+            Icons.arrow_back_ios,
+            color: AppDesignSystem.textPrimaryColor,
+          ),
         ),
-        title: Row(
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            CircleAvatar(
-              radius: 18,
-              backgroundColor: Colors.white.withValues(alpha: 0.2),
-              child: Text(
-                (patientData!['patientName'] ?? 'P')[0].toUpperCase(),
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
+            Text(
+              widget.patient.patientName,
+              style: AppDesignSystem.h3Style,
             ),
-            const SizedBox(width: AppDesignSystem.spaceSM),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    patientData!['patientName'] ?? 'Paciente',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  Text(
-                    'Online agora',
-                    style: TextStyle(
-                      color: Colors.white.withValues(alpha: 0.8),
-                      fontSize: 12,
-                    ),
-                  ),
-                ],
+            Text(
+              widget.patient.isOnline ? 'Online agora' : 'Visto por último hoje',
+              style: AppDesignSystem.captionStyle.copyWith(
+                color: widget.patient.isOnline 
+                  ? AppDesignSystem.successColor 
+                  : AppDesignSystem.textSecondaryColor,
               ),
             ),
           ],
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.videocam, color: Colors.white),
             onPressed: _startVideoCall,
+            icon: Icon(
+              Icons.videocam_outlined,
+              color: AppDesignSystem.primaryColor,
+            ),
           ),
           IconButton(
-            icon: const Icon(Icons.call, color: Colors.white),
-            onPressed: _startVoiceCall,
+            onPressed: _startCall,
+            icon: Icon(
+              Icons.call_outlined,
+              color: AppDesignSystem.primaryColor,
+            ),
           ),
-          const SizedBox(width: AppDesignSystem.spaceXS),
         ],
       ),
       body: Column(
         children: [
-          // Lista de mensagens
+          // Messages list
           Expanded(
             child: ListView.builder(
-              controller: _scrollController,
-              padding: const EdgeInsets.all(AppDesignSystem.spaceMD),
-              itemCount: messages.length,
+              padding: const EdgeInsets.all(AppDesignSystem.spaceLG),
+              itemCount: _messages.length,
               itemBuilder: (context, index) {
-                return _buildMessage(messages[index]);
+                return _buildMessageBubble(_messages[index]);
               },
             ),
           ),
           
-          // Campo de entrada de mensagem
+          // Message input
           _buildMessageInput(),
         ],
       ),
     );
   }
 
-  Widget _buildMessage(Map<String, dynamic> message) {
-    final isFromMe = message['isFromMe'] as bool;
-    final timestamp = message['timestamp'] as DateTime;
-    
+  Widget _buildMessageBubble(ChatMessage message) {
     return Container(
-      margin: const EdgeInsets.only(bottom: AppDesignSystem.spaceSM),
+      margin: const EdgeInsets.only(bottom: AppDesignSystem.spaceMD),
       child: Row(
-        mainAxisAlignment: isFromMe ? MainAxisAlignment.end : MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.end,
+        mainAxisAlignment: message.isFromCaregiver 
+          ? MainAxisAlignment.end 
+          : MainAxisAlignment.start,
         children: [
-          if (!isFromMe) ...[
+          if (!message.isFromCaregiver) ...[
             CircleAvatar(
               radius: 16,
-              backgroundColor: AppDesignSystem.primaryColor.withValues(alpha: 0.1),
-              child: Text(
-                (message['senderName'] as String)[0].toUpperCase(),
-                style: TextStyle(
-                  color: AppDesignSystem.primaryColor,
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                ),
+              backgroundColor: widget.patient.chatType == 'family' 
+                ? AppDesignSystem.warningColor.withValues(alpha: 0.1)
+                : AppDesignSystem.primaryColor.withValues(alpha: 0.1),
+              child: Icon(
+                widget.patient.chatType == 'family' ? Icons.family_restroom : Icons.person,
+                size: 16,
+                color: widget.patient.chatType == 'family' 
+                  ? AppDesignSystem.warningColor
+                  : AppDesignSystem.primaryColor,
               ),
             ),
             const SizedBox(width: AppDesignSystem.spaceXS),
@@ -180,68 +816,26 @@ class _CaregiverChatScreenState extends State<CaregiverChatScreen> {
           
           Flexible(
             child: Container(
-              constraints: BoxConstraints(
-                maxWidth: MediaQuery.of(context).size.width * 0.7,
-              ),
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppDesignSystem.spaceMD,
-                vertical: AppDesignSystem.spaceSM,
-              ),
+              padding: const EdgeInsets.all(AppDesignSystem.spaceMD),
               decoration: BoxDecoration(
-                color: isFromMe 
-                  ? AppDesignSystem.primaryColor 
-                  : AppDesignSystem.cardColor,
-                borderRadius: BorderRadius.only(
-                  topLeft: const Radius.circular(AppDesignSystem.borderRadius),
-                  topRight: const Radius.circular(AppDesignSystem.borderRadius),
-                  bottomLeft: Radius.circular(isFromMe ? AppDesignSystem.borderRadius : 4),
-                  bottomRight: Radius.circular(isFromMe ? 4 : AppDesignSystem.borderRadius),
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
-                    blurRadius: 4,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
+                color: message.isFromCaregiver 
+                  ? AppDesignSystem.primaryColor
+                  : AppDesignSystem.surfaceColor,
+                borderRadius: BorderRadius.circular(AppDesignSystem.borderRadiusLarge),
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    message['text'],
-                    style: TextStyle(
-                      color: isFromMe ? Colors.white : AppDesignSystem.textPrimaryColor,
-                      fontSize: 14,
-                    ),
-                  ),
-                  const SizedBox(height: AppDesignSystem.spaceXS),
-                  Text(
-                    _formatTime(timestamp),
-                    style: TextStyle(
-                      color: isFromMe 
-                        ? Colors.white.withValues(alpha: 0.7)
-                        : AppDesignSystem.textSecondaryColor,
-                      fontSize: 11,
-                    ),
-                  ),
-                ],
+              child: Text(
+                message.text,
+                style: AppDesignSystem.bodySmallStyle.copyWith(
+                  color: message.isFromCaregiver 
+                    ? Colors.white
+                    : AppDesignSystem.textPrimaryColor,
+                ),
               ),
             ),
           ),
           
-          if (isFromMe) ...[
-            const SizedBox(width: AppDesignSystem.spaceXS),
-            CircleAvatar(
-              radius: 16,
-              backgroundColor: AppDesignSystem.successColor.withValues(alpha: 0.1),
-              child: const Icon(
-                Icons.person,
-                color: AppDesignSystem.successColor,
-                size: 16,
-              ),
-            ),
-          ],
+          if (message.isFromCaregiver)
+            const SizedBox(width: AppDesignSystem.spaceXL),
         ],
       ),
     );
@@ -249,80 +843,52 @@ class _CaregiverChatScreenState extends State<CaregiverChatScreen> {
 
   Widget _buildMessageInput() {
     return Container(
-      padding: const EdgeInsets.all(AppDesignSystem.spaceMD),
+      padding: const EdgeInsets.all(AppDesignSystem.spaceLG),
       decoration: BoxDecoration(
-        color: AppDesignSystem.cardColor,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-            offset: const Offset(0, -2),
+        color: AppDesignSystem.surfaceColor,
+        border: Border(
+          top: BorderSide(
+            color: AppDesignSystem.borderColor,
+            width: 1,
           ),
-        ],
+        ),
       ),
       child: Row(
         children: [
-          // Botão de anexo
-          Container(
-            decoration: BoxDecoration(
-              color: AppDesignSystem.primaryColor.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(AppDesignSystem.borderRadiusLarge),
-            ),
-            child: IconButton(
-              icon: Icon(
-                Icons.attach_file,
-                color: AppDesignSystem.primaryColor,
-                size: 20,
-              ),
-              onPressed: _showAttachmentOptions,
-            ),
-          ),
-          
-          const SizedBox(width: AppDesignSystem.spaceSM),
-          
-          // Campo de texto
           Expanded(
-            child: Container(
-              decoration: BoxDecoration(
-                color: AppDesignSystem.backgroundColor,
-                borderRadius: BorderRadius.circular(AppDesignSystem.borderRadiusLarge),
-                border: Border.all(
-                  color: AppDesignSystem.borderColor,
-                  width: 1,
+            child: TextField(
+              controller: _messageController,
+              decoration: InputDecoration(
+                hintText: 'Digite sua mensagem...',
+                hintStyle: AppDesignSystem.placeholderStyle,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(AppDesignSystem.borderRadiusLarge),
+                  borderSide: BorderSide(color: AppDesignSystem.borderColor),
+                ),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: AppDesignSystem.spaceLG,
+                  vertical: AppDesignSystem.spaceMD,
                 ),
               ),
-              child: TextField(
-                controller: _messageController,
-                decoration: const InputDecoration(
-                  hintText: 'Digite sua mensagem...',
-                  border: InputBorder.none,
-                  contentPadding: EdgeInsets.symmetric(
-                    horizontal: AppDesignSystem.spaceMD,
-                    vertical: AppDesignSystem.spaceSM,
-                  ),
-                ),
-                maxLines: null,
-                textInputAction: TextInputAction.send,
-                onSubmitted: (_) => _sendMessage(),
-              ),
+              style: AppDesignSystem.bodySmallStyle,
             ),
           ),
           
-          const SizedBox(width: AppDesignSystem.spaceSM),
+          const SizedBox(width: AppDesignSystem.spaceMD),
           
-          // Botão de enviar
-          Container(
-            decoration: BoxDecoration(
-              color: AppDesignSystem.primaryColor,
-              borderRadius: BorderRadius.circular(AppDesignSystem.borderRadiusLarge),
-            ),
-            child: IconButton(
-              icon: const Icon(
+          GestureDetector(
+            onTap: _sendMessage,
+            child: Container(
+              padding: const EdgeInsets.all(AppDesignSystem.spaceMD),
+              decoration: BoxDecoration(
+                color: AppDesignSystem.primaryColor,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
                 Icons.send,
                 color: Colors.white,
                 size: 20,
               ),
-              onPressed: _sendMessage,
             ),
           ),
         ],
@@ -331,192 +897,59 @@ class _CaregiverChatScreenState extends State<CaregiverChatScreen> {
   }
 
   void _sendMessage() {
-    if (_messageController.text.trim().isEmpty) return;
-
-    final newMessage = {
-      'id': DateTime.now().millisecondsSinceEpoch.toString(),
-      'text': _messageController.text.trim(),
-      'isFromMe': true,
-      'timestamp': DateTime.now(),
-      'senderName': 'Você',
-    };
-
-    setState(() {
-      messages.add(newMessage);
-      _messageController.clear();
-    });
-
-    // Auto scroll para a última mensagem
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (_scrollController.hasClients) {
-        _scrollController.animateTo(
-          _scrollController.position.maxScrollExtent,
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeOut,
+    if (_messageController.text.trim().isNotEmpty) {
+      setState(() {
+        _messages.add(
+          ChatMessage(
+            text: _messageController.text.trim(),
+            isFromCaregiver: true,
+            timestamp: DateTime.now(),
+          ),
         );
-      }
-    });
+      });
+      _messageController.clear();
+    }
+  }
 
-    // Simular resposta automática após 2 segundos
-    Future.delayed(const Duration(seconds: 2), () {
-      if (mounted) {
-        final responses = [
-          'Obrigado pela mensagem! Vou analisar e responder em breve.',
-          'Perfeito! Podemos agendar uma conversa para discutir melhor.',
-          'Entendi. Vou verificar minha agenda e te retorno.',
-          'Ótima pergunta! Deixe-me explicar melhor...',
-        ];
-        
-        final randomResponse = responses[DateTime.now().millisecond % responses.length];
-        
-        setState(() {
-          messages.add({
-            'id': DateTime.now().millisecondsSinceEpoch.toString(),
-            'text': randomResponse,
-            'isFromMe': false,
-            'timestamp': DateTime.now(),
-            'senderName': patientData!['patientName'] ?? 'Paciente',
-          });
-        });
-
-        // Auto scroll para a última mensagem
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (_scrollController.hasClients) {
-            _scrollController.animateTo(
-              _scrollController.position.maxScrollExtent,
-              duration: const Duration(milliseconds: 300),
-              curve: Curves.easeOut,
-            );
-          }
-        });
-      }
-    });
+  void _startCall() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          'Iniciando chamada com ${widget.patient.patientName}...',
+          style: AppDesignSystem.bodySmallStyle.copyWith(color: Colors.white),
+        ),
+        backgroundColor: AppDesignSystem.primaryColor,
+      ),
+    );
   }
 
   void _startVideoCall() {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('Iniciando videochamada com ${patientData!['patientName']}...'),
+        content: Text(
+          'Iniciando videochamada com ${widget.patient.patientName}...',
+          style: AppDesignSystem.bodySmallStyle.copyWith(color: Colors.white),
+        ),
         backgroundColor: AppDesignSystem.primaryColor,
       ),
     );
-  }
-
-  void _startVoiceCall() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Iniciando chamada de voz com ${patientData!['patientName']}...'),
-        backgroundColor: AppDesignSystem.primaryColor,
-      ),
-    );
-  }
-
-  void _showAttachmentOptions() {
-    showModalBottomSheet(
-      context: context,
-      backgroundColor: AppDesignSystem.cardColor,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(AppDesignSystem.borderRadius),
-        ),
-      ),
-      builder: (context) => Container(
-        padding: const EdgeInsets.all(AppDesignSystem.spaceLG),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: AppDesignSystem.borderColor,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            const SizedBox(height: AppDesignSystem.spaceLG),
-            
-            Text(
-              'Anexar arquivo',
-              style: AppDesignSystem.h1Style,
-            ),
-            
-            const SizedBox(height: AppDesignSystem.spaceLG),
-            
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                _buildAttachmentOption(
-                  Icons.photo_library,
-                  'Galeria',
-                  () => Navigator.pop(context),
-                ),
-                _buildAttachmentOption(
-                  Icons.camera_alt,
-                  'Câmera',
-                  () => Navigator.pop(context),
-                ),
-                _buildAttachmentOption(
-                  Icons.insert_drive_file,
-                  'Documento',
-                  () => Navigator.pop(context),
-                ),
-              ],
-            ),
-            
-            const SizedBox(height: AppDesignSystem.spaceLG),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildAttachmentOption(IconData icon, String label, VoidCallback onTap) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Column(
-        children: [
-          Container(
-            width: 60,
-            height: 60,
-            decoration: BoxDecoration(
-              color: AppDesignSystem.primaryColor.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(AppDesignSystem.borderRadiusLarge),
-            ),
-            child: Icon(
-              icon,
-              color: AppDesignSystem.primaryColor,
-              size: 28,
-            ),
-          ),
-          const SizedBox(height: AppDesignSystem.spaceXS),
-          Text(
-            label,
-            style: AppDesignSystem.captionStyle,
-          ),
-        ],
-      ),
-    );
-  }
-
-  String _formatTime(DateTime dateTime) {
-    final now = DateTime.now();
-    final difference = now.difference(dateTime);
-
-    if (difference.inMinutes < 1) {
-      return 'Agora';
-    } else if (difference.inHours < 1) {
-      return '${difference.inMinutes}min';
-    } else if (difference.inDays < 1) {
-      return '${difference.inHours}h';
-    } else {
-      return '${dateTime.day}/${dateTime.month}';
-    }
   }
 
   @override
   void dispose() {
     _messageController.dispose();
-    _scrollController.dispose();
     super.dispose();
   }
+}
+
+class ChatMessage {
+  final String text;
+  final bool isFromCaregiver;
+  final DateTime timestamp;
+
+  ChatMessage({
+    required this.text,
+    required this.isFromCaregiver,
+    required this.timestamp,
+  });
 }

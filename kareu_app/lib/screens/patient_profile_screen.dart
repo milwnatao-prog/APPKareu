@@ -103,6 +103,7 @@ class _PatientProfileScreenState extends State<PatientProfileScreen> {
       backgroundColor: AppDesignSystem.backgroundColor,
       appBar: AppDesignSystem.styledAppBar(
         title: 'Perfil do Paciente',
+        context: context,
         actions: isEditable ? [
           IconButton(
             icon: const Icon(Icons.settings, color: Colors.white),

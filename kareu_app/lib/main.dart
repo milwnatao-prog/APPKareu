@@ -6,7 +6,6 @@ import 'screens/register_screen.dart';
 import 'screens/formation_experience_screen.dart';
 import 'screens/availability_screen.dart';
 import 'screens/home_professional_screen.dart';
-import 'screens/professional_chat_screen.dart';
 import 'screens/patient_chat_screen.dart';
 import 'screens/caregiver_chat_screen.dart';
 import 'screens/patient_profile_screen.dart';
@@ -25,6 +24,13 @@ import 'screens/engagement_plans_screen.dart';
 import 'screens/home_patient_screen.dart';
 import 'screens/search_screen.dart';
 import 'screens/filters_screen.dart';
+import 'screens/caregiver_schedule_screen.dart';
+import 'screens/caregiver_payment_screen.dart';
+import 'screens/contracts_screen.dart';
+import 'screens/hire_caregiver_screen.dart';
+import 'screens/caregiver_account_screen.dart';
+import 'screens/patient_account_screen.dart';
+
 
 void main() {
   runApp(const KareuApp());
@@ -81,7 +87,7 @@ class KareuApp extends StatelessWidget {
         '/formation-experience': (context) => const FormationExperienceScreen(),
         '/availability': (context) => const AvailabilityScreen(),
         '/home-professional': (context) => const HomeProfessionalScreen(),
-        '/chat': (context) => const ProfessionalChatScreen(),
+        '/chat': (context) => const CaregiverChatScreen(),
         '/patient-chat': (context) => const PatientChatScreen(),
         '/caregiver-chat': (context) => const CaregiverChatScreen(),
         '/patient-profile': (context) => const PatientProfileScreen(),
@@ -98,6 +104,12 @@ class KareuApp extends StatelessWidget {
           '/home-patient': (context) => const HomePatientScreen(),
           '/search': (context) => const SearchScreen(),
           '/filters': (context) => const FiltersScreen(),
+          '/caregiver-schedule': (context) => const CaregiverScheduleScreen(),
+          '/caregiver-payment': (context) => const CaregiverPaymentScreen(),
+          '/contracts': (context) => const ContractsScreen(),
+          '/hire-caregiver': (context) => const HireCaregiverScreen(),
+          '/caregiver-account': (context) => const CaregiverAccountScreen(),
+          '/patient-account': (context) => const PatientAccountScreen(),
       },
     );
   }

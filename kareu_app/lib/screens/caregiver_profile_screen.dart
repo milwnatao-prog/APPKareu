@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../constants/app_design_system.dart';
+import '../services/user_service.dart';
 
 class CaregiverProfileScreen extends StatefulWidget {
   final Map<String, dynamic>? caregiverData;
@@ -21,6 +22,8 @@ class _CaregiverProfileScreenState extends State<CaregiverProfileScreen> {
   void initState() {
     super.initState();
     caregiver = widget.caregiverData ?? _getDefaultCaregiverData();
+    // Definir tipo de usuário como paciente (quem visualiza o perfil do cuidador)
+    UserService.setUserType(UserType.patient);
   }
   
   @override
@@ -50,30 +53,33 @@ class _CaregiverProfileScreenState extends State<CaregiverProfileScreen> {
         'Administração de medicamentos',
         'Mobilidade',
         'Alimentação',
+        'Companhia',
+        'Medicação',
       ],
       'experiences': [
-        'Casa de repouso',
-        'Hospital dos pescadores',
-        'Cuidador domiciliar',
+        '5 anos em casa de repouso Vila Serena',
+        '3 anos no Hospital dos Pescadores',
+        '2 anos como cuidadora domiciliar',
+        'Curso de primeiros socorros',
       ],
       'reviews': [
         {
           'rating': 5,
-          'comment': 'Muito atenciosa, pontual. Recomendo',
+          'comment': 'Muito atenciosa e pontual. Recomendo!',
           'reviewer': 'Ana Silva',
-          'date': '2024-08-15',
+          'date': '15/08/2024',
         },
         {
           'rating': 5,
-          'comment': 'Paciente e profissional, minha mãe foi muito bem cuidada',
+          'comment': 'Paciente e profissional, minha mãe foi muito bem cuidada.',
           'reviewer': 'João Santos',
-          'date': '2024-07-20',
+          'date': '20/07/2024',
         },
         {
-          'rating': 5,
-          'comment': 'Prestativa, recomendo',
+          'rating': 4,
+          'comment': 'Prestativa e cuidadosa. Recomendo!',
           'reviewer': 'Maria Oliveira',
-          'date': '2024-06-10',
+          'date': '10/06/2024',
         },
       ],
       'hourlyRate': 25.0,
@@ -92,7 +98,7 @@ class _CaregiverProfileScreenState extends State<CaregiverProfileScreen> {
           isFavorited 
             ? '${caregiver['name']} adicionado aos favoritos'
             : '${caregiver['name']} removido dos favoritos',
-          style: AppDesignSystem.bodySmallStyle.copyWith(color: Colors.white),
+          style: const TextStyle(color: Colors.white),
         ),
         backgroundColor: AppDesignSystem.primaryColor,
         behavior: SnackBarBehavior.floating,
@@ -112,190 +118,58 @@ class _CaregiverProfileScreenState extends State<CaregiverProfileScreen> {
   }
 
   void _hireCaregiverDialog() {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          backgroundColor: AppDesignSystem.cardColor,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppDesignSystem.borderRadiusLarge),
-          ),
-          title: Text('Contratar Cuidador', style: AppDesignSystem.h3Style),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Você deseja contratar ${caregiver['name']}?',
-                style: AppDesignSystem.bodyStyle,
-              ),
-              AppDesignSystem.verticalSpace(1),
-              Container(
-                padding: const EdgeInsets.all(AppDesignSystem.spaceMD),
-                decoration: BoxDecoration(
-                  color: AppDesignSystem.surfaceColor,
-                  borderRadius: BorderRadius.circular(AppDesignSystem.borderRadius),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.person_outline,
-                          size: 20,
-                          color: AppDesignSystem.primaryColor,
-                        ),
-                        const SizedBox(width: AppDesignSystem.spaceXS),
-                        Text(
-                          caregiver['name'],
-                          style: AppDesignSystem.bodySmallStyle.copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ),
-                    AppDesignSystem.verticalSpace(0.5),
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.attach_money,
-                          size: 20,
-                          color: AppDesignSystem.primaryColor,
-                        ),
-                        const SizedBox(width: AppDesignSystem.spaceXS),
-                        Text(
-                          'R\$ ${caregiver['hourlyRate']?.toStringAsFixed(2) ?? '25,00'}/hora',
-                          style: AppDesignSystem.bodySmallStyle.copyWith(
-                            fontWeight: FontWeight.w600,
-                            color: AppDesignSystem.primaryColor,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          actions: [
-            AppDesignSystem.secondaryButton(
-              text: 'Cancelar',
-              onPressed: () => Navigator.of(context).pop(),
-              height: 40,
-            ),
-            AppDesignSystem.primaryButton(
-              text: 'Confirmar',
-              onPressed: () {
-                Navigator.of(context).pop();
-                _confirmHiring();
-              },
-              height: 40,
-            ),
-          ],
-        );
+    // Navegar diretamente para a tela de contratação e pagamento
+    Navigator.pushNamed(
+      context,
+      '/hire-caregiver',
+      arguments: {
+        'name': caregiver['name'],
+        'specialty': caregiver['profession'],
+        'rating': caregiver['rating'],
+        'hourlyRate': caregiver['hourlyRate']?.toDouble() ?? 25.0,
+        'image': caregiver['profileImage'],
       },
-    );
-  }
-
-  void _confirmHiring() {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          'Solicitação de contratação enviada para ${caregiver['name']}!',
-          style: AppDesignSystem.bodySmallStyle.copyWith(color: Colors.white),
-        ),
-        backgroundColor: AppDesignSystem.successColor,
-        behavior: SnackBarBehavior.floating,
-        action: SnackBarAction(
-          label: 'Ver Status',
-          textColor: Colors.white,
-          onPressed: () {
-            // Navegar para tela de status da contratação
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  'Funcionalidade de acompanhamento será implementada em breve',
-                  style: AppDesignSystem.bodySmallStyle.copyWith(color: Colors.white),
-                ),
-                backgroundColor: AppDesignSystem.infoColor,
-              ),
-            );
-          },
-        ),
-      ),
-    );
-  }
-
-  Widget _buildRatingStars(double rating) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: List.generate(5, (index) {
-        return Icon(
-          index < rating.floor() 
-            ? Icons.star 
-            : (index < rating ? Icons.star_half : Icons.star_border),
-          color: AppDesignSystem.accentColor,
-          size: 16,
-        );
-      }),
     );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppDesignSystem.backgroundColor,
+      backgroundColor: const Color(0xFFFAFBFC),
       body: SafeArea(
         child: Column(
           children: [
-            // Header com botão de voltar
-            Padding(
-              padding: const EdgeInsets.all(AppDesignSystem.spaceLG),
-              child: Row(
-                children: [
-                  GestureDetector(
-                    onTap: () => Navigator.of(context).pop(),
-                    child: Container(
-                      padding: const EdgeInsets.all(AppDesignSystem.spaceSM),
-                      decoration: BoxDecoration(
-                        color: AppDesignSystem.surfaceColor,
-                        borderRadius: BorderRadius.circular(AppDesignSystem.borderRadius),
-                      ),
-                      child: Icon(
-                        Icons.arrow_back_ios,
-                        color: AppDesignSystem.textPrimaryColor,
-                        size: 20,
-                      ),
-                    ),
-                  ),
-                  const Spacer(),
-                  Text(
-                    'Perfil',
-                    style: AppDesignSystem.h2Style,
-                  ),
-                  const Spacer(),
-                  const SizedBox(width: 40), // Para balancear o layout
-                ],
-              ),
-            ),
-
+            // Header moderno
+            _buildModernHeader(),
+            
             // Conteúdo principal
             Expanded(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: AppDesignSystem.spaceLG),
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Card principal do perfil
-                    _buildProfileCard(),
+                    // Hero section com foto e informações principais
+                    _buildHeroSection(),
                     
-                    AppDesignSystem.verticalSpace(2),
+                    const SizedBox(height: 32),
                     
-                    // Informações detalhadas
-                    _buildDetailedInfo(),
-                    
-                    AppDesignSystem.verticalSpace(2),
+                    // Cards de informações
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 24),
+                      child: Column(
+                        children: [
+                          _buildStatsCards(),
+                          const SizedBox(height: 24),
+                          _buildAboutSection(),
+                          const SizedBox(height: 24),
+                          _buildServicesSection(),
+                          const SizedBox(height: 24),
+                          _buildExperienceSection(),
+                          const SizedBox(height: 24),
+                          _buildReviewsSection(),
+                          const SizedBox(height: 32),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -309,245 +183,744 @@ class _CaregiverProfileScreenState extends State<CaregiverProfileScreen> {
     );
   }
 
-  Widget _buildProfileCard() {
-    return AppDesignSystem.styledCard(
-      child: Column(
+  Widget _buildModernHeader() {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(24, 16, 24, 16),
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: Color(0x0A000000),
+            offset: Offset(0, 1),
+            blurRadius: 3,
+          ),
+        ],
+      ),
+      child: Row(
         children: [
-          // Foto do perfil
-          Container(
-            width: 120,
-            height: 120,
-            decoration: BoxDecoration(
-              color: AppDesignSystem.surfaceColor,
-              borderRadius: BorderRadius.circular(AppDesignSystem.borderRadius),
-              border: Border.all(
-                color: AppDesignSystem.borderColor,
-                width: 1,
-              ),
-            ),
-            child: caregiver['profileImage'] != null
-              ? ClipRRect(
-                  borderRadius: BorderRadius.circular(AppDesignSystem.borderRadius),
-                  child: Image.network(
-                    caregiver['profileImage'],
-                    fit: BoxFit.cover,
-                  ),
-                )
-              : Icon(
-                  Icons.person,
-                  size: 60,
-                  color: AppDesignSystem.textSecondaryColor,
-                ),
-          ),
-          
-          AppDesignSystem.verticalSpace(1.5),
-          
-          // Nome e informações básicas
-          Text(
-            caregiver['name'],
-            style: AppDesignSystem.h2Style,
-            textAlign: TextAlign.center,
-          ),
-          
-          AppDesignSystem.verticalSpace(0.5),
-          
-          Text(
-            caregiver['profession'],
-            style: AppDesignSystem.bodyStyle.copyWith(
-              color: AppDesignSystem.textSecondaryColor,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          
-          AppDesignSystem.verticalSpace(0.25),
-          
-          Text(
-            caregiver['registration'],
-            style: AppDesignSystem.captionStyle,
-            textAlign: TextAlign.center,
-          ),
-          
-          AppDesignSystem.verticalSpace(0.5),
-          
-          // Badge de verificado
-          if (caregiver['verified'] == true)
-            Container(
-              padding: const EdgeInsets.symmetric(
-                horizontal: AppDesignSystem.spaceMD,
-                vertical: AppDesignSystem.spaceXS,
-              ),
+          GestureDetector(
+            onTap: () => Navigator.of(context).pop(),
+            child: Container(
+              padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: AppDesignSystem.successColor.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(20),
+                color: const Color(0xFFF3F4F6),
+                borderRadius: BorderRadius.circular(8),
               ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    Icons.verified,
-                    size: 16,
-                    color: AppDesignSystem.successColor,
-                  ),
-                  const SizedBox(width: AppDesignSystem.spaceXS),
-                  Text(
-                    'Verificado',
-                    style: AppDesignSystem.captionStyle.copyWith(
-                      color: AppDesignSystem.successColor,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
+              child: const Icon(
+                Icons.arrow_back,
+                color: Color(0xFF6B7280),
+                size: 20,
               ),
             ),
-          
-          AppDesignSystem.verticalSpace(1.5),
-          
-          // Botões de ação
-          Row(
-            children: [
-              Expanded(
-                child: AppDesignSystem.primaryButton(
-                  text: 'Contratar',
-                  onPressed: _hireCaregiverDialog,
-                  height: 44,
-                ),
+          ),
+          const Expanded(
+            child: Text(
+              'Perfil do Cuidador',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontFamily: 'Poppins',
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF1F2937),
               ),
-              const SizedBox(width: AppDesignSystem.spaceMD),
-              Expanded(
-                child: AppDesignSystem.secondaryButton(
-                  text: 'Chat',
-                  onPressed: _startChat,
-                  height: 44,
-                ),
+            ),
+          ),
+          GestureDetector(
+            onTap: _toggleFavorite,
+            child: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: isFavorited 
+                  ? const Color(0xFFEF4444).withValues(alpha: 0.1)
+                  : const Color(0xFFF3F4F6),
+                borderRadius: BorderRadius.circular(8),
               ),
-            ],
+              child: Icon(
+                isFavorited ? Icons.favorite : Icons.favorite_border,
+                color: isFavorited ? const Color(0xFFEF4444) : const Color(0xFF6B7280),
+                size: 20,
+              ),
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildDetailedInfo() {
-    return AppDesignSystem.styledCard(
+  Widget _buildHeroSection() {
+    return Container(
+      width: double.infinity,
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          colors: [Color(0xFF4D64C8), Color(0xFF8B5CF6)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+      ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Descrição
-          Text(
-            'Descrição',
-            style: AppDesignSystem.h3Style,
-          ),
-          AppDesignSystem.verticalSpace(0.75),
-          Text(
-            caregiver['description'],
-            style: AppDesignSystem.bodySmallStyle,
-            textAlign: TextAlign.justify,
-          ),
+          const SizedBox(height: 40),
           
-          AppDesignSystem.verticalSpace(2),
-          
-          // Serviços oferecidos
-          Text(
-            'Serviços oferecidos',
-            style: AppDesignSystem.h3Style,
-          ),
-          AppDesignSystem.verticalSpace(0.75),
-          ...caregiver['services'].map<Widget>((service) => Padding(
-            padding: const EdgeInsets.only(bottom: AppDesignSystem.spaceXS),
-            child: Row(
-              children: [
-                Icon(
-                  Icons.check_circle,
-                  size: 16,
-                  color: AppDesignSystem.successColor,
-                ),
-                const SizedBox(width: AppDesignSystem.spaceSM),
-                Text(
-                  service,
-                  style: AppDesignSystem.bodySmallStyle,
-                ),
-              ],
-            ),
-          )).toList(),
-          
-          AppDesignSystem.verticalSpace(2),
-          
-          // Experiências
-          Text(
-            'Experiências',
-            style: AppDesignSystem.h3Style,
-          ),
-          AppDesignSystem.verticalSpace(0.75),
-          ...caregiver['experiences'].map<Widget>((experience) => Padding(
-            padding: const EdgeInsets.only(bottom: AppDesignSystem.spaceXS),
-            child: Row(
-              children: [
-                Icon(
-                  Icons.work_outline,
-                  size: 16,
-                  color: AppDesignSystem.primaryColor,
-                ),
-                const SizedBox(width: AppDesignSystem.spaceSM),
-                Text(
-                  experience,
-                  style: AppDesignSystem.bodySmallStyle,
-                ),
-              ],
-            ),
-          )).toList(),
-          
-          AppDesignSystem.verticalSpace(2),
-          
-          // Avaliações
-          Row(
-            children: [
-              Text(
-                'Avaliações',
-                style: AppDesignSystem.h3Style,
-              ),
-              const Spacer(),
-              _buildRatingStars(caregiver['rating']),
-              const SizedBox(width: AppDesignSystem.spaceXS),
-              Text(
-                '${caregiver['rating']} (${caregiver['totalReviews']})',
-                style: AppDesignSystem.captionStyle,
-              ),
-            ],
-          ),
-          AppDesignSystem.verticalSpace(0.75),
-          ...caregiver['reviews'].take(3).map<Widget>((review) => Container(
-            margin: const EdgeInsets.only(bottom: AppDesignSystem.spaceMD),
-            padding: const EdgeInsets.all(AppDesignSystem.spaceMD),
+          // Foto do perfil
+          Container(
+            width: 120,
+            height: 120,
             decoration: BoxDecoration(
-              color: AppDesignSystem.surfaceColor,
-              borderRadius: BorderRadius.circular(AppDesignSystem.borderRadius),
+              shape: BoxShape.circle,
+              border: Border.all(color: Colors.white, width: 4),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.2),
+                  offset: const Offset(0, 4),
+                  blurRadius: 12,
+                ),
+              ],
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            child: CircleAvatar(
+              radius: 56,
+              backgroundColor: Colors.white,
+              child: Text(
+                caregiver['name']?[0] ?? 'C',
+                style: const TextStyle(
+                  fontFamily: 'Poppins',
+                  fontSize: 40,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF4D64C8),
+                ),
+              ),
+            ),
+          ),
+          
+          const SizedBox(height: 20),
+          
+          // Nome
+          Text(
+            caregiver['name'] ?? 'Cuidador',
+            style: const TextStyle(
+              fontFamily: 'Poppins',
+              fontSize: 24,
+              fontWeight: FontWeight.w700,
+              color: Colors.white,
+            ),
+          ),
+          
+          const SizedBox(height: 8),
+          
+          // Profissão
+          Text(
+            caregiver['profession'] ?? 'Profissional de Saúde',
+            style: const TextStyle(
+              fontFamily: 'Poppins',
+              fontSize: 16,
+              fontWeight: FontWeight.w400,
+              color: Colors.white,
+            ),
+          ),
+          
+          const SizedBox(height: 4),
+          
+          // Registro
+          Text(
+            caregiver['registration'] ?? 'Registro Profissional',
+            style: TextStyle(
+              fontFamily: 'Poppins',
+              fontSize: 14,
+              fontWeight: FontWeight.w400,
+              color: Colors.white.withValues(alpha: 0.8),
+            ),
+          ),
+          
+          const SizedBox(height: 16),
+          
+          // Badge verificado
+          if (caregiver['verified'] == true)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              decoration: BoxDecoration(
+                color: const Color(0xFF10B981),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.verified,
+                    color: Colors.white,
+                    size: 16,
+                  ),
+                  SizedBox(width: 6),
+                  Text(
+                    'Perfil Verificado',
+                    style: TextStyle(
+                      fontFamily: 'Poppins',
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.white,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          
+          const SizedBox(height: 32),
+          
+          // Botões de ação principais
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Row(
               children: [
-                Row(
-                  children: [
-                    _buildRatingStars(review['rating'].toDouble()),
-                    const Spacer(),
-                    Text(
-                      review['reviewer'],
-                      style: AppDesignSystem.captionStyle.copyWith(
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: _hireCaregiverDialog,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.white,
+                      foregroundColor: const Color(0xFF4D64C8),
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      elevation: 0,
+                    ),
+                    child: const Text(
+                      'Contratar',
+                      style: TextStyle(
+                        fontFamily: 'Poppins',
+                        fontSize: 16,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
-                  ],
+                  ),
                 ),
-                AppDesignSystem.verticalSpace(0.5),
-                Text(
-                  review['comment'],
-                  style: AppDesignSystem.bodySmallStyle,
+                const SizedBox(width: 16),
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: _startChat,
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: Colors.white,
+                      side: const BorderSide(color: Colors.white, width: 2),
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: const Text(
+                      'Conversar',
+                      style: TextStyle(
+                        fontFamily: 'Poppins',
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
                 ),
               ],
             ),
-          )).toList(),
+          ),
+          
+          const SizedBox(height: 40),
         ],
       ),
     );
+  }
+
+  Widget _buildStatsCards() {
+    return Row(
+      children: [
+        Expanded(
+          child: _buildStatCard(
+            'Avaliação',
+            '${caregiver['rating'] ?? 4.8}⭐',
+            Icons.star,
+            const Color(0xFFFBBF24),
+          ),
+        ),
+        const SizedBox(width: 16),
+        Expanded(
+          child: _buildStatCard(
+            'Avaliações',
+            '${caregiver['totalReviews'] ?? 127}',
+            Icons.rate_review,
+            const Color(0xFF10B981),
+          ),
+        ),
+        const SizedBox(width: 16),
+        Expanded(
+          child: _buildStatCard(
+            'Valor/hora',
+            'R\$ ${caregiver['hourlyRate'] ?? 25}',
+            Icons.attach_money,
+            const Color(0xFF4D64C8),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStatCard(String title, String value, IconData icon, Color color) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFE5E7EB)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            offset: const Offset(0, 2),
+            blurRadius: 8,
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(
+              icon,
+              color: color,
+              size: 24,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            value,
+            style: const TextStyle(
+              fontFamily: 'Poppins',
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
+              color: Color(0xFF1F2937),
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            title,
+            style: const TextStyle(
+              fontFamily: 'Poppins',
+              fontSize: 12,
+              fontWeight: FontWeight.w500,
+              color: Color(0xFF6B7280),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAboutSection() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFE5E7EB)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            offset: const Offset(0, 2),
+            blurRadius: 8,
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Row(
+            children: [
+              Icon(
+                Icons.person_outline,
+                color: Color(0xFF4D64C8),
+                size: 24,
+              ),
+              SizedBox(width: 12),
+              Text(
+                'Sobre o Profissional',
+                style: TextStyle(
+                  fontFamily: 'Poppins',
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF1F2937),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Text(
+            caregiver['description'] ?? 'Descrição não disponível.',
+            style: const TextStyle(
+              fontFamily: 'Poppins',
+              fontSize: 14,
+              fontWeight: FontWeight.w400,
+              color: Color(0xFF6B7280),
+              height: 1.6,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildServicesSection() {
+    final services = caregiver['services'] as List<String>? ?? [];
+    
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFE5E7EB)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            offset: const Offset(0, 2),
+            blurRadius: 8,
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Row(
+            children: [
+              Icon(
+                Icons.medical_services_outlined,
+                color: Color(0xFF10B981),
+                size: 24,
+              ),
+              SizedBox(width: 12),
+              Text(
+                'Serviços Oferecidos',
+                style: TextStyle(
+                  fontFamily: 'Poppins',
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF1F2937),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: services.map((service) {
+              return Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF10B981).withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: const Color(0xFF10B981).withValues(alpha: 0.3),
+                  ),
+                ),
+                child: Text(
+                  service,
+                  style: const TextStyle(
+                    fontFamily: 'Poppins',
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                    color: Color(0xFF10B981),
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildExperienceSection() {
+    final experiences = caregiver['experiences'] as List<String>? ?? [];
+    
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFE5E7EB)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            offset: const Offset(0, 2),
+            blurRadius: 8,
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Row(
+            children: [
+              Icon(
+                Icons.work_outline,
+                color: Color(0xFF8B5CF6),
+                size: 24,
+              ),
+              SizedBox(width: 12),
+              Text(
+                'Experiência Profissional',
+                style: TextStyle(
+                  fontFamily: 'Poppins',
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF1F2937),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          ...experiences.map((experience) {
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: 8,
+                    height: 8,
+                    margin: const EdgeInsets.only(top: 6),
+                    decoration: const BoxDecoration(
+                      color: Color(0xFF8B5CF6),
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      experience,
+                      style: const TextStyle(
+                        fontFamily: 'Poppins',
+                        fontSize: 14,
+                        fontWeight: FontWeight.w400,
+                        color: Color(0xFF6B7280),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }).toList(),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildReviewsSection() {
+    final reviews = caregiver['reviews'] as List<Map<String, dynamic>>? ?? [];
+    
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFE5E7EB)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            offset: const Offset(0, 2),
+            blurRadius: 8,
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Row(
+            children: [
+              Icon(
+                Icons.rate_review_outlined,
+                color: Color(0xFFFBBF24),
+                size: 24,
+              ),
+              SizedBox(width: 12),
+              Text(
+                'Avaliações dos Clientes',
+                style: TextStyle(
+                  fontFamily: 'Poppins',
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF1F2937),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          ...reviews.take(3).map((review) {
+            return Container(
+              margin: const EdgeInsets.only(bottom: 16),
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF9FAFB),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: const Color(0xFFE5E7EB)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      CircleAvatar(
+                        radius: 16,
+                        backgroundColor: const Color(0xFF4D64C8).withValues(alpha: 0.1),
+                        child: Text(
+                          review['reviewer']?[0] ?? 'U',
+                          style: const TextStyle(
+                            fontFamily: 'Poppins',
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xFF4D64C8),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              review['reviewer'] ?? 'Cliente',
+                              style: const TextStyle(
+                                fontFamily: 'Poppins',
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: Color(0xFF1F2937),
+                              ),
+                            ),
+                            Row(
+                              children: List.generate(5, (index) {
+                                return Icon(
+                                  index < (review['rating'] ?? 5)
+                                    ? Icons.star
+                                    : Icons.star_border,
+                                  color: const Color(0xFFFBBF24),
+                                  size: 14,
+                                );
+                              }),
+                            ),
+                          ],
+                        ),
+                      ),
+                      Text(
+                        review['date'] ?? '',
+                        style: const TextStyle(
+                          fontFamily: 'Poppins',
+                          fontSize: 12,
+                          fontWeight: FontWeight.w400,
+                          color: Color(0xFF9CA3AF),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    review['comment'] ?? '',
+                    style: const TextStyle(
+                      fontFamily: 'Poppins',
+                      fontSize: 14,
+                      fontWeight: FontWeight.w400,
+                      color: Color(0xFF6B7280),
+                      height: 1.5,
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }).toList(),
+          if (reviews.length > 3)
+            Center(
+              child: TextButton(
+                onPressed: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('Ver todas as avaliações será implementado em breve'),
+                    ),
+                  );
+                },
+                child: const Text(
+                  'Ver todas as avaliações',
+                  style: TextStyle(
+                    fontFamily: 'Poppins',
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF4D64C8),
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNavItem(IconData icon, String label, int index, {bool isSelected = false}) {
+    return GestureDetector(
+      onTap: () => _onTabSelected(index),
+      child: Container(
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppDesignSystem.spaceMD,
+          vertical: AppDesignSystem.spaceSM,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              color: isSelected 
+                ? AppDesignSystem.primaryColor 
+                : AppDesignSystem.textSecondaryColor,
+              size: 24,
+            ),
+            const SizedBox(height: AppDesignSystem.spaceXS),
+            Text(
+              label,
+              style: AppDesignSystem.captionStyle.copyWith(
+                color: isSelected 
+                  ? AppDesignSystem.primaryColor 
+                  : AppDesignSystem.textSecondaryColor,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _onTabSelected(int index) {
+    switch (index) {
+      case 0:
+        // Navegar para Home
+        Navigator.pushReplacementNamed(context, '/home-patient');
+        break;
+      case 1:
+        // Navegar para Chat
+        Navigator.pushNamed(context, '/patient-chat');
+        break;
+      case 2:
+        // Navegar para Contratos
+        Navigator.pushNamed(context, '/contracts');
+        break;
+      case 3:
+        // Navegar para Agenda
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Tela de agenda será implementada em breve'),
+            backgroundColor: AppDesignSystem.infoColor,
+          ),
+        );
+        break;
+      case 4:
+        // Navegar para Perfil
+        Navigator.pushNamed(context, UserService.getAccountRoute());
+        break;
+    }
   }
 
   Widget _buildBottomNavigationBar() {
@@ -566,53 +939,12 @@ class _CaregiverProfileScreenState extends State<CaregiverProfileScreen> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          _buildBottomNavItem(Icons.search, 'Buscar', () {
-            Navigator.pop(context);
-          }),
-          _buildBottomNavItem(Icons.chat_bubble_outline, 'Chat', _startChat),
-          _buildBottomNavItem(
-            isFavorited ? Icons.favorite : Icons.favorite_border, 
-            'Favorito', 
-            _toggleFavorite,
-            isActive: isFavorited,
-          ),
-          _buildBottomNavItem(Icons.person_outline, 'Perfil', () {
-            Navigator.pushNamed(context, '/account-settings');
-          }),
+          _buildNavItem(Icons.home, 'Início', 0),
+          _buildNavItem(Icons.chat_bubble_outline, 'Chat', 1),
+          _buildNavItem(Icons.assignment, 'Contratos', 2),
+          _buildNavItem(Icons.calendar_today, 'Agenda', 3),
+          _buildNavItem(Icons.account_circle_outlined, 'Perfil', 4),
         ],
-      ),
-    );
-  }
-
-  Widget _buildBottomNavItem(IconData icon, String label, VoidCallback onTap, {bool isActive = false}) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppDesignSystem.spaceMD,
-          vertical: AppDesignSystem.spaceSM,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              icon,
-              color: isActive 
-                ? AppDesignSystem.primaryColor 
-                : AppDesignSystem.textSecondaryColor,
-              size: 24,
-            ),
-            const SizedBox(height: AppDesignSystem.spaceXS),
-            Text(
-              label,
-              style: AppDesignSystem.captionStyle.copyWith(
-                color: isActive 
-                  ? AppDesignSystem.primaryColor 
-                  : AppDesignSystem.textSecondaryColor,
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }

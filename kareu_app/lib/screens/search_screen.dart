@@ -110,6 +110,7 @@ class _SearchScreenState extends State<SearchScreen> {
       backgroundColor: AppDesignSystem.backgroundColor,
       appBar: AppDesignSystem.styledAppBar(
         title: 'Buscar Cuidadores',
+        context: context,
         onBackPressed: () => Navigator.pop(context),
       ),
       body: Column(

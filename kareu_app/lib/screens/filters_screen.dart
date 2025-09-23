@@ -74,6 +74,7 @@ class _FiltersScreenState extends State<FiltersScreen> {
       backgroundColor: AppDesignSystem.backgroundColor,
       appBar: AppDesignSystem.styledAppBar(
         title: 'Filtros',
+        context: context,
         onBackPressed: () => Navigator.pop(context),
         actions: [
           TextButton(

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 /// Sistema de Design do App Kareu
 /// 
@@ -41,6 +42,11 @@ class AppDesignSystem {
   static const double spaceM = spaceMD;      // 12px
   static const double spaceL = spaceLG;      // 16px
   static const double spaceXXL = space2XL;   // 24px
+  
+  // Aliases de spacing para manter compatibilidade
+  static const double spacing2 = spaceSM;    // 8px
+  static const double spacing3 = spaceMD;    // 12px  
+  static const double spacing4 = spaceLG;    // 16px
   
   // ============================================================================
   // ESTILOS DE TEXTO PRÉ-DEFINIDOS
@@ -245,6 +251,11 @@ class AppDesignSystem {
   static const Color textColor = textPrimaryColor;
   static const Color placeholderColor = textHintColor;
   
+  // Aliases para manter compatibilidade com código existente
+  static const Color darkColor = textPrimaryColor;
+  static const Color grayColor = textSecondaryColor;
+  static const Color lightGrayColor = borderLightColor;
+  
   // ============================================================================
   // DIMENSÕES DE COMPONENTES
   // ============================================================================
@@ -320,6 +331,7 @@ class AppDesignSystem {
   /// Retorna um AppBar padronizado
   static AppBar styledAppBar({
     required String title,
+    required BuildContext context,
     bool centerTitle = true,
     List<Widget>? actions,
     Widget? leading,
@@ -424,6 +436,9 @@ class AppDesignSystem {
     String? Function(String?)? validator,
     void Function(String)? onChanged,
     Widget? suffixIcon,
+    IconData? prefixIcon,
+    List<TextInputFormatter>? inputFormatters,
+    TextCapitalization textCapitalization = TextCapitalization.none,
     int maxLines = 1,
   }) {
     return Column(
@@ -439,10 +454,13 @@ class AppDesignSystem {
           onChanged: onChanged,
           maxLines: maxLines,
           style: bodyStyle,
+          inputFormatters: inputFormatters,
+          textCapitalization: textCapitalization,
           decoration: InputDecoration(
             hintText: hint,
             hintStyle: placeholderStyle,
             suffixIcon: suffixIcon,
+            prefixIcon: prefixIcon != null ? Icon(prefixIcon, color: grayColor) : null,
             filled: true,
             fillColor: surfaceColor,
             border: OutlineInputBorder(
