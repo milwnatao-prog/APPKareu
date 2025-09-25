@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../constants/app_design_system.dart';
+import '../services/user_service.dart';
 
 class CaregiverAccountScreen extends StatefulWidget {
   const CaregiverAccountScreen({super.key});
@@ -178,6 +179,8 @@ class _CaregiverAccountScreenState extends State<CaregiverAccountScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             _buildProfileHeader(),
+            AppDesignSystem.verticalSpace(1),
+            _buildSubscriptionCard(),
             AppDesignSystem.verticalSpace(2),
             _buildPersonalInfo(),
             AppDesignSystem.verticalSpace(2),
@@ -1337,6 +1340,135 @@ class _CaregiverAccountScreenState extends State<CaregiverAccountScreen> {
       const SnackBar(
         content: Text('Você saiu da sua conta com sucesso'),
         backgroundColor: AppDesignSystem.successColor,
+      ),
+    );
+  }
+
+  Widget _buildSubscriptionCard() {
+    final currentTier = UserService.currentSubscriptionTier;
+    final tierName = UserService.getSubscriptionDisplayName();
+    final tierPrice = UserService.getSubscriptionPrice();
+    
+    Color tierColor;
+    IconData tierIcon;
+    String statusText;
+    
+    switch (currentTier) {
+      case SubscriptionTier.free:
+        tierColor = AppDesignSystem.grayColor;
+        tierIcon = Icons.person_outline;
+        statusText = 'Upgrade para ativar seu perfil';
+        break;
+      case SubscriptionTier.basic:
+        tierColor = AppDesignSystem.infoColor;
+        tierIcon = Icons.verified_user;
+        statusText = 'Perfil ativo - 5 agendamentos/mês';
+        break;
+      case SubscriptionTier.plus:
+        tierColor = AppDesignSystem.warningColor;
+        tierIcon = Icons.star;
+        statusText = 'Destaque na busca - Ilimitado';
+        break;
+      case SubscriptionTier.premium:
+        tierColor = const Color(0xFFFFD700);
+        tierIcon = Icons.workspace_premium;
+        statusText = 'Posição TOP + Benefícios exclusivos';
+        break;
+    }
+    
+    return AppDesignSystem.styledCard(
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: tierColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(
+                  tierIcon,
+                  color: tierColor,
+                  size: 24,
+                ),
+              ),
+              AppDesignSystem.horizontalSpace(1),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Text(
+                          'Plano $tierName',
+                          style: AppDesignSystem.h3Style.copyWith(
+                            fontWeight: FontWeight.w700,
+                            color: tierColor,
+                          ),
+                        ),
+                        if (currentTier != SubscriptionTier.free) ...[
+                          AppDesignSystem.horizontalSpace(0.5),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                            decoration: BoxDecoration(
+                              color: AppDesignSystem.successColor.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Text(
+                              'ATIVO',
+                              style: AppDesignSystem.captionStyle.copyWith(
+                                color: AppDesignSystem.successColor,
+                                fontWeight: FontWeight.w700,
+                                fontSize: 10,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
+                    Text(
+                      statusText,
+                      style: AppDesignSystem.bodyStyle.copyWith(
+                        color: AppDesignSystem.grayColor,
+                      ),
+                    ),
+                    if (currentTier != SubscriptionTier.free)
+                      Text(
+                        'R\$ ${tierPrice.toStringAsFixed(2).replaceAll('.', ',')}/mês',
+                        style: AppDesignSystem.captionStyle.copyWith(
+                          color: AppDesignSystem.grayColor,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          
+          AppDesignSystem.verticalSpace(1.5),
+          
+          Row(
+            children: [
+              Expanded(
+                child: AppDesignSystem.secondaryButton(
+                  text: 'Gerenciar Assinatura',
+                  onPressed: () => Navigator.pushNamed(context, '/subscription-management'),
+                ),
+              ),
+              if (currentTier != SubscriptionTier.premium) ...[
+                AppDesignSystem.horizontalSpace(1),
+                Expanded(
+                  child: AppDesignSystem.primaryButton(
+                    text: currentTier == SubscriptionTier.free ? 'Ativar Plano' : 'Upgrade',
+                    onPressed: () => Navigator.pushNamed(context, '/caregiver-payment'),
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ],
       ),
     );
   }

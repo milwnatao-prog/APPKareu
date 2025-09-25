@@ -26,6 +26,7 @@ import 'screens/search_screen.dart';
 import 'screens/filters_screen.dart';
 import 'screens/caregiver_schedule_screen.dart';
 import 'screens/caregiver_payment_screen.dart';
+import 'screens/subscription_management_screen.dart';
 import 'screens/contracts_screen.dart';
 import 'screens/hire_caregiver_screen.dart';
 import 'screens/caregiver_account_screen.dart';
@@ -106,6 +107,7 @@ class KareuApp extends StatelessWidget {
           '/filters': (context) => const FiltersScreen(),
           '/caregiver-schedule': (context) => const CaregiverScheduleScreen(),
           '/caregiver-payment': (context) => const CaregiverPaymentScreen(),
+          '/subscription-management': (context) => const SubscriptionManagementScreen(),
           '/contracts': (context) => const ContractsScreen(),
           '/hire-caregiver': (context) => const HireCaregiverScreen(),
           '/caregiver-account': (context) => const CaregiverAccountScreen(),
