@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../constants/app_design_system.dart';
+import '../services/user_service.dart';
 
 class CaregiverScheduleScreen extends StatefulWidget {
   const CaregiverScheduleScreen({super.key});
@@ -18,6 +19,8 @@ class _CaregiverScheduleScreenState extends State<CaregiverScheduleScreen> {
   @override
   void initState() {
     super.initState();
+    // Definir tipo de usuário como cuidador
+    UserService.setUserType(UserType.caregiver);
     _initializeSchedule();
   }
 
@@ -798,7 +801,7 @@ class _CaregiverScheduleScreenState extends State<CaregiverScheduleScreen> {
         // Já estamos na agenda
         break;
       case 4:
-        Navigator.pushNamed(context, '/account-settings');
+        Navigator.pushNamed(context, '/caregiver-account');
         break;
     }
   }

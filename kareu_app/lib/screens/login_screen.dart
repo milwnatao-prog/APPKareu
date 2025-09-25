@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:ui';
 import '../constants/app_design_system.dart';
+import '../services/user_service.dart';
 
 enum Role { familiar, profissional }
 
@@ -40,6 +41,7 @@ class _LoginScreenState extends State<LoginScreen> {
     // Navegar para a tela apropriada baseada no tipo de usuário
     if (_selected == Role.familiar) {
       // Usuário logou como paciente/familiar
+      UserService.setUserType(UserType.patient);
       Navigator.pushNamedAndRemoveUntil(
         context,
         '/home-patient',
@@ -47,6 +49,7 @@ class _LoginScreenState extends State<LoginScreen> {
       );
     } else {
       // Usuário logou como profissional
+      UserService.setUserType(UserType.caregiver);
       Navigator.pushNamedAndRemoveUntil(
         context,
         '/home-professional',
@@ -133,185 +136,214 @@ class _LoginScreenState extends State<LoginScreen> {
             child: SingleChildScrollView(
               child: Column(
                 children: [
-                  SizedBox(height: screenHeight * 0.08), // Espaço responsivo
+                  SizedBox(height: screenHeight * 0.05), // Espaço responsivo otimizado
                   
-                  // Logo "Kareu"
+                  // Header profissional com logo e descrição
                   Container(
-                    width: 156,
-                    height: 101,
-                    alignment: Alignment.center,
-                    child: Text(
-                      'Kareu',
-                      style: AppDesignSystem.logoStyle,
-                    ),
-                  ),
-                  
-                  const SizedBox(height: 10),
-                  
-                  // "Bem-Vindo"
-                  Text(
-                    'Bem-Vindo',
-                    style: AppDesignSystem.bodyStyle.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  
-                  const SizedBox(height: 25),
-                  
-                  // "Conectamos cuidadores e pacientes"
-                  Text(
-                    'Conectamos cuidadores e pacientes',
-                    textAlign: TextAlign.center,
-                    style: AppDesignSystem.bodyStyle.copyWith(
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  
-                  const SizedBox(height: 20),
-                  
-                  // Toggle Familiar/Profissional
-                  Container(
-                    margin: EdgeInsets.symmetric(horizontal: screenWidth * 0.09),
-                    child: _RoleToggle(
-                      selected: _selected,
-                      onChanged: (role) => setState(() => _selected = role),
-                    ),
-                  ),
-                  
-                  const SizedBox(height: 37),
-                  
-                  // Formulários
-                  Container(
-                    margin: EdgeInsets.symmetric(horizontal: screenWidth * 0.074),
+                    padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.06),
                     child: Column(
                       children: [
-                        // Campo Usuário
-                        _FormField(
-                          label: 'Usuário',
-                          hintText: 'Digite seu email',
-                          controller: _emailCtrl,
-                          prefixIcon: 'assets/images/user-icon-combined.svg',
+                        // Logo "Kareu" com container melhorado
+                        Container(
+                          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(
+                              color: Colors.white.withValues(alpha: 0.3),
+                              width: 1,
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.1),
+                                blurRadius: 10,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: Text(
+                            'Kareu',
+                            style: TextStyle(
+                              fontFamily: 'Poppins',
+                              fontSize: screenWidth < 400 ? 32 : 38,
+                              fontWeight: FontWeight.w700,
+                              letterSpacing: 1.2,
+                              color: Colors.white,
+                            ),
+                          ),
                         ),
                         
-                        const SizedBox(height: 10),
+                        const SizedBox(height: 20),
+                        
+                        // Título de boas-vindas mais profissional
+                        Text(
+                          'Bem-vindo de volta',
+                          style: TextStyle(
+                            fontFamily: 'Poppins',
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                            fontSize: screenWidth < 400 ? 20 : 22,
+                          ),
+                        ),
+                        
+                        const SizedBox(height: 8),
+                        
+                        // Subtítulo mais elegante
+                        Container(
+                          padding: EdgeInsets.symmetric(horizontal: screenWidth * 0.04),
+                          child: Text(
+                            'Conectando profissionais de saúde com famílias que precisam de cuidado especializado',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontFamily: 'Poppins',
+                              color: Colors.white.withValues(alpha: 0.9),
+                              fontWeight: FontWeight.w400,
+                              fontSize: screenWidth < 400 ? 14 : 15,
+                              height: 1.4,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  
+                  const SizedBox(height: 32),
+                  
+                  // Toggle Familiar/Profissional com design melhorado
+                  Container(
+                    margin: EdgeInsets.symmetric(horizontal: screenWidth * 0.08),
+                    child: Column(
+                      children: [
+                        Text(
+                          'Selecione seu tipo de acesso',
+                          style: AppDesignSystem.bodyStyle.copyWith(
+                            color: Colors.white.withValues(alpha: 0.9),
+                            fontWeight: FontWeight.w500,
+                            fontSize: 16,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        _RoleToggle(
+                          selected: _selected,
+                          onChanged: (role) => setState(() => _selected = role),
+                        ),
+                      ],
+                    ),
+                  ),
+                  
+                  const SizedBox(height: 40),
+                  
+                  // Formulários com design melhorado
+                  Container(
+                    margin: EdgeInsets.symmetric(horizontal: screenWidth * 0.06),
+                    padding: EdgeInsets.all(screenWidth < 400 ? 16 : 20),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.15),
+                          blurRadius: 15,
+                          offset: const Offset(0, 6),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Título da seção de login
+                        Text(
+                          'Faça seu login',
+                          style: TextStyle(
+                            fontFamily: 'Poppins',
+                            color: const Color(0xFF2D3748),
+                            fontWeight: FontWeight.w600,
+                            fontSize: screenWidth < 400 ? 18 : 20,
+                          ),
+                        ),
+                        
+                        const SizedBox(height: 24),
+                        
+                        // Campo Usuário
+                        _FormField(
+                          label: 'Email',
+                          hintText: 'Digite seu email profissional',
+                          controller: _emailCtrl,
+                          prefixIcon: Icons.email_outlined,
+                        ),
+                        
+                        const SizedBox(height: 20),
                         
                         // Campo Senha
                         _FormField(
                           label: 'Senha',
                           hintText: 'Digite sua senha',
                           controller: _passCtrl,
-                          prefixIcon: 'assets/images/lock-icon-combined.svg',
+                          prefixIcon: Icons.lock_outlined,
                           isPassword: true,
                           obscureText: _obscure,
                           onToggleVisibility: () => setState(() => _obscure = !_obscure),
                         ),
                         
-                        const SizedBox(height: 8),
+                        const SizedBox(height: 12),
                         
                         // Esqueci minha senha
                         Align(
                           alignment: Alignment.centerRight,
                           child: GestureDetector(
-                            onTap: () {},
-                            child: const Text(
+                            onTap: () {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: const Text('Funcionalidade em desenvolvimento'),
+                                  backgroundColor: AppDesignSystem.primaryColor,
+                                ),
+                              );
+                            },
+                            child: Text(
                               'Esqueci minha senha',
                               style: TextStyle(
-                                fontFamily: 'Roboto',
-                                fontWeight: FontWeight.w400,
-                                fontSize: 11,
-                                height: 1.5,
-                                color: Color(0xFF4E4E4E),
+                                fontFamily: 'Poppins',
+                                fontWeight: FontWeight.w500,
+                                fontSize: 13,
+                                color: AppDesignSystem.primaryColor,
+                                decoration: TextDecoration.underline,
                               ),
                             ),
                           ),
                         ),
                         
-                        const SizedBox(height: 28),
+                        const SizedBox(height: 32),
                         
-                        // Botão Entrar
+                        // Botão Entrar melhorado
                         SizedBox(
                           width: double.infinity,
-                          height: 46,
+                          height: 52,
                           child: ElevatedButton(
                             onPressed: () {
                               _performLogin();
                             },
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFF4D64C8),
+                              backgroundColor: AppDesignSystem.primaryColor,
+                              foregroundColor: Colors.white,
                               shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
+                                borderRadius: BorderRadius.circular(12),
                               ),
-                              elevation: 0,
-                            ),
-                            child: Text(
-                              'Entrar',
-                              style: AppDesignSystem.buttonStyle,
-                            ),
-                          ),
-                        ),
-                        
-                        const SizedBox(height: 42),
-                        
-                        // Divisor "ou"
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Container(
-                                height: 1,
-                                color: const Color(0xFFAAAAAA),
-                              ),
-                            ),
-                            const Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 13),
-                              child: Text(
-                                'ou',
-                                style: TextStyle(
-                                  fontFamily: 'Roboto',
-                                  fontWeight: FontWeight.w400,
-                                  fontSize: 13,
-                                  height: 1.5,
-                                  color: Color(0xFF4E4E4E),
-                                ),
-                              ),
-                            ),
-                            Expanded(
-                              child: Container(
-                                height: 1,
-                                color: const Color(0xFFAAAAAA),
-                              ),
-                            ),
-                          ],
-                        ),
-                        
-                        const SizedBox(height: 42),
-                        
-                        // Botão Google
-                        SizedBox(
-                          width: double.infinity,
-                          height: 38,
-                          child: OutlinedButton(
-                            onPressed: () {},
-                            style: OutlinedButton.styleFrom(
-                              side: const BorderSide(color: Color(0xFFAAAAAA)),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              backgroundColor: Colors.white,
+                              elevation: 4,
+                              shadowColor: AppDesignSystem.primaryColor.withValues(alpha: 0.3),
                             ),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Image.asset(
-                                  'assets/images/google-icon.png',
-                                  width: 23,
-                                  height: 23,
+                                const Icon(
+                                  Icons.login,
+                                  size: 20,
                                 ),
-                                const SizedBox(width: 10),
+                                const SizedBox(width: 8),
                                 Text(
-                                  'Entrar com Google',
-                                  style: AppDesignSystem.bodyStyle.copyWith(
-                                    color: AppDesignSystem.primaryColor,
+                                  'Entrar',
+                                  style: AppDesignSystem.buttonStyle.copyWith(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w600,
                                   ),
                                 ),
                               ],
@@ -319,29 +351,142 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ),
                         
-                        const SizedBox(height: 64),
+                        const SizedBox(height: 24),
                         
-                        // Criar Perfil
-                        Container(
-                          padding: const EdgeInsets.all(16),
-                          child: GestureDetector(
-                            onTap: () {
-                              print('Navegando para tela de seleção de usuário');
-                              Navigator.pushNamed(context, '/user-type-selection');
-                            },
-                            child: Text(
-                              'Ainda não possui conta? Cadastre-se',
-                              style: AppDesignSystem.linkStyle.copyWith(
-                                color: Colors.black,
+                        // Divisor "ou" melhorado
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Container(
+                                height: 1,
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: [
+                                      Colors.transparent,
+                                      AppDesignSystem.borderColor,
+                                      Colors.transparent,
+                                    ],
+                                  ),
+                                ),
                               ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 16),
+                              child: Text(
+                                'ou',
+                                style: TextStyle(
+                                  fontFamily: 'Poppins',
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: 14,
+                                  color: AppDesignSystem.textSecondaryColor,
+                                ),
+                              ),
+                            ),
+                            Expanded(
+                              child: Container(
+                                height: 1,
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: [
+                                      Colors.transparent,
+                                      AppDesignSystem.borderColor,
+                                      Colors.transparent,
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        
+                        const SizedBox(height: 24),
+                        
+                        // Botão Google melhorado
+                        SizedBox(
+                          width: double.infinity,
+                          height: 52,
+                          child: OutlinedButton(
+                            onPressed: () {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: const Text('Login com Google em desenvolvimento'),
+                                  backgroundColor: AppDesignSystem.primaryColor,
+                                ),
+                              );
+                            },
+                            style: OutlinedButton.styleFrom(
+                              side: BorderSide(
+                                color: AppDesignSystem.borderColor,
+                                width: 1.5,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              backgroundColor: Colors.white,
+                              elevation: 2,
+                              shadowColor: Colors.black.withValues(alpha: 0.1),
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Image.asset(
+                                  'assets/images/google-icon.png',
+                                  width: 24,
+                                  height: 24,
+                                ),
+                                const SizedBox(width: 12),
+                                Text(
+                                  'Continuar com Google',
+                                  style: AppDesignSystem.bodyStyle.copyWith(
+                                    color: AppDesignSystem.textPrimaryColor,
+                                    fontWeight: FontWeight.w500,
+                                    fontSize: 15,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
                         ),
                         
-                        const SizedBox(height: 20),
                       ],
                     ),
                   ),
+                  
+                  const SizedBox(height: 32),
+                  
+                  // Seção de cadastro melhorada
+                  Container(
+                    margin: EdgeInsets.symmetric(horizontal: screenWidth * 0.08),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'Ainda não possui conta? ',
+                          style: AppDesignSystem.bodyStyle.copyWith(
+                            color: AppDesignSystem.textSecondaryColor,
+                            fontSize: 15,
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: () {
+                            debugPrint('Navegando para tela de seleção de usuário');
+                            Navigator.pushNamed(context, '/user-type-selection');
+                          },
+                          child: Text(
+                            'Cadastre-se',
+                            style: AppDesignSystem.linkStyle.copyWith(
+                              color: AppDesignSystem.primaryColor,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 15,
+                              decoration: TextDecoration.underline,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  
+                  const SizedBox(height: 40),
                 ],
               ),
             ),
@@ -367,83 +512,82 @@ class _FormField extends StatelessWidget {
   final String label;
   final String hintText;
   final TextEditingController controller;
-  final String prefixIcon;
+  final IconData prefixIcon;
   final bool isPassword;
   final bool obscureText;
   final VoidCallback? onToggleVisibility;
 
-  IconData _getIconFromPath(String path) {
-    if (path.contains('user-icon')) {
-      return Icons.person_outline;
-    } else if (path.contains('lock-icon')) {
-      return Icons.lock_outline;
-    } else if (path.contains('briefcase-icon')) {
-      return Icons.work_outline;
-    } else {
-      return Icons.help_outline;
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Label
+        // Label melhorado
         Text(
           label,
           style: AppDesignSystem.labelStyle.copyWith(
-            fontSize: AppDesignSystem.fontSizeCaption,
+            fontSize: 14,
             fontWeight: FontWeight.w600,
+            color: AppDesignSystem.textPrimaryColor,
           ),
         ),
-        const SizedBox(height: 1),
+        const SizedBox(height: 8),
         
-        // Campo de input
+        // Campo de input melhorado
         Container(
-          height: 45.58,
+          height: 52,
           decoration: BoxDecoration(
-            color: const Color(0xFFF4F4F4),
-            borderRadius: BorderRadius.circular(8.85),
+            color: const Color(0xFFF8F9FA),
+            borderRadius: BorderRadius.circular(10),
             border: Border.all(
-              color: const Color(0xFFE0E0E0),
-              width: 1.0,
+              color: const Color(0xFFE2E8F0),
+              width: 1,
             ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.04),
+                blurRadius: 3,
+                offset: const Offset(0, 1),
+              ),
+            ],
           ),
           child: TextField(
             controller: controller,
             obscureText: isPassword ? obscureText : false,
-            style: AppDesignSystem.bodySmallStyle.copyWith(
-              fontSize: AppDesignSystem.fontSizeCaption,
+            style: AppDesignSystem.bodyStyle.copyWith(
+              fontSize: 15,
+              color: AppDesignSystem.textPrimaryColor,
             ),
             decoration: InputDecoration(
               hintText: hintText,
               hintStyle: AppDesignSystem.placeholderStyle.copyWith(
-                fontSize: AppDesignSystem.fontSizeCaption,
+                fontSize: 15,
+                color: AppDesignSystem.textSecondaryColor,
               ),
               border: InputBorder.none,
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
               prefixIcon: Container(
-                width: 40,
-                height: 45.58,
+                width: 48,
+                height: 56,
                 alignment: Alignment.center,
                 child: Icon(
-                  _getIconFromPath(prefixIcon),
-                  size: 16,
-                  color: const Color(0xFF666666),
+                  prefixIcon,
+                  size: 20,
+                  color: AppDesignSystem.primaryColor,
                 ),
               ),
               suffixIcon: isPassword
                   ? Container(
-                      width: 40,
-                      height: 45.58,
+                      width: 48,
+                      height: 56,
                       alignment: Alignment.center,
                       child: GestureDetector(
                         onTap: onToggleVisibility,
                         child: Icon(
-                          obscureText ? Icons.visibility_off : Icons.visibility,
-                          size: 18,
-                          color: const Color(0xFF666666),
+                          obscureText ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                          size: 20,
+                          color: AppDesignSystem.textSecondaryColor,
                         ),
                       ),
                     )
@@ -468,29 +612,56 @@ class _RoleToggle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
-    final toggleWidth = screenWidth * 0.82;
+    final toggleWidth = screenWidth * 0.84;
     final halfWidth = toggleWidth / 2;
     
     return Container(
       width: toggleWidth,
-      height: 32,
+      height: 48,
+      padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: const Color(0xFFFFAD00),
-        borderRadius: BorderRadius.circular(30),
+        color: Colors.white.withValues(alpha: 0.15),
+        borderRadius: BorderRadius.circular(26),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.3),
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.1),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Stack(
         children: [
           // Fundo selecionado que se move
           AnimatedPositioned(
-            duration: const Duration(milliseconds: 200),
-            left: selected == Role.profissional ? 0 : halfWidth,
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeInOut,
+            left: selected == Role.profissional ? 0 : halfWidth - 4,
             top: 0,
             child: Container(
               width: halfWidth,
-              height: 32,
+              height: 40,
               decoration: BoxDecoration(
-                color: const Color(0xFF4D64C8),
-                borderRadius: BorderRadius.circular(30),
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    AppDesignSystem.primaryColor,
+                    AppDesignSystem.primaryColor.withValues(alpha: 0.8),
+                  ],
+                ),
+                borderRadius: BorderRadius.circular(22),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppDesignSystem.primaryColor.withValues(alpha: 0.4),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
               ),
             ),
           ),
@@ -503,24 +674,29 @@ class _RoleToggle extends StatelessWidget {
                 child: GestureDetector(
                   onTap: () => onChanged(Role.profissional),
                   child: SizedBox(
-                    height: 32,
+                    height: 40,
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(
-                          Icons.work_outline,
-                          size: 18,
-                          color: Colors.white,
+                        Icon(
+                          Icons.medical_services_outlined,
+                          size: 20,
+                          color: selected == Role.profissional 
+                            ? Colors.white 
+                            : Colors.white.withValues(alpha: 0.7),
                         ),
                         const SizedBox(width: 8),
-                        const Text(
+                        Text(
                           'Profissional',
                           style: TextStyle(
-                            fontFamily: 'Roboto',
-                            fontWeight: FontWeight.w600,
-                            fontSize: 15,
-                            height: 1.5,
-                            color: Colors.white,
+                            fontFamily: 'Poppins',
+                            fontWeight: selected == Role.profissional 
+                              ? FontWeight.w600 
+                              : FontWeight.w500,
+                            fontSize: 14,
+                            color: selected == Role.profissional 
+                              ? Colors.white 
+                              : Colors.white.withValues(alpha: 0.7),
                           ),
                         ),
                       ],
@@ -534,24 +710,29 @@ class _RoleToggle extends StatelessWidget {
                 child: GestureDetector(
                   onTap: () => onChanged(Role.familiar),
                   child: SizedBox(
-                    height: 32,
+                    height: 40,
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(
-                          Icons.family_restroom,
-                          size: 18,
-                          color: Colors.white,
+                        Icon(
+                          Icons.family_restroom_outlined,
+                          size: 20,
+                          color: selected == Role.familiar 
+                            ? Colors.white 
+                            : Colors.white.withValues(alpha: 0.7),
                         ),
                         const SizedBox(width: 8),
-                        const Text(
+                        Text(
                           'Familiar',
                           style: TextStyle(
-                            fontFamily: 'Roboto',
-                            fontWeight: FontWeight.w600,
-                            fontSize: 15,
-                            height: 1.5,
-                            color: Colors.white,
+                            fontFamily: 'Poppins',
+                            fontWeight: selected == Role.familiar 
+                              ? FontWeight.w600 
+                              : FontWeight.w500,
+                            fontSize: 14,
+                            color: selected == Role.familiar 
+                              ? Colors.white 
+                              : Colors.white.withValues(alpha: 0.7),
                           ),
                         ),
                       ],

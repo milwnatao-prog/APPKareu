@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../constants/app_design_system.dart';
+import '../services/user_service.dart';
 import 'caregiver_chat_screen.dart';
 
 class HomeProfessionalScreen extends StatefulWidget {
@@ -14,6 +15,14 @@ class _HomeProfessionalScreenState extends State<HomeProfessionalScreen>
   
   @override
   bool get wantKeepAlive => true; // Otimização: manter estado vivo
+
+  @override
+  void initState() {
+    super.initState();
+    // Definir tipo de usuário como cuidador
+    UserService.setUserType(UserType.caregiver);
+    _calculateStatistics();
+  }
   
   // Dados sincronizados com o chat do cuidador
   final List<PatientData> _patients = [
@@ -66,11 +75,6 @@ class _HomeProfessionalScreenState extends State<HomeProfessionalScreen>
   // Estatísticas calculadas dinamicamente
   late Map<String, dynamic> _statistics;
 
-  @override
-  void initState() {
-    super.initState();
-    _calculateStatistics();
-  }
 
   void _calculateStatistics() {
     final activePatients = _patients.where((p) => p.status == PatientStatus.active).length;
@@ -118,7 +122,7 @@ class _HomeProfessionalScreenState extends State<HomeProfessionalScreen>
         break;
       case 4:
         // Navegar para Configurações da Conta
-        Navigator.pushNamed(context, '/account-settings');
+        Navigator.pushNamed(context, '/caregiver-account');
         break;
     }
   }

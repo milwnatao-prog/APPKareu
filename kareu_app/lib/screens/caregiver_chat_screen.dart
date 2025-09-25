@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../constants/app_design_system.dart';
+import '../services/user_service.dart';
 
 class CaregiverChatScreen extends StatefulWidget {
   const CaregiverChatScreen({super.key});
@@ -13,6 +14,13 @@ class _CaregiverChatScreenState extends State<CaregiverChatScreen>
   
   @override
   bool get wantKeepAlive => true; // Otimização: manter estado vivo
+
+  @override
+  void initState() {
+    super.initState();
+    // Definir tipo de usuário como cuidador
+    UserService.setUserType(UserType.caregiver);
+  }
   
   // Lista de conversas para cuidadores (com pacientes/famílias)
   final List<CaregiverChatItem> _chats = [
@@ -647,7 +655,7 @@ class _CaregiverChatScreenState extends State<CaregiverChatScreen>
         Navigator.pushNamed(context, '/caregiver-schedule');
         break;
       case 4:
-        Navigator.pushNamed(context, '/account-settings');
+        Navigator.pushNamed(context, '/caregiver-account');
         break;
     }
   }

@@ -22,8 +22,8 @@ class _CaregiverProfileScreenState extends State<CaregiverProfileScreen> {
   void initState() {
     super.initState();
     caregiver = widget.caregiverData ?? _getDefaultCaregiverData();
-    // Definir tipo de usuário como paciente (quem visualiza o perfil do cuidador)
-    UserService.setUserType(UserType.patient);
+    // Definir tipo de usuário como cuidador (perfil do próprio cuidador)
+    UserService.setUserType(UserType.caregiver);
   }
   
   @override

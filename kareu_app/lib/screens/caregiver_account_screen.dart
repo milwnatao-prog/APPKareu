@@ -21,6 +21,12 @@ class _CaregiverAccountScreenState extends State<CaregiverAccountScreen> {
   final TextEditingController _descriptionController = TextEditingController(
     text: 'Sou técnica de enfermagem com 5 anos de experiência em cuidados domiciliares e hospitalares. Especializada em cuidados com idosos, administração de medicamentos e acompanhamento médico.'
   );
+  final TextEditingController _emergencyContactController = TextEditingController(text: 'João Souza - (84) 88888-8888');
+  final TextEditingController _experienceYearsController = TextEditingController(text: '5');
+  final TextEditingController _specializationController = TextEditingController(text: 'Geriatria, Cuidados Paliativos');
+  final TextEditingController _hourlyRateController = TextEditingController(text: 'R\$ 25,00');
+  final TextEditingController _dailyRateController = TextEditingController(text: 'R\$ 180,00');
+  final TextEditingController _weeklyRateController = TextEditingController(text: 'R\$ 1.200,00');
   
   // Estados dos toggles
   bool _facebookLoginEnabled = true;
@@ -29,6 +35,11 @@ class _CaregiverAccountScreenState extends State<CaregiverAccountScreen> {
   bool _calendarIntegrationEnabled = true;
   bool _notificationsEnabled = true;
   bool _availableForEmergency = true;
+  bool _backgroundCheckCompleted = true;
+  bool _insuranceActive = true;
+  bool _availableWeekends = true;
+  bool _availableNights = false;
+  bool _ownTransportation = true;
   
   // Estado do gênero selecionado
   String _selectedGender = 'Feminino';
@@ -56,6 +67,23 @@ class _CaregiverAccountScreenState extends State<CaregiverAccountScreen> {
     'Alimentação'
   };
 
+  // Certificações profissionais selecionadas
+  final Set<String> _selectedCertifications = {
+    'Primeiros Socorros',
+    'RCP (Ressuscitação Cardiopulmonar)',
+    'Cuidados com Idosos',
+    'Administração de Medicamentos'
+  };
+
+  // Horários de disponibilidade selecionados
+  final Set<String> _selectedAvailability = {
+    'Segunda-feira',
+    'Terça-feira',
+    'Quarta-feira',
+    'Quinta-feira',
+    'Sexta-feira'
+  };
+
   // Lista de aspectos de personalidade disponíveis
   final List<String> _personalityTraits = [
     'Paciente', 'Empática', 'Responsável', 'Comunicativa', 'Carinhosa',
@@ -72,6 +100,21 @@ class _CaregiverAccountScreenState extends State<CaregiverAccountScreen> {
     'Acompanhamento em consultas'
   ];
 
+  // Lista de certificações disponíveis
+  final List<String> _certifications = [
+    'Primeiros Socorros', 'RCP (Ressuscitação Cardiopulmonar)', 'Cuidados com Idosos',
+    'Administração de Medicamentos', 'Cuidados Paliativos', 'Fisioterapia Básica',
+    'Nutrição Geriátrica', 'Psicologia do Idoso', 'Cuidados com Demência',
+    'Enfermagem Domiciliar', 'Técnico em Enfermagem', 'Auxiliar de Enfermagem',
+    'Cuidados Pós-Cirúrgicos', 'Controle de Diabetes', 'Cuidados Respiratórios'
+  ];
+
+  // Lista de dias da semana disponíveis
+  final List<String> _weekDays = [
+    'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira',
+    'Sexta-feira', 'Sábado', 'Domingo'
+  ];
+
   @override
   void dispose() {
     _nameController.dispose();
@@ -83,6 +126,12 @@ class _CaregiverAccountScreenState extends State<CaregiverAccountScreen> {
     _phoneController.dispose();
     _registrationController.dispose();
     _descriptionController.dispose();
+    _emergencyContactController.dispose();
+    _experienceYearsController.dispose();
+    _specializationController.dispose();
+    _hourlyRateController.dispose();
+    _dailyRateController.dispose();
+    _weeklyRateController.dispose();
     super.dispose();
   }
 
@@ -133,6 +182,12 @@ class _CaregiverAccountScreenState extends State<CaregiverAccountScreen> {
             _buildPersonalInfo(),
             AppDesignSystem.verticalSpace(2),
             _buildProfessionalInfo(),
+            AppDesignSystem.verticalSpace(2),
+            _buildCertificationsSection(),
+            AppDesignSystem.verticalSpace(2),
+            _buildAvailabilitySection(),
+            AppDesignSystem.verticalSpace(2),
+            _buildRatesSection(),
             AppDesignSystem.verticalSpace(2),
             _buildDescriptionSection(),
             AppDesignSystem.verticalSpace(2),
@@ -305,6 +360,36 @@ class _CaregiverAccountScreenState extends State<CaregiverAccountScreen> {
           
           Row(
             children: [
+              Expanded(
+                child: _buildTextField(
+                  controller: _experienceYearsController,
+                  label: 'Anos de Experiência',
+                  icon: Icons.work_outline,
+                ),
+              ),
+              const SizedBox(width: AppDesignSystem.spaceMD),
+              Expanded(
+                child: _buildTextField(
+                  controller: _specializationController,
+                  label: 'Especializações',
+                  icon: Icons.medical_services_outlined,
+                ),
+              ),
+            ],
+          ),
+          
+          AppDesignSystem.verticalSpace(1.5),
+          
+          _buildTextField(
+            controller: _emergencyContactController,
+            label: 'Contato de Emergência',
+            icon: Icons.emergency_outlined,
+          ),
+          
+          AppDesignSystem.verticalSpace(1.5),
+          
+          Row(
+            children: [
               Icon(
                 Icons.emergency,
                 color: AppDesignSystem.primaryColor,
@@ -324,7 +409,63 @@ class _CaregiverAccountScreenState extends State<CaregiverAccountScreen> {
                     _availableForEmergency = value;
                   });
                 } : null,
-                activeColor: AppDesignSystem.primaryColor,
+                activeThumbColor: AppDesignSystem.primaryColor,
+              ),
+            ],
+          ),
+          
+          AppDesignSystem.verticalSpace(1),
+          
+          Row(
+            children: [
+              Icon(
+                Icons.verified_user,
+                color: AppDesignSystem.successColor,
+                size: 20,
+              ),
+              const SizedBox(width: AppDesignSystem.spaceSM),
+              Expanded(
+                child: Text(
+                  'Verificação de antecedentes concluída',
+                  style: AppDesignSystem.bodyStyle,
+                ),
+              ),
+              Switch(
+                value: _backgroundCheckCompleted,
+                onChanged: _isEditing ? (value) {
+                  setState(() {
+                    _backgroundCheckCompleted = value;
+                  });
+                } : null,
+                activeThumbColor: AppDesignSystem.successColor,
+              ),
+            ],
+          ),
+          
+          AppDesignSystem.verticalSpace(1),
+          
+          Row(
+            children: [
+              Icon(
+                Icons.security,
+                color: AppDesignSystem.warningColor,
+                size: 20,
+              ),
+              const SizedBox(width: AppDesignSystem.spaceSM),
+              Expanded(
+                child: Text(
+                  'Seguro de responsabilidade civil ativo',
+                  style: AppDesignSystem.bodyStyle,
+                ),
+              ),
+              Switch(
+                value: _insuranceActive,
+                onChanged: _isEditing ? (value) {
+                  setState(() {
+                    _insuranceActive = value;
+                  });
+                } : null,
+                activeThumbColor: AppDesignSystem.warningColor,
               ),
             ],
           ),
@@ -668,31 +809,37 @@ class _CaregiverAccountScreenState extends State<CaregiverAccountScreen> {
         Row(
           children: [
             Expanded(
-              child: RadioListTile<String>(
-                title: Text('Feminino', style: AppDesignSystem.bodySmallStyle),
-                value: 'Feminino',
-                groupValue: _selectedGender,
-                onChanged: _isEditing ? (value) {
-                  setState(() {
-                    _selectedGender = value!;
-                  });
-                } : null,
-                activeColor: AppDesignSystem.primaryColor,
-                contentPadding: EdgeInsets.zero,
+              child: Row(
+                children: [
+                  Radio<String>(
+                    value: 'Feminino',
+                    groupValue: _selectedGender,
+                    onChanged: _isEditing ? (value) {
+                      setState(() {
+                        _selectedGender = value!;
+                      });
+                    } : null,
+                    activeColor: AppDesignSystem.primaryColor,
+                  ),
+                  Text('Feminino', style: AppDesignSystem.bodySmallStyle),
+                ],
               ),
             ),
             Expanded(
-              child: RadioListTile<String>(
-                title: Text('Masculino', style: AppDesignSystem.bodySmallStyle),
-                value: 'Masculino',
-                groupValue: _selectedGender,
-                onChanged: _isEditing ? (value) {
-                  setState(() {
-                    _selectedGender = value!;
-                  });
-                } : null,
-                activeColor: AppDesignSystem.primaryColor,
-                contentPadding: EdgeInsets.zero,
+              child: Row(
+                children: [
+                  Radio<String>(
+                    value: 'Masculino',
+                    groupValue: _selectedGender,
+                    onChanged: _isEditing ? (value) {
+                      setState(() {
+                        _selectedGender = value!;
+                      });
+                    } : null,
+                    activeColor: AppDesignSystem.primaryColor,
+                  ),
+                  Text('Masculino', style: AppDesignSystem.bodySmallStyle),
+                ],
               ),
             ),
           ],
@@ -768,6 +915,297 @@ class _CaregiverAccountScreenState extends State<CaregiverAccountScreen> {
           activeColor: AppDesignSystem.primaryColor,
         ),
       ],
+    );
+  }
+
+  Widget _buildCertificationsSection() {
+    return AppDesignSystem.styledCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Certificações e Qualificações', style: AppDesignSystem.h3Style),
+          AppDesignSystem.verticalSpace(0.5),
+          Text(
+            'Selecione suas certificações e qualificações profissionais',
+            style: AppDesignSystem.captionStyle,
+          ),
+          AppDesignSystem.verticalSpace(1.5),
+          
+          Wrap(
+            spacing: AppDesignSystem.spaceSM,
+            runSpacing: AppDesignSystem.spaceSM,
+            children: _certifications.map((certification) {
+              final isSelected = _selectedCertifications.contains(certification);
+              return GestureDetector(
+                onTap: _isEditing ? () {
+                  setState(() {
+                    if (isSelected) {
+                      _selectedCertifications.remove(certification);
+                    } else {
+                      _selectedCertifications.add(certification);
+                    }
+                  });
+                } : null,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppDesignSystem.spaceMD,
+                    vertical: AppDesignSystem.spaceSM,
+                  ),
+                  decoration: BoxDecoration(
+                    color: isSelected 
+                      ? AppDesignSystem.warningColor 
+                      : AppDesignSystem.surfaceColor,
+                    borderRadius: BorderRadius.circular(AppDesignSystem.borderRadiusLarge),
+                    border: Border.all(
+                      color: isSelected 
+                        ? AppDesignSystem.warningColor 
+                        : AppDesignSystem.borderColor,
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      if (isSelected)
+                        Icon(
+                          Icons.verified,
+                          size: 16,
+                          color: Colors.white,
+                        ),
+                      if (isSelected) const SizedBox(width: AppDesignSystem.spaceXS),
+                      Text(
+                        certification,
+                        style: AppDesignSystem.bodySmallStyle.copyWith(
+                          color: isSelected 
+                            ? Colors.white 
+                            : AppDesignSystem.textPrimaryColor,
+                          fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAvailabilitySection() {
+    return AppDesignSystem.styledCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Disponibilidade', style: AppDesignSystem.h3Style),
+          AppDesignSystem.verticalSpace(0.5),
+          Text(
+            'Selecione os dias da semana em que você está disponível',
+            style: AppDesignSystem.captionStyle,
+          ),
+          AppDesignSystem.verticalSpace(1.5),
+          
+          Wrap(
+            spacing: AppDesignSystem.spaceSM,
+            runSpacing: AppDesignSystem.spaceSM,
+            children: _weekDays.map((day) {
+              final isSelected = _selectedAvailability.contains(day);
+              return GestureDetector(
+                onTap: _isEditing ? () {
+                  setState(() {
+                    if (isSelected) {
+                      _selectedAvailability.remove(day);
+                    } else {
+                      _selectedAvailability.add(day);
+                    }
+                  });
+                } : null,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppDesignSystem.spaceMD,
+                    vertical: AppDesignSystem.spaceSM,
+                  ),
+                  decoration: BoxDecoration(
+                    color: isSelected 
+                      ? AppDesignSystem.primaryColor 
+                      : AppDesignSystem.surfaceColor,
+                    borderRadius: BorderRadius.circular(AppDesignSystem.borderRadiusLarge),
+                    border: Border.all(
+                      color: isSelected 
+                        ? AppDesignSystem.primaryColor 
+                        : AppDesignSystem.borderColor,
+                    ),
+                  ),
+                  child: Text(
+                    day,
+                    style: AppDesignSystem.bodySmallStyle.copyWith(
+                      color: isSelected 
+                        ? Colors.white 
+                        : AppDesignSystem.textPrimaryColor,
+                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                    ),
+                  ),
+                ),
+              );
+            }).toList(),
+          ),
+          
+          AppDesignSystem.verticalSpace(1.5),
+          
+          Row(
+            children: [
+              Icon(
+                Icons.weekend,
+                color: AppDesignSystem.primaryColor,
+                size: 20,
+              ),
+              const SizedBox(width: AppDesignSystem.spaceSM),
+              Expanded(
+                child: Text(
+                  'Disponível aos fins de semana',
+                  style: AppDesignSystem.bodyStyle,
+                ),
+              ),
+              Switch(
+                value: _availableWeekends,
+                onChanged: _isEditing ? (value) {
+                  setState(() {
+                    _availableWeekends = value;
+                  });
+                } : null,
+                activeThumbColor: AppDesignSystem.primaryColor,
+              ),
+            ],
+          ),
+          
+          AppDesignSystem.verticalSpace(1),
+          
+          Row(
+            children: [
+              Icon(
+                Icons.nightlight_round,
+                color: AppDesignSystem.primaryColor,
+                size: 20,
+              ),
+              const SizedBox(width: AppDesignSystem.spaceSM),
+              Expanded(
+                child: Text(
+                  'Disponível para plantões noturnos',
+                  style: AppDesignSystem.bodyStyle,
+                ),
+              ),
+              Switch(
+                value: _availableNights,
+                onChanged: _isEditing ? (value) {
+                  setState(() {
+                    _availableNights = value;
+                  });
+                } : null,
+                activeThumbColor: AppDesignSystem.primaryColor,
+              ),
+            ],
+          ),
+          
+          AppDesignSystem.verticalSpace(1),
+          
+          Row(
+            children: [
+              Icon(
+                Icons.directions_car,
+                color: AppDesignSystem.primaryColor,
+                size: 20,
+              ),
+              const SizedBox(width: AppDesignSystem.spaceSM),
+              Expanded(
+                child: Text(
+                  'Possui transporte próprio',
+                  style: AppDesignSystem.bodyStyle,
+                ),
+              ),
+              Switch(
+                value: _ownTransportation,
+                onChanged: _isEditing ? (value) {
+                  setState(() {
+                    _ownTransportation = value;
+                  });
+                } : null,
+                activeThumbColor: AppDesignSystem.primaryColor,
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRatesSection() {
+    return AppDesignSystem.styledCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Tarifas e Condições', style: AppDesignSystem.h3Style),
+          AppDesignSystem.verticalSpace(1.5),
+          
+          Row(
+            children: [
+              Expanded(
+                child: _buildTextField(
+                  controller: _hourlyRateController,
+                  label: 'Valor por Hora',
+                  icon: Icons.access_time,
+                ),
+              ),
+              const SizedBox(width: AppDesignSystem.spaceMD),
+              Expanded(
+                child: _buildTextField(
+                  controller: _dailyRateController,
+                  label: 'Valor por Dia',
+                  icon: Icons.today,
+                ),
+              ),
+            ],
+          ),
+          
+          AppDesignSystem.verticalSpace(1.5),
+          
+          _buildTextField(
+            controller: _weeklyRateController,
+            label: 'Valor por Semana',
+            icon: Icons.date_range,
+          ),
+          
+          AppDesignSystem.verticalSpace(1.5),
+          
+          Container(
+            padding: const EdgeInsets.all(AppDesignSystem.spaceMD),
+            decoration: BoxDecoration(
+              color: AppDesignSystem.primaryColor.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(AppDesignSystem.borderRadius),
+              border: Border.all(
+                color: AppDesignSystem.primaryColor.withValues(alpha: 0.3),
+              ),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.info_outline,
+                  color: AppDesignSystem.primaryColor,
+                  size: 20,
+                ),
+                const SizedBox(width: AppDesignSystem.spaceSM),
+                Expanded(
+                  child: Text(
+                    'Os valores podem ser negociados conforme a complexidade dos cuidados necessários',
+                    style: AppDesignSystem.bodySmallStyle.copyWith(
+                      color: AppDesignSystem.primaryColor,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 

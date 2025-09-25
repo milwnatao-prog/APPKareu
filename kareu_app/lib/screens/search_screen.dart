@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:kareu_app/constants/app_design_system.dart';
+import '../services/user_service.dart';
+import '../services/reputation_service.dart';
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});
@@ -14,9 +16,10 @@ class _SearchScreenState extends State<SearchScreen> {
   List<Map<String, dynamic>> _searchResults = [];
   bool _isSearching = false;
 
-  // Dados simulados de cuidadores
+  // Dados simulados de cuidadores com informações de assinatura
   final List<Map<String, dynamic>> _allCaregivers = [
     {
+      'id': 'caregiver_001',
       'name': 'Maria Silva',
       'specialty': 'Cuidadora',
       'experience': '5 anos',
@@ -25,8 +28,11 @@ class _SearchScreenState extends State<SearchScreen> {
       'location': 'Natal, RN',
       'image': 'assets/images/caregiver1.jpg',
       'verified': true,
+      'subscriptionTier': SubscriptionTier.premium, // Premium - aparece primeiro
+      'reputationLevel': ReputationLevel.expert,
     },
     {
+      'id': 'caregiver_002',
       'name': 'João Santos',
       'specialty': 'Técnico de Enfermagem',
       'experience': '8 anos',
@@ -35,8 +41,11 @@ class _SearchScreenState extends State<SearchScreen> {
       'location': 'João Pessoa, PB',
       'image': 'assets/images/caregiver2.jpg',
       'verified': true,
+      'subscriptionTier': SubscriptionTier.plus, // Plus - segunda prioridade
+      'reputationLevel': ReputationLevel.elite,
     },
     {
+      'id': 'caregiver_003',
       'name': 'Ana Costa',
       'specialty': 'Acompanhante Hospitalar',
       'experience': '3 anos',
@@ -45,8 +54,11 @@ class _SearchScreenState extends State<SearchScreen> {
       'location': 'São Paulo, SP',
       'image': 'assets/images/caregiver3.jpg',
       'verified': false,
+      'subscriptionTier': SubscriptionTier.free, // Gratuito - última prioridade
+      'reputationLevel': ReputationLevel.developing,
     },
     {
+      'id': 'caregiver_004',
       'name': 'Carlos Oliveira',
       'specialty': 'Acompanhante Domiciliar',
       'experience': '6 anos',
@@ -55,8 +67,11 @@ class _SearchScreenState extends State<SearchScreen> {
       'location': 'Curitiba, PR',
       'image': 'assets/images/caregiver4.jpg',
       'verified': true,
+      'subscriptionTier': SubscriptionTier.basic, // Básico - terceira prioridade
+      'reputationLevel': ReputationLevel.trusted,
     },
     {
+      'id': 'caregiver_005',
       'name': 'Lucia Ferreira',
       'specialty': 'Cuidadora',
       'experience': '4 anos',
@@ -65,6 +80,8 @@ class _SearchScreenState extends State<SearchScreen> {
       'location': 'Recife, PE',
       'image': 'assets/images/caregiver5.jpg',
       'verified': true,
+      'subscriptionTier': SubscriptionTier.plus, // Plus - segunda prioridade
+      'reputationLevel': ReputationLevel.trusted,
     },
   ];
 
@@ -72,7 +89,7 @@ class _SearchScreenState extends State<SearchScreen> {
   void initState() {
     super.initState();
     _focusNode.requestFocus();
-    _searchResults = _allCaregivers;
+    _searchResults = _sortCaregiversByPriority(_allCaregivers);
   }
 
   @override
@@ -90,17 +107,48 @@ class _SearchScreenState extends State<SearchScreen> {
     // Simular delay de busca
     Future.delayed(const Duration(milliseconds: 500), () {
       setState(() {
+        List<Map<String, dynamic>> filteredResults;
         if (query.isEmpty) {
-          _searchResults = _allCaregivers;
+          filteredResults = _allCaregivers;
         } else {
-          _searchResults = _allCaregivers.where((caregiver) {
+          filteredResults = _allCaregivers.where((caregiver) {
             return caregiver['name'].toLowerCase().contains(query.toLowerCase()) ||
                    caregiver['specialty'].toLowerCase().contains(query.toLowerCase()) ||
                    caregiver['location'].toLowerCase().contains(query.toLowerCase());
           }).toList();
         }
+        // Sempre aplicar ordenação por prioridade de assinatura
+        _searchResults = _sortCaregiversByPriority(filteredResults);
         _isSearching = false;
       });
+    });
+  }
+
+  /// Ordena cuidadores por prioridade de assinatura e reputação
+  List<Map<String, dynamic>> _sortCaregiversByPriority(List<Map<String, dynamic>> caregivers) {
+    return caregivers..sort((a, b) {
+      final aTier = a['subscriptionTier'] as SubscriptionTier;
+      final bTier = b['subscriptionTier'] as SubscriptionTier;
+      
+      // Definir ordem de prioridade das assinaturas
+      final priorityOrder = {
+        SubscriptionTier.premium: 0,  // Primeira prioridade
+        SubscriptionTier.plus: 1,     // Segunda prioridade
+        SubscriptionTier.basic: 2,    // Terceira prioridade
+        SubscriptionTier.free: 3,     // Última prioridade
+      };
+      
+      final aPriority = priorityOrder[aTier]!;
+      final bPriority = priorityOrder[bTier]!;
+      
+      // Se têm a mesma assinatura, ordenar por avaliação
+      if (aPriority == bPriority) {
+        final aRating = a['rating'] as double;
+        final bRating = b['rating'] as double;
+        return bRating.compareTo(aRating); // Maior avaliação primeiro
+      }
+      
+      return aPriority.compareTo(bPriority);
     });
   }
 
@@ -250,19 +298,8 @@ class _SearchScreenState extends State<SearchScreen> {
                           style: AppDesignSystem.cardTitleStyle,
                         ),
                       ),
-                      if (caregiver['verified'])
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                          decoration: BoxDecoration(
-                            color: AppDesignSystem.successColor.withValues(alpha: 0.1),
-                            borderRadius: BorderRadius.circular(AppDesignSystem.borderRadiusSmall),
-                          ),
-                          child: const Icon(
-                            Icons.verified,
-                            color: AppDesignSystem.successColor,
-                            size: 16,
-                          ),
-                        ),
+                      // Badges de assinatura e verificação
+                      ..._buildCaregiverBadges(caregiver),
                     ],
                   ),
                   
@@ -327,6 +364,82 @@ class _SearchScreenState extends State<SearchScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  /// Constrói os badges de assinatura e verificação para um cuidador
+  List<Widget> _buildCaregiverBadges(Map<String, dynamic> caregiver) {
+    final List<Widget> badges = [];
+    final subscriptionTier = caregiver['subscriptionTier'] as SubscriptionTier;
+    final reputationLevel = caregiver['reputationLevel'] as ReputationLevel;
+
+    // Badge de assinatura Premium
+    if (subscriptionTier == SubscriptionTier.premium) {
+      badges.add(_buildSubscriptionBadge(
+        'PREMIUM',
+        Icons.workspace_premium,
+        const Color(0xFFFFD700), // Dourado
+      ));
+      badges.add(const SizedBox(width: 4));
+    }
+    // Badge de assinatura Plus
+    else if (subscriptionTier == SubscriptionTier.plus) {
+      badges.add(_buildSubscriptionBadge(
+        'PLUS',
+        Icons.star,
+        AppDesignSystem.warningColor,
+      ));
+      badges.add(const SizedBox(width: 4));
+    }
+
+    // Badge de verificação (para assinantes)
+    if (caregiver['verified'] && subscriptionTier != SubscriptionTier.free) {
+      badges.add(Container(
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+        decoration: BoxDecoration(
+          color: AppDesignSystem.successColor.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(AppDesignSystem.borderRadiusSmall),
+        ),
+        child: const Icon(
+          Icons.verified,
+          color: AppDesignSystem.successColor,
+          size: 16,
+        ),
+      ));
+    }
+
+    return badges;
+  }
+
+  /// Constrói um badge de assinatura
+  Widget _buildSubscriptionBadge(String text, IconData icon, Color color) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(AppDesignSystem.borderRadiusSmall),
+        border: Border.all(color: color.withValues(alpha: 0.3)),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(
+            icon,
+            color: color,
+            size: 12,
+          ),
+          const SizedBox(width: 2),
+          Text(
+            text,
+            style: TextStyle(
+              fontSize: 10,
+              fontWeight: FontWeight.w700,
+              color: color,
+              fontFamily: 'Poppins',
+            ),
+          ),
+        ],
       ),
     );
   }
