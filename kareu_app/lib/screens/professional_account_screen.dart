@@ -193,34 +193,6 @@ class _ProfessionalAccountScreenState extends State<ProfessionalAccountScreen> {
 
 
 
-  Widget _buildDropdownField(String label, String value, List<String> options, Function(String?) onChanged) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: AppDesignSystem.captionStyle,
-        ),
-        const SizedBox(height: 4),
-        DropdownButtonFormField<String>(
-          value: value,
-          onChanged: _isEditing ? onChanged : null,
-          decoration: InputDecoration(
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(AppDesignSystem.borderRadius),
-            ),
-            contentPadding: const EdgeInsets.all(AppDesignSystem.spaceMD),
-          ),
-          items: options.map<DropdownMenuItem<String>>((String option) {
-            return DropdownMenuItem<String>(
-              value: option,
-              child: Text(option),
-            );
-          }).toList(),
-        ),
-      ],
-    );
-  }
 
   Widget _buildPersonalInfo() {
     return AppDesignSystem.styledCard(
@@ -375,99 +347,7 @@ class _ProfessionalAccountScreenState extends State<ProfessionalAccountScreen> {
     );
   }
 
-  Widget _buildPreferencesSection() {
-    return AppDesignSystem.styledCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Preferências Profissionais',
-            style: AppDesignSystem.sectionTitleStyle,
-          ),
-          AppDesignSystem.verticalSpace(1),
-          
-          _buildSwitchTile(
-            'Aceitar Chamadas Urgentes',
-            'Receber notificações para casos urgentes',
-            _acceptUrgentCalls,
-            (value) => setState(() => _acceptUrgentCalls = value),
-            Icons.emergency_outlined,
-          ),
-          
-          _buildSwitchTile(
-            'Disponível aos Finais de Semana',
-            'Trabalhar em sábados e domingos',
-            _availableWeekendsEnabled,
-            (value) => setState(() => _availableWeekendsEnabled = value),
-            Icons.weekend_outlined,
-          ),
-          
-          _buildSwitchTile(
-            'Compartilhar Localização',
-            'Permitir que famílias vejam sua localização',
-            _shareLocationEnabled,
-            (value) => setState(() => _shareLocationEnabled = value),
-            Icons.location_on_outlined,
-          ),
-        ],
-      ),
-    );
-  }
 
-  Widget _buildPrivacySection() {
-    return AppDesignSystem.styledCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const Text(
-            'Privacidade e Configurações',
-            style: AppDesignSystem.sectionTitleStyle,
-          ),
-          AppDesignSystem.verticalSpace(1),
-          
-          _buildSwitchTile(
-            'Login com Facebook',
-            'Usar Facebook para entrar na conta',
-            _facebookLoginEnabled,
-            (value) => setState(() => _facebookLoginEnabled = value),
-            Icons.facebook,
-          ),
-          
-          _buildSwitchTile(
-            'Login com Google',
-            'Usar Google para entrar na conta',
-            _googleLoginEnabled,
-            (value) => setState(() => _googleLoginEnabled = value),
-            Icons.g_mobiledata,
-          ),
-          
-          _buildSwitchTile(
-            'Login com Apple',
-            'Usar Apple ID para entrar na conta',
-            _appleLoginEnabled,
-            (value) => setState(() => _appleLoginEnabled = value),
-            Icons.apple,
-          ),
-          
-          _buildSwitchTile(
-            'Integração com Calendário',
-            'Sincronizar agendamentos com seu calendário',
-            _calendarIntegrationEnabled,
-            (value) => setState(() => _calendarIntegrationEnabled = value),
-            Icons.calendar_today_outlined,
-          ),
-          
-          _buildSwitchTile(
-            'Notificações Push',
-            'Receber notificações no dispositivo',
-            _notificationsEnabled,
-            (value) => setState(() => _notificationsEnabled = value),
-            Icons.notifications_outlined,
-          ),
-        ],
-      ),
-    );
-  }
 
   Widget _buildInfoRow(
     String label,
