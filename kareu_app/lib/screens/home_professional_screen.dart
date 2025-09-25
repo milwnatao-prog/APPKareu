@@ -122,7 +122,7 @@ class _HomeProfessionalScreenState extends State<HomeProfessionalScreen>
         break;
       case 4:
         // Navegar para Configurações da Conta
-        Navigator.pushNamed(context, '/caregiver-account');
+        Navigator.pushNamed(context, '/professional-account');
         break;
     }
   }

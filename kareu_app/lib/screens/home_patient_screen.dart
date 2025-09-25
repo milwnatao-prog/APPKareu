@@ -894,13 +894,8 @@ class _HomePatientScreenState extends State<HomePatientScreen> {
         Navigator.pushNamed(context, '/contracts');
         break;
       case 3:
-        // Navegar para Agenda (implementar se necessário)
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Tela de agenda será implementada em breve'),
-            backgroundColor: AppDesignSystem.infoColor,
-          ),
-        );
+        // Navegar para Agenda do Paciente
+        Navigator.pushNamed(context, '/patient-schedule');
         break;
       case 4:
         // Navegar para Perfil

@@ -19,7 +19,7 @@ class UserService {
   static bool get isPatient => _currentUserType == UserType.patient;
   
   static String getAccountRoute() {
-    return isCaregiver ? '/caregiver-account' : '/patient-account';
+    return isCaregiver ? '/professional-account' : '/patient-account';
   }
   
   // Funcionalidades de monetização

@@ -801,7 +801,7 @@ class _CaregiverScheduleScreenState extends State<CaregiverScheduleScreen> {
         // Já estamos na agenda
         break;
       case 4:
-        Navigator.pushNamed(context, '/caregiver-account');
+        Navigator.pushNamed(context, '/professional-account');
         break;
     }
   }

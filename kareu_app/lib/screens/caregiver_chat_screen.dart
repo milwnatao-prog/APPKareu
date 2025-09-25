@@ -655,7 +655,7 @@ class _CaregiverChatScreenState extends State<CaregiverChatScreen>
         Navigator.pushNamed(context, '/caregiver-schedule');
         break;
       case 4:
-        Navigator.pushNamed(context, '/caregiver-account');
+        Navigator.pushNamed(context, '/professional-account');
         break;
     }
   }

@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'dart:ui';
-import 'user_type_selection_screen.dart';
+import 'user_type_selection_screen.dart' as selection_screen;
 import '../constants/app_design_system.dart';
-import '../services/user_service.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -13,7 +10,6 @@ class RegisterScreen extends StatefulWidget {
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
-  final _formKey = GlobalKey<FormState>();
   final _pageController = PageController();
   int _currentStep = 0;
   
@@ -31,10 +27,202 @@ class _RegisterScreenState extends State<RegisterScreen> {
   // Estado
   String _selectedGender = 'Feminino';
   String? _selectedState;
-  UserType? _userType;
+  selection_screen.UserType? _userType;
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
   bool _acceptTerms = false;
+  
+  // Campos específicos para profissionais
+  final _crefController = TextEditingController();
+  final _experienceController = TextEditingController();
+  final _referenceNameController = TextEditingController();
+  final _referencePhoneController = TextEditingController();
+  String? _selectedSpecialty;
+  String? _selectedEducation;
+  String? _selectedExperienceYears;
+  Set<String> _selectedCareAreas = {};
+  
+  // Campos específicos para pacientes
+  final _medicalConditionsController = TextEditingController();
+  final _medicationsController = TextEditingController();
+  final _allergiesController = TextEditingController();
+  final _emergencyContactController = TextEditingController();
+  final _emergencyPhoneController = TextEditingController();
+  final _specialNeedsController = TextEditingController();
+  String? _selectedMobilityLevel;
+  String? _selectedCareType;
+  Set<String> _selectedPatientNeeds = {};
+  Set<String> _selectedPersonalityTraits = {};
+  
+  final List<String> _specialties = [
+    'Enfermagem',
+    'Fisioterapia',
+    'Cuidador de Idosos',
+    'Técnico em Enfermagem',
+    'Auxiliar de Enfermagem',
+    'Acompanhante Hospitalar',
+    'Cuidador Infantil',
+    'Medicina',
+    'Psicologia',
+    'Terapia Ocupacional',
+    'Nutrição',
+    'Outros',
+  ];
+  
+  final List<String> _educationOptions = [
+    'Ensino Fundamental',
+    'Ensino Médio',
+    'Ensino Superior',
+    'Pós-graduação',
+    'Mestrado',
+    'Doutorado'
+  ];
+
+  final List<String> _experienceYearsOptions = [
+    'Menos de 1 ano',
+    '1-2 anos',
+    '3-5 anos',
+    '6-10 anos',
+    'Mais de 10 anos'
+  ];
+
+  final List<Map<String, dynamic>> _careAreas = [
+    {
+      'id': 'idosos',
+      'title': 'Idosos',
+      'icon': Icons.elderly,
+    },
+    {
+      'id': 'hospitalizadas',
+      'title': 'Pessoas hospitalizadas',
+      'icon': Icons.local_hospital,
+    },
+    {
+      'id': 'domiciliar',
+      'title': 'Domiciliar',
+      'icon': Icons.home,
+    },
+    {
+      'id': 'criancas',
+      'title': 'Crianças',
+      'icon': Icons.child_care,
+    },
+    {
+      'id': 'deficiencias',
+      'title': 'Pessoas com deficiência',
+      'icon': Icons.accessible,
+    },
+    {
+      'id': 'outros',
+      'title': 'Outros',
+      'icon': Icons.more_horiz,
+    },
+  ];
+
+  final List<String> _mobilityLevels = [
+    'Totalmente independente',
+    'Parcialmente dependente',
+    'Dependente com assistência',
+    'Totalmente dependente',
+    'Cadeirante',
+    'Acamado',
+  ];
+
+  final List<String> _careTypes = [
+    'Cuidados básicos',
+    'Cuidados médicos',
+    'Acompanhamento hospitalar',
+    'Cuidados paliativos',
+    'Reabilitação',
+    'Cuidados pós-cirúrgicos',
+    'Cuidados de longa duração',
+  ];
+
+  final List<Map<String, dynamic>> _patientNeeds = [
+    {
+      'id': 'higiene',
+      'title': 'Higiene pessoal',
+      'icon': Icons.shower,
+    },
+    {
+      'id': 'alimentacao',
+      'title': 'Auxílio alimentação',
+      'icon': Icons.restaurant,
+    },
+    {
+      'id': 'medicacao',
+      'title': 'Administração medicamentos',
+      'icon': Icons.medication,
+    },
+    {
+      'id': 'mobilidade',
+      'title': 'Auxílio mobilidade',
+      'icon': Icons.accessible,
+    },
+    {
+      'id': 'companhia',
+      'title': 'Companhia',
+      'icon': Icons.people,
+    },
+    {
+      'id': 'exercicios',
+      'title': 'Exercícios/Fisioterapia',
+      'icon': Icons.fitness_center,
+    },
+    {
+      'id': 'transporte',
+      'title': 'Transporte/Acompanhamento',
+      'icon': Icons.directions_car,
+    },
+    {
+      'id': 'domesticas',
+      'title': 'Atividades domésticas',
+      'icon': Icons.home_work,
+    },
+  ];
+
+  final List<Map<String, dynamic>> _personalityTraits = [
+    {
+      'id': 'calmo',
+      'title': 'Calmo',
+      'icon': Icons.self_improvement,
+    },
+    {
+      'id': 'comunicativo',
+      'title': 'Comunicativo',
+      'icon': Icons.chat,
+    },
+    {
+      'id': 'independente',
+      'title': 'Independente',
+      'icon': Icons.person,
+    },
+    {
+      'id': 'sociavel',
+      'title': 'Sociável',
+      'icon': Icons.groups,
+    },
+    {
+      'id': 'ativo',
+      'title': 'Ativo',
+      'icon': Icons.directions_run,
+    },
+    {
+      'id': 'pacifico',
+      'title': 'Pacífico',
+      'icon': Icons.favorite,
+    },
+    {
+      'id': 'colaborativo',
+      'title': 'Colaborativo',
+      'icon': Icons.handshake,
+    },
+    {
+      'id': 'reservado',
+      'title': 'Reservado',
+      'icon': Icons.visibility_off,
+    },
+  ];
   
   final List<String> _brazilianStates = [
     'AC', 'AL', 'AP', 'AM', 'BA', 'CE', 'DF', 'ES', 'GO', 'MA',
@@ -45,7 +233,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _userType = ModalRoute.of(context)?.settings.arguments as UserType?;
+    _userType = ModalRoute.of(context)?.settings.arguments as selection_screen.UserType?;
   }
 
   @override
@@ -59,12 +247,23 @@ class _RegisterScreenState extends State<RegisterScreen> {
     _birthDateController.dispose();
     _addressController.dispose();
     _cityController.dispose();
+    _crefController.dispose();
+    _experienceController.dispose();
+    _referenceNameController.dispose();
+    _referencePhoneController.dispose();
+    _medicalConditionsController.dispose();
+    _medicationsController.dispose();
+    _allergiesController.dispose();
+    _emergencyContactController.dispose();
+    _emergencyPhoneController.dispose();
+    _specialNeedsController.dispose();
     _pageController.dispose();
     super.dispose();
   }
 
   void _nextStep() {
-    if (_currentStep < 2) {
+    int maxSteps = _userType == selection_screen.UserType.amCaregiver ? 3 : 3; // Agora pacientes também têm 4 etapas
+    if (_currentStep < maxSteps) {
       if (_validateCurrentStep()) {
         setState(() {
           _currentStep++;
@@ -100,10 +299,34 @@ class _RegisterScreenState extends State<RegisterScreen> {
                _confirmPasswordController.text.isNotEmpty &&
                _passwordController.text == _confirmPasswordController.text;
       case 1:
-        return _phoneController.text.isNotEmpty &&
-               _cpfController.text.isNotEmpty &&
-               _birthDateController.text.isNotEmpty;
+        bool basicValidation = _phoneController.text.isNotEmpty &&
+                              _cpfController.text.isNotEmpty &&
+                              _birthDateController.text.isNotEmpty;
+        
+        // Validação adicional para profissionais
+        if (_userType == selection_screen.UserType.amCaregiver) {
+          return basicValidation &&
+                 _selectedSpecialty != null &&
+                 _selectedEducation != null &&
+                 _selectedExperienceYears != null &&
+                 _selectedCareAreas.isNotEmpty &&
+                 _experienceController.text.isNotEmpty;
+        }
+        
+        return basicValidation;
       case 2:
+        // Para profissionais: validação das referências (opcional)
+        if (_userType == selection_screen.UserType.amCaregiver) {
+          return true; // Referências são opcionais
+        }
+        // Para pacientes: validação das informações de saúde e necessidades
+        return _selectedMobilityLevel != null &&
+               _selectedCareType != null &&
+               _selectedPatientNeeds.isNotEmpty &&
+               _emergencyContactController.text.isNotEmpty &&
+               _emergencyPhoneController.text.isNotEmpty;
+      case 3:
+        // Etapa final para profissionais (endereço)
         return _addressController.text.isNotEmpty &&
                _cityController.text.isNotEmpty &&
                _selectedState != null &&
@@ -115,161 +338,58 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   void _submitForm() {
     if (_validateCurrentStep()) {
-      // Simular cadastro bem-sucedido
-      _showSuccessDialog();
-    } else {
+      // Simular criação de conta
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Por favor, preencha todos os campos obrigatórios'),
-          backgroundColor: Colors.red,
+        SnackBar(
+          content: Text('Conta criada com sucesso como ${_userType == selection_screen.UserType.needCaregiver ? 'Paciente' : 'Profissional'}!'),
+          backgroundColor: AppDesignSystem.successColor,
         ),
       );
+      
+      // Navegar para login
+      Navigator.pushReplacementNamed(context, '/login');
     }
-  }
-
-  void _showSuccessDialog() {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: AppDesignSystem.successColor.withOpacity(0.1),
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                Icons.check_circle,
-                color: AppDesignSystem.successColor,
-                size: 48,
-              ),
-            ),
-            AppDesignSystem.verticalSpace(1.5),
-            Text(
-              'Cadastro Realizado!',
-              style: AppDesignSystem.h3Style.copyWith(
-                fontWeight: FontWeight.w700,
-                color: AppDesignSystem.successColor,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            AppDesignSystem.verticalSpace(1),
-            Text(
-              'Sua conta foi criada com sucesso. Agora você pode fazer login.',
-              style: AppDesignSystem.bodyStyle.copyWith(
-                color: AppDesignSystem.grayColor,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-        actions: [
-          AppDesignSystem.primaryButton(
-            text: 'Fazer Login',
-            onPressed: () {
-              Navigator.of(context).popUntil((route) => route.isFirst);
-            },
-            width: double.infinity,
-          ),
-        ],
-      ),
-    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      body: Stack(
+      backgroundColor: AppDesignSystem.backgroundColor,
+      appBar: AppDesignSystem.styledAppBar(
+        title: _userType == selection_screen.UserType.amCaregiver 
+            ? 'Cadastro Profissional' 
+            : 'Cadastro Paciente/Família',
+        context: context,
+        onBackPressed: () => Navigator.pop(context),
+      ),
+      body: Column(
         children: [
-          // Efeito blur similar ao login
-          Positioned(
-            left: -MediaQuery.of(context).size.width * 0.1,
-            top: -MediaQuery.of(context).size.height * 0.55,
-            child: Container(
-              width: MediaQuery.of(context).size.width * 1.2,
-              height: MediaQuery.of(context).size.height * 0.9,
-              decoration: BoxDecoration(
-                color: AppDesignSystem.primaryColor,
-                borderRadius: BorderRadius.circular(MediaQuery.of(context).size.width * 1.3),
-              ),
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 46.6, sigmaY: 46.6),
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: AppDesignSystem.primaryColor,
-                    borderRadius: BorderRadius.circular(MediaQuery.of(context).size.width * 1.3),
-                  ),
-                ),
-              ),
+          // Indicador de progresso
+          _buildProgressIndicator(),
+          
+          // Conteúdo do formulário
+          Expanded(
+            child: PageView(
+              controller: _pageController,
+              physics: const NeverScrollableScrollPhysics(),
+              children: _userType == selection_screen.UserType.amCaregiver
+                  ? [
+                      _buildStep1(),
+                      _buildStep2(),
+                      _buildStep3Professional(),
+                      _buildStep4Professional(),
+                    ]
+                  : [
+                      _buildStep1(),
+                      _buildStep2(),
+                      _buildStep3PatientHealth(),
+                      _buildStep4PatientAddress(),
+                    ],
             ),
           ),
           
-          SafeArea(
-            child: Column(
-              children: [
-                // Header
-                _buildHeader(),
-                
-                // Progress indicator
-                _buildProgressIndicator(),
-                
-                // Content
-                Expanded(
-                  child: PageView(
-                    controller: _pageController,
-                    physics: const NeverScrollableScrollPhysics(),
-                    children: [
-                      _buildStep1(), // Dados básicos
-                      _buildStep2(), // Dados pessoais
-                      _buildStep3(), // Endereço e termos
-                    ],
-                  ),
-                ),
-                
-                // Navigation buttons
-                _buildNavigationButtons(),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildHeader() {
-    return Container(
-      padding: const EdgeInsets.all(AppDesignSystem.spacing4),
-      child: Row(
-        children: [
-          IconButton(
-            onPressed: () => Navigator.pop(context),
-            icon: const Icon(Icons.arrow_back, color: Colors.white),
-          ),
-          AppDesignSystem.horizontalSpace(1),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Criar Conta',
-                style: AppDesignSystem.h2Style.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-              Text(
-                _userType == UserType.needCaregiver 
-                  ? 'Como Paciente/Família'
-                  : 'Como Cuidador',
-                style: AppDesignSystem.bodyStyle.copyWith(
-                  color: Colors.white.withOpacity(0.8),
-                ),
-              ),
-            ],
-          ),
+          // Botões de navegação
+          _buildNavigationButtons(),
         ],
       ),
     );
@@ -277,339 +397,398 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   Widget _buildProgressIndicator() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: AppDesignSystem.spacing4),
-      child: Row(
+      padding: const EdgeInsets.all(AppDesignSystem.space2XL),
+      child: Column(
         children: [
-          for (int i = 0; i < 3; i++) ...[
-            Expanded(
-              child: Container(
-                height: 4,
-                decoration: BoxDecoration(
-                  color: i <= _currentStep 
-                    ? AppDesignSystem.primaryColor
-                    : AppDesignSystem.lightGrayColor,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
+          // Título do passo atual
+          Text(
+            _getStepTitle(),
+            style: AppDesignSystem.h2Style,
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: AppDesignSystem.spaceMD),
+          
+          // Subtítulo
+          Text(
+            _getStepSubtitle(),
+            style: AppDesignSystem.bodyStyle.copyWith(
+              color: AppDesignSystem.textSecondaryColor,
             ),
-            if (i < 2) AppDesignSystem.horizontalSpace(0.5),
-          ],
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: AppDesignSystem.space2XL),
+          
+          // Indicador de progresso
+          Row(
+            children: List.generate(
+              4, // Agora ambos os tipos têm 4 etapas
+              (index) {
+                int totalSteps = 4;
+                return Expanded(
+                  child: Container(
+                    margin: EdgeInsets.only(
+                      right: index < totalSteps - 1 ? AppDesignSystem.spaceSM : 0,
+                    ),
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: index <= _currentStep
+                          ? AppDesignSystem.primaryColor
+                          : AppDesignSystem.borderColor,
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                );
+              }
+            ),
+          ),
         ],
       ),
     );
   }
 
+  String _getStepTitle() {
+    if (_userType == selection_screen.UserType.amCaregiver) {
+      switch (_currentStep) {
+        case 0:
+          return 'Informações Básicas';
+        case 1:
+          return 'Dados Pessoais e Profissionais';
+        case 2:
+          return 'Referências Profissionais';
+        case 3:
+          return 'Endereço e Finalização';
+        default:
+          return '';
+      }
+    } else {
+      switch (_currentStep) {
+        case 0:
+          return 'Informações Básicas';
+        case 1:
+          return 'Dados Pessoais';
+        case 2:
+          return 'Informações de Saúde e Necessidades';
+        case 3:
+          return 'Endereço e Finalização';
+        default:
+          return '';
+      }
+    }
+  }
+
+  String _getStepSubtitle() {
+    if (_userType == selection_screen.UserType.amCaregiver) {
+      switch (_currentStep) {
+        case 0:
+          return 'Vamos começar com suas informações de acesso';
+        case 1:
+          return 'Dados pessoais e sua formação profissional';
+        case 2:
+          return 'Referências profissionais (opcional)';
+        case 3:
+          return 'Por último, seu endereço e aceite dos termos';
+        default:
+          return '';
+      }
+    } else {
+      switch (_currentStep) {
+        case 0:
+          return 'Vamos começar com suas informações de acesso';
+        case 1:
+          return 'Agora precisamos de alguns dados pessoais';
+        case 2:
+          return 'Informações médicas e necessidades de cuidado';
+        case 3:
+          return 'Por último, seu endereço e aceite dos termos';
+        default:
+          return '';
+      }
+    }
+  }
+
   Widget _buildStep1() {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(AppDesignSystem.spacing4),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          AppDesignSystem.verticalSpace(2),
-          Text(
-            'Dados Básicos',
-            style: AppDesignSystem.h3Style.copyWith(
-              fontWeight: FontWeight.w700,
+      padding: const EdgeInsets.all(AppDesignSystem.space2XL),
+      child: AppDesignSystem.styledCard(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Tipo de usuário selecionado
+            _buildUserTypeBadge(),
+            
+            const SizedBox(height: AppDesignSystem.space2XL),
+            
+            // Nome completo
+            _buildFormField(
+              label: 'Nome Completo',
+              controller: _nameController,
+              hintText: 'Digite seu nome completo',
+              prefixIcon: Icons.person_outline,
+              keyboardType: TextInputType.name,
             ),
-          ),
-          AppDesignSystem.verticalSpace(0.5),
-          Text(
-            'Vamos começar com suas informações básicas',
-            style: AppDesignSystem.bodyStyle.copyWith(
-              color: AppDesignSystem.grayColor,
+            
+            const SizedBox(height: AppDesignSystem.spaceLG),
+            
+            // E-mail
+            _buildFormField(
+              label: 'E-mail',
+              controller: _emailController,
+              hintText: 'Digite seu e-mail',
+              prefixIcon: Icons.email_outlined,
+              keyboardType: TextInputType.emailAddress,
             ),
-          ),
-          AppDesignSystem.verticalSpace(2),
-          
-          AppDesignSystem.styledTextField(
-            controller: _nameController,
-            label: 'Nome Completo',
-            hint: 'Digite seu nome completo',
-            prefixIcon: Icons.person_outline,
-            textCapitalization: TextCapitalization.words,
-          ),
-          
-          AppDesignSystem.verticalSpace(1.5),
-          
-          AppDesignSystem.styledTextField(
-            controller: _emailController,
-            label: 'E-mail',
-            hint: 'Digite seu e-mail',
-            prefixIcon: Icons.email_outlined,
-            keyboardType: TextInputType.emailAddress,
-          ),
-          
-          AppDesignSystem.verticalSpace(1.5),
-          
-          AppDesignSystem.styledTextField(
-            controller: _passwordController,
-            label: 'Senha',
-            hint: 'Digite sua senha',
-            prefixIcon: Icons.lock_outline,
-            obscureText: _obscurePassword,
-            suffixIcon: IconButton(
-              icon: Icon(
-                _obscurePassword ? Icons.visibility : Icons.visibility_off,
-                color: AppDesignSystem.grayColor,
+            
+            const SizedBox(height: AppDesignSystem.spaceLG),
+            
+            // Senha
+            _buildFormField(
+              label: 'Senha',
+              controller: _passwordController,
+              hintText: 'Digite sua senha',
+              prefixIcon: Icons.lock_outline,
+              obscureText: _obscurePassword,
+              suffixIcon: IconButton(
+                icon: Icon(
+                  _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                  size: 20,
+                ),
+                onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
               ),
-              onPressed: () {
-                setState(() {
-                  _obscurePassword = !_obscurePassword;
-                });
-              },
             ),
-          ),
-          
-          AppDesignSystem.verticalSpace(1.5),
-          
-          AppDesignSystem.styledTextField(
-            controller: _confirmPasswordController,
-            label: 'Confirmar Senha',
-            hint: 'Digite sua senha novamente',
-            prefixIcon: Icons.lock_outline,
-            obscureText: _obscureConfirmPassword,
-            suffixIcon: IconButton(
-              icon: Icon(
-                _obscureConfirmPassword ? Icons.visibility : Icons.visibility_off,
-                color: AppDesignSystem.grayColor,
+            
+            const SizedBox(height: AppDesignSystem.spaceLG),
+            
+            // Confirmar senha
+            _buildFormField(
+              label: 'Confirmar Senha',
+              controller: _confirmPasswordController,
+              hintText: 'Confirme sua senha',
+              prefixIcon: Icons.lock_outline,
+              obscureText: _obscureConfirmPassword,
+              suffixIcon: IconButton(
+                icon: Icon(
+                  _obscureConfirmPassword ? Icons.visibility_off : Icons.visibility,
+                  size: 20,
+                ),
+                onPressed: () => setState(() => _obscureConfirmPassword = !_obscureConfirmPassword),
               ),
-              onPressed: () {
-                setState(() {
-                  _obscureConfirmPassword = !_obscureConfirmPassword;
-                });
-              },
             ),
-          ),
-          
-          AppDesignSystem.verticalSpace(1),
-          
-          if (_passwordController.text.isNotEmpty && _confirmPasswordController.text.isNotEmpty)
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: _passwordController.text == _confirmPasswordController.text
-                  ? AppDesignSystem.successColor.withOpacity(0.1)
-                  : AppDesignSystem.errorColor.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Row(
-                children: [
-                  Icon(
-                    _passwordController.text == _confirmPasswordController.text
-                      ? Icons.check_circle
-                      : Icons.error,
-                    color: _passwordController.text == _confirmPasswordController.text
-                      ? AppDesignSystem.successColor
-                      : AppDesignSystem.errorColor,
-                    size: 20,
-                  ),
-                  AppDesignSystem.horizontalSpace(0.5),
-                  Text(
-                    _passwordController.text == _confirmPasswordController.text
-                      ? 'Senhas coincidem'
-                      : 'Senhas não coincidem',
-                    style: AppDesignSystem.captionStyle.copyWith(
+            
+            // Validação de senha
+            if (_passwordController.text.isNotEmpty && _confirmPasswordController.text.isNotEmpty)
+              Padding(
+                padding: const EdgeInsets.only(top: AppDesignSystem.spaceSM),
+                child: Row(
+                  children: [
+                    Icon(
+                      _passwordController.text == _confirmPasswordController.text
+                          ? Icons.check_circle
+                          : Icons.error,
                       color: _passwordController.text == _confirmPasswordController.text
-                        ? AppDesignSystem.successColor
-                        : AppDesignSystem.errorColor,
+                          ? AppDesignSystem.successColor
+                          : AppDesignSystem.errorColor,
+                      size: 16,
                     ),
-                  ),
-                ],
+                    const SizedBox(width: AppDesignSystem.spaceXS),
+                    Text(
+                      _passwordController.text == _confirmPasswordController.text
+                          ? 'Senhas coincidem'
+                          : 'Senhas não coincidem',
+                      style: AppDesignSystem.captionStyle.copyWith(
+                        color: _passwordController.text == _confirmPasswordController.text
+                            ? AppDesignSystem.successColor
+                            : AppDesignSystem.errorColor,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
   Widget _buildStep2() {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(AppDesignSystem.spacing4),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          AppDesignSystem.verticalSpace(2),
-          Text(
-            'Dados Pessoais',
-            style: AppDesignSystem.h3Style.copyWith(
-              fontWeight: FontWeight.w700,
+      padding: const EdgeInsets.all(AppDesignSystem.space2XL),
+      child: AppDesignSystem.styledCard(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Telefone
+            _buildFormField(
+              label: 'Telefone',
+              controller: _phoneController,
+              hintText: '(00) 00000-0000',
+              prefixIcon: Icons.phone_outlined,
+              keyboardType: TextInputType.phone,
             ),
-          ),
-          AppDesignSystem.verticalSpace(0.5),
-          Text(
-            'Precisamos de mais algumas informações',
-            style: AppDesignSystem.bodyStyle.copyWith(
-              color: AppDesignSystem.grayColor,
+            
+            const SizedBox(height: AppDesignSystem.spaceLG),
+            
+            // CPF
+            _buildFormField(
+              label: 'CPF',
+              controller: _cpfController,
+              hintText: '000.000.000-00',
+              prefixIcon: Icons.badge_outlined,
+              keyboardType: TextInputType.number,
             ),
-          ),
-          AppDesignSystem.verticalSpace(2),
-          
-          AppDesignSystem.styledTextField(
-            controller: _phoneController,
-            label: 'Telefone',
-            hint: '(11) 99999-9999',
-            prefixIcon: Icons.phone_outlined,
-            keyboardType: TextInputType.phone,
-            inputFormatters: [
-              FilteringTextInputFormatter.digitsOnly,
-              _PhoneInputFormatter(),
-            ],
-          ),
-          
-          AppDesignSystem.verticalSpace(1.5),
-          
-          AppDesignSystem.styledTextField(
-            controller: _cpfController,
-            label: 'CPF',
-            hint: '000.000.000-00',
-            prefixIcon: Icons.badge_outlined,
-            keyboardType: TextInputType.number,
-            inputFormatters: [
-              FilteringTextInputFormatter.digitsOnly,
-              _CpfInputFormatter(),
-            ],
-          ),
-          
-          AppDesignSystem.verticalSpace(1.5),
-          
-          AppDesignSystem.styledTextField(
-            controller: _birthDateController,
-            label: 'Data de Nascimento',
-            hint: 'DD/MM/AAAA',
-            prefixIcon: Icons.calendar_today_outlined,
-            keyboardType: TextInputType.datetime,
-            inputFormatters: [
-              FilteringTextInputFormatter.digitsOnly,
-              _DateInputFormatter(),
-            ],
-          ),
-          
-          AppDesignSystem.verticalSpace(1.5),
-          
-          // Seleção de gênero
-          Text(
-            'Gênero',
-            style: AppDesignSystem.bodyStyle.copyWith(
-              fontWeight: FontWeight.w600,
-              color: AppDesignSystem.darkColor,
+            
+            const SizedBox(height: AppDesignSystem.spaceLG),
+            
+            // Data de nascimento
+            _buildFormField(
+              label: 'Data de Nascimento',
+              controller: _birthDateController,
+              hintText: 'DD/MM/AAAA',
+              prefixIcon: Icons.calendar_today_outlined,
+              keyboardType: TextInputType.datetime,
+              onTap: () => _selectDate(),
+              readOnly: true,
             ),
-          ),
-          AppDesignSystem.verticalSpace(0.5),
-          Row(
-            children: [
-              Expanded(child: _buildGenderOption('Feminino')),
-              AppDesignSystem.horizontalSpace(1),
-              Expanded(child: _buildGenderOption('Masculino')),
-              AppDesignSystem.horizontalSpace(1),
-              Expanded(child: _buildGenderOption('Outro')),
+            
+            const SizedBox(height: AppDesignSystem.spaceLG),
+            
+            // Gênero
+            _buildGenderSelector(),
+            
+            // Campos específicos para profissionais
+            if (_userType == selection_screen.UserType.amCaregiver) ...[
+              const SizedBox(height: AppDesignSystem.space2XL),
+              
+              // Título da seção profissional
+              Text(
+                'Informações Profissionais',
+                style: AppDesignSystem.h3Style.copyWith(
+                  color: AppDesignSystem.primaryColor,
+                ),
+              ),
+              
+              const SizedBox(height: AppDesignSystem.spaceLG),
+              
+              // Especialidade
+              _buildSpecialtySelector(),
+              
+              const SizedBox(height: AppDesignSystem.spaceLG),
+              
+              // Escolaridade
+              _buildEducationSelector(),
+              
+              const SizedBox(height: AppDesignSystem.spaceLG),
+              
+              // Anos de experiência
+              _buildExperienceYearsSelector(),
+              
+              const SizedBox(height: AppDesignSystem.spaceLG),
+              
+              // Áreas de cuidado
+              _buildCareAreasSelector(),
+              
+              const SizedBox(height: AppDesignSystem.spaceLG),
+              
+              // CREF (opcional)
+              _buildFormField(
+                label: 'CREF/Registro Profissional (Opcional)',
+                controller: _crefController,
+                hintText: 'Ex: CREF 123456-G/SP, COREN 123456',
+                prefixIcon: Icons.card_membership_outlined,
+                keyboardType: TextInputType.text,
+              ),
+              
+              const SizedBox(height: AppDesignSystem.spaceLG),
+              
+              // Experiência detalhada
+              _buildFormField(
+                label: 'Experiência Profissional Detalhada',
+                controller: _experienceController,
+                hintText: 'Descreva sua experiência na área, certificações, cursos...',
+                prefixIcon: Icons.work_outline,
+                keyboardType: TextInputType.multiline,
+                maxLines: 4,
+              ),
             ],
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildStep3() {
+  Widget _buildStep4PatientAddress() {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(AppDesignSystem.spacing4),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      padding: const EdgeInsets.all(AppDesignSystem.space2XL),
+      child: AppDesignSystem.styledCard(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Endereço
+            _buildFormField(
+              label: 'Endereço Completo',
+              controller: _addressController,
+              hintText: 'Rua, número, bairro',
+              prefixIcon: Icons.location_on_outlined,
+              keyboardType: TextInputType.streetAddress,
+            ),
+            
+            const SizedBox(height: AppDesignSystem.spaceLG),
+            
+            // Cidade
+            _buildFormField(
+              label: 'Cidade',
+              controller: _cityController,
+              hintText: 'Digite sua cidade',
+              prefixIcon: Icons.location_city_outlined,
+              keyboardType: TextInputType.text,
+            ),
+            
+            const SizedBox(height: AppDesignSystem.spaceLG),
+            
+            // Estado
+            _buildStateSelector(),
+            
+            const SizedBox(height: AppDesignSystem.space2XL),
+            
+            // Termos de uso
+            _buildTermsCheckbox(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildUserTypeBadge() {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppDesignSystem.spaceLG,
+        vertical: AppDesignSystem.spaceMD,
+      ),
+      decoration: BoxDecoration(
+        color: AppDesignSystem.primaryColor.withValues(alpha: 0.1),
+        borderRadius: BorderRadius.circular(AppDesignSystem.borderRadius),
+        border: Border.all(
+          color: AppDesignSystem.primaryColor,
+          width: 1,
+        ),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
         children: [
-          AppDesignSystem.verticalSpace(2),
-          Text(
-            'Endereço e Finalização',
-            style: AppDesignSystem.h3Style.copyWith(
-              fontWeight: FontWeight.w700,
-            ),
+          Icon(
+            _userType == selection_screen.UserType.needCaregiver
+                ? Icons.family_restroom
+                : Icons.medical_services,
+            color: AppDesignSystem.primaryColor,
+            size: 20,
           ),
-          AppDesignSystem.verticalSpace(0.5),
+          const SizedBox(width: AppDesignSystem.spaceSM),
           Text(
-            'Últimas informações para completar seu cadastro',
+            _userType == selection_screen.UserType.needCaregiver
+                ? 'Cadastro como Paciente/Família'
+                : 'Cadastro como Profissional',
             style: AppDesignSystem.bodyStyle.copyWith(
-              color: AppDesignSystem.grayColor,
-            ),
-          ),
-          AppDesignSystem.verticalSpace(2),
-          
-          AppDesignSystem.styledTextField(
-            controller: _addressController,
-            label: 'Endereço',
-            hint: 'Rua, número, bairro',
-            prefixIcon: Icons.location_on_outlined,
-            textCapitalization: TextCapitalization.words,
-          ),
-          
-          AppDesignSystem.verticalSpace(1.5),
-          
-          Row(
-            children: [
-              Expanded(
-                flex: 2,
-                child: AppDesignSystem.styledTextField(
-                  controller: _cityController,
-                  label: 'Cidade',
-                  hint: 'Digite sua cidade',
-                  prefixIcon: Icons.location_city_outlined,
-                  textCapitalization: TextCapitalization.words,
-                ),
-              ),
-              AppDesignSystem.horizontalSpace(1),
-              Expanded(
-                child: _buildStateDropdown(),
-              ),
-            ],
-          ),
-          
-          AppDesignSystem.verticalSpace(2),
-          
-          // Termos e condições
-          AppDesignSystem.styledCard(
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Checkbox(
-                  value: _acceptTerms,
-                  onChanged: (value) {
-                    setState(() {
-                      _acceptTerms = value ?? false;
-                    });
-                  },
-                  activeColor: AppDesignSystem.primaryColor,
-                ),
-                Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.only(top: 12),
-                    child: RichText(
-                      text: TextSpan(
-                        style: AppDesignSystem.captionStyle.copyWith(
-                          color: AppDesignSystem.darkColor,
-                        ),
-                        children: [
-                          const TextSpan(text: 'Aceito os '),
-                          TextSpan(
-                            text: 'Termos de Uso',
-                            style: AppDesignSystem.captionStyle.copyWith(
-                              color: AppDesignSystem.primaryColor,
-                              fontWeight: FontWeight.w600,
-                              decoration: TextDecoration.underline,
-                            ),
-                          ),
-                          const TextSpan(text: ' e '),
-                          TextSpan(
-                            text: 'Política de Privacidade',
-                            style: AppDesignSystem.captionStyle.copyWith(
-                              color: AppDesignSystem.primaryColor,
-                              fontWeight: FontWeight.w600,
-                              decoration: TextDecoration.underline,
-                            ),
-                          ),
-                          const TextSpan(text: ' do Kareu.'),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-              ],
+              color: AppDesignSystem.primaryColor,
+              fontWeight: FontWeight.w600,
             ),
           ),
         ],
@@ -617,76 +796,207 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 
-  Widget _buildGenderOption(String gender) {
-    final isSelected = _selectedGender == gender;
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          _selectedGender = gender;
-        });
-      },
-      child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 12),
-        decoration: BoxDecoration(
-          color: isSelected ? AppDesignSystem.primaryColor : AppDesignSystem.lightGrayColor,
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-            color: isSelected ? AppDesignSystem.primaryColor : AppDesignSystem.borderColor,
-          ),
-        ),
-        child: Center(
-          child: Text(
-            gender,
-            style: AppDesignSystem.bodyStyle.copyWith(
-              color: isSelected ? Colors.white : AppDesignSystem.darkColor,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ),
-      ),
+  Widget _buildFormField({
+    required String label,
+    required TextEditingController controller,
+    required String hintText,
+    required IconData prefixIcon,
+    TextInputType? keyboardType,
+    bool obscureText = false,
+    Widget? suffixIcon,
+    VoidCallback? onTap,
+    bool readOnly = false,
+    int maxLines = 1,
+  }) {
+    return AppDesignSystem.styledTextField(
+      label: label,
+      controller: controller,
+      hint: hintText,
+      prefixIcon: prefixIcon,
+      keyboardType: keyboardType,
+      obscureText: obscureText,
+      suffixIcon: suffixIcon,
+      onChanged: onTap != null ? (_) => onTap!() : null,
+      maxLines: maxLines,
     );
   }
 
-  Widget _buildStateDropdown() {
+  Widget _buildGenderSelector() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Gênero',
+          style: AppDesignSystem.captionStyle.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(height: AppDesignSystem.spaceXS),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: AppDesignSystem.spaceLG),
+          decoration: BoxDecoration(
+            color: AppDesignSystem.surfaceColor,
+            borderRadius: BorderRadius.circular(AppDesignSystem.borderRadius),
+            border: Border.all(color: AppDesignSystem.borderColor),
+          ),
+          child: DropdownButtonHideUnderline(
+            child: DropdownButton<String>(
+              value: _selectedGender,
+              isExpanded: true,
+              onChanged: (String? newValue) {
+                setState(() {
+                  _selectedGender = newValue ?? 'Feminino';
+                });
+              },
+              items: ['Feminino', 'Masculino', 'Outro', 'Prefiro não informar']
+                  .map<DropdownMenuItem<String>>((String value) {
+                return DropdownMenuItem<String>(
+                  value: value,
+                  child: Text(value),
+                );
+              }).toList(),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStateSelector() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
           'Estado',
-          style: AppDesignSystem.bodyStyle.copyWith(
+          style: AppDesignSystem.captionStyle.copyWith(
             fontWeight: FontWeight.w600,
-            color: AppDesignSystem.darkColor,
           ),
         ),
-        AppDesignSystem.verticalSpace(0.5),
+        const SizedBox(height: AppDesignSystem.spaceXS),
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 12),
+          padding: const EdgeInsets.symmetric(horizontal: AppDesignSystem.spaceLG),
           decoration: BoxDecoration(
             color: AppDesignSystem.surfaceColor,
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(AppDesignSystem.borderRadius),
             border: Border.all(color: AppDesignSystem.borderColor),
           ),
-          child: DropdownButton<String>(
-            value: _selectedState,
-            hint: Text(
-              'UF',
-              style: AppDesignSystem.bodyStyle.copyWith(
-                color: AppDesignSystem.grayColor,
-              ),
+          child: DropdownButtonHideUnderline(
+            child: DropdownButton<String>(
+              value: _selectedState,
+              isExpanded: true,
+              hint: const Text('Selecione seu estado'),
+              onChanged: (String? newValue) {
+                setState(() {
+                  _selectedState = newValue;
+                });
+              },
+              items: _brazilianStates.map<DropdownMenuItem<String>>((String value) {
+                return DropdownMenuItem<String>(
+                  value: value,
+                  child: Text(value),
+                );
+              }).toList(),
             ),
-            isExpanded: true,
-            underline: const SizedBox(),
-            items: _brazilianStates.map((state) {
-              return DropdownMenuItem(
-                value: state,
-                child: Text(state),
-              );
-            }).toList(),
-            onChanged: (value) {
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildSpecialtySelector() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Especialidade',
+          style: AppDesignSystem.captionStyle.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(height: AppDesignSystem.spaceXS),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: AppDesignSystem.spaceLG),
+          decoration: BoxDecoration(
+            color: AppDesignSystem.surfaceColor,
+            borderRadius: BorderRadius.circular(AppDesignSystem.borderRadius),
+            border: Border.all(color: AppDesignSystem.borderColor),
+          ),
+          child: DropdownButtonHideUnderline(
+            child: DropdownButton<String>(
+              value: _selectedSpecialty,
+              hint: Text(
+                'Selecione sua especialidade',
+                style: AppDesignSystem.bodyStyle.copyWith(
+                  color: AppDesignSystem.textSecondaryColor,
+                ),
+              ),
+              isExpanded: true,
+              onChanged: (String? newValue) {
+                setState(() {
+                  _selectedSpecialty = newValue;
+                });
+              },
+              items: _specialties.map<DropdownMenuItem<String>>((String value) {
+                return DropdownMenuItem<String>(
+                  value: value,
+                  child: Text(value),
+                );
+              }).toList(),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTermsCheckbox() {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Checkbox(
+          value: _acceptTerms,
+          onChanged: (bool? value) {
+            setState(() {
+              _acceptTerms = value ?? false;
+            });
+          },
+          activeColor: AppDesignSystem.primaryColor,
+        ),
+        Expanded(
+          child: GestureDetector(
+            onTap: () {
               setState(() {
-                _selectedState = value;
+                _acceptTerms = !_acceptTerms;
               });
             },
+            child: Padding(
+              padding: const EdgeInsets.only(top: 12),
+              child: RichText(
+                text: TextSpan(
+                  style: AppDesignSystem.bodyStyle.copyWith(
+                    color: AppDesignSystem.textSecondaryColor,
+                  ),
+                  children: [
+                    const TextSpan(text: 'Eu aceito os '),
+                    TextSpan(
+                      text: 'Termos de Uso',
+                      style: AppDesignSystem.bodyStyle.copyWith(
+                        color: AppDesignSystem.primaryColor,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const TextSpan(text: ' e a '),
+                    TextSpan(
+                      text: 'Política de Privacidade',
+                      style: AppDesignSystem.bodyStyle.copyWith(
+                        color: AppDesignSystem.primaryColor,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ),
         ),
       ],
@@ -695,103 +1005,730 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   Widget _buildNavigationButtons() {
     return Container(
-      padding: const EdgeInsets.all(AppDesignSystem.spacing4),
+      padding: const EdgeInsets.all(AppDesignSystem.space2XL),
       child: Row(
         children: [
-          if (_currentStep > 0) ...[
+          if (_currentStep > 0)
             Expanded(
               child: AppDesignSystem.secondaryButton(
                 text: 'Voltar',
                 onPressed: _previousStep,
               ),
             ),
-            AppDesignSystem.horizontalSpace(1),
-          ],
+          if (_currentStep > 0) const SizedBox(width: AppDesignSystem.spaceLG),
           Expanded(
             flex: _currentStep == 0 ? 1 : 1,
-            child: AppDesignSystem.primaryButton(
-              text: _currentStep == 2 ? 'Criar Conta' : 'Próximo',
-              onPressed: _validateCurrentStep() ? _nextStep : null,
+            child: Opacity(
+              opacity: _validateCurrentStep() ? 1.0 : 0.5,
+              child: AppDesignSystem.primaryButton(
+                text: _currentStep == 3 ? 'Criar Conta' : 'Próximo',
+                onPressed: () {
+                  if (_validateCurrentStep()) {
+                    if (_currentStep == 3) {
+                      _submitForm();
+                    } else {
+                      _nextStep();
+                    }
+                  }
+                },
+              ),
             ),
           ),
         ],
       ),
     );
   }
-}
 
-// Formatadores de input
-class _PhoneInputFormatter extends TextInputFormatter {
-  @override
-  TextEditingValue formatEditUpdate(TextEditingValue oldValue, TextEditingValue newValue) {
-    final text = newValue.text.replaceAll(RegExp(r'[^0-9]'), '');
-    if (text.length > 11) return oldValue;
-    
-    String formatted = '';
-    if (text.length >= 1) {
-      formatted = '(${text.substring(0, text.length >= 2 ? 2 : text.length)}';
-      if (text.length >= 3) {
-        formatted += ') ${text.substring(2, text.length >= 7 ? 7 : text.length)}';
-        if (text.length >= 8) {
-          formatted += '-${text.substring(7)}';
-        }
-      }
-    }
-    
-    return TextEditingValue(
-      text: formatted,
-      selection: TextSelection.collapsed(offset: formatted.length),
+  Widget _buildStep3PatientHealth() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(AppDesignSystem.space2XL),
+      child: AppDesignSystem.styledCard(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Título da seção
+            Text(
+              'Informações de Saúde e Necessidades',
+              style: AppDesignSystem.h3Style.copyWith(
+                color: AppDesignSystem.primaryColor,
+              ),
+            ),
+            
+            const SizedBox(height: AppDesignSystem.spaceLG),
+            
+            // Nível de mobilidade
+            _buildMobilityLevelSelector(),
+            
+            const SizedBox(height: AppDesignSystem.spaceLG),
+            
+            // Tipo de cuidado necessário
+            _buildCareTypeSelector(),
+            
+            const SizedBox(height: AppDesignSystem.spaceLG),
+            
+            // Necessidades de cuidado
+            _buildPatientNeedsSelector(),
+            
+            const SizedBox(height: AppDesignSystem.spaceLG),
+            
+            // Traços de personalidade
+            _buildPersonalityTraitsSelector(),
+            
+            const SizedBox(height: AppDesignSystem.spaceLG),
+            
+            // Condições médicas
+            _buildFormField(
+              label: 'Condições Médicas/Comorbidades',
+              controller: _medicalConditionsController,
+              hintText: 'Ex: Diabetes, Hipertensão, Alzheimer...',
+              prefixIcon: Icons.medical_information_outlined,
+              keyboardType: TextInputType.multiline,
+              maxLines: 3,
+            ),
+            
+            const SizedBox(height: AppDesignSystem.spaceLG),
+            
+            // Medicações
+            _buildFormField(
+              label: 'Medicações em Uso',
+              controller: _medicationsController,
+              hintText: 'Liste os medicamentos e horários...',
+              prefixIcon: Icons.medication_outlined,
+              keyboardType: TextInputType.multiline,
+              maxLines: 3,
+            ),
+            
+            const SizedBox(height: AppDesignSystem.spaceLG),
+            
+            // Alergias
+            _buildFormField(
+              label: 'Alergias',
+              controller: _allergiesController,
+              hintText: 'Medicamentos, alimentos, outros...',
+              prefixIcon: Icons.warning_outlined,
+              keyboardType: TextInputType.multiline,
+              maxLines: 2,
+            ),
+            
+            const SizedBox(height: AppDesignSystem.spaceLG),
+            
+            // Necessidades especiais
+            _buildFormField(
+              label: 'Necessidades Especiais',
+              controller: _specialNeedsController,
+              hintText: 'Equipamentos, cuidados específicos...',
+              prefixIcon: Icons.accessibility_new_outlined,
+              keyboardType: TextInputType.multiline,
+              maxLines: 3,
+            ),
+            
+            const SizedBox(height: AppDesignSystem.space2XL),
+            
+            // Contato de emergência
+            Text(
+              'Contato de Emergência',
+              style: AppDesignSystem.h3Style.copyWith(
+                color: AppDesignSystem.primaryColor,
+              ),
+            ),
+            
+            const SizedBox(height: AppDesignSystem.spaceLG),
+            
+            // Nome do contato de emergência
+            _buildFormField(
+              label: 'Nome do Contato',
+              controller: _emergencyContactController,
+              hintText: 'Nome completo',
+              prefixIcon: Icons.contact_emergency_outlined,
+              keyboardType: TextInputType.name,
+            ),
+            
+            const SizedBox(height: AppDesignSystem.spaceLG),
+            
+            // Telefone do contato de emergência
+            _buildFormField(
+              label: 'Telefone do Contato',
+              controller: _emergencyPhoneController,
+              hintText: '(00) 00000-0000',
+              prefixIcon: Icons.phone_outlined,
+              keyboardType: TextInputType.phone,
+            ),
+          ],
+        ),
+      ),
     );
   }
-}
 
-class _CpfInputFormatter extends TextInputFormatter {
-  @override
-  TextEditingValue formatEditUpdate(TextEditingValue oldValue, TextEditingValue newValue) {
-    final text = newValue.text.replaceAll(RegExp(r'[^0-9]'), '');
-    if (text.length > 11) return oldValue;
-    
-    String formatted = '';
-    if (text.length >= 1) {
-      formatted = text.substring(0, text.length >= 3 ? 3 : text.length);
-      if (text.length >= 4) {
-        formatted += '.${text.substring(3, text.length >= 6 ? 6 : text.length)}';
-        if (text.length >= 7) {
-          formatted += '.${text.substring(6, text.length >= 9 ? 9 : text.length)}';
-          if (text.length >= 10) {
-            formatted += '-${text.substring(9)}';
-          }
-        }
-      }
-    }
-    
-    return TextEditingValue(
-      text: formatted,
-      selection: TextSelection.collapsed(offset: formatted.length),
+  Widget _buildStep3Professional() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(AppDesignSystem.space2XL),
+      child: AppDesignSystem.styledCard(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Título da seção
+            Text(
+              'Referências Profissionais',
+              style: AppDesignSystem.h3Style.copyWith(
+                color: AppDesignSystem.primaryColor,
+              ),
+            ),
+            
+            const SizedBox(height: AppDesignSystem.spaceMD),
+            
+            Text(
+              'Forneça referências profissionais para validar sua experiência (opcional)',
+              style: AppDesignSystem.bodyStyle.copyWith(
+                color: AppDesignSystem.textSecondaryColor,
+              ),
+            ),
+            
+            const SizedBox(height: AppDesignSystem.space2XL),
+            
+            // Nome da referência
+            _buildFormField(
+              label: 'Nome da Referência',
+              controller: _referenceNameController,
+              hintText: 'Ex: Dr. João Silva',
+              prefixIcon: Icons.person_outline,
+              keyboardType: TextInputType.name,
+            ),
+            
+            const SizedBox(height: AppDesignSystem.spaceLG),
+            
+            // Telefone da referência
+            _buildFormField(
+              label: 'Telefone da Referência',
+              controller: _referencePhoneController,
+              hintText: '(00) 00000-0000',
+              prefixIcon: Icons.phone_outlined,
+              keyboardType: TextInputType.phone,
+            ),
+            
+            const SizedBox(height: AppDesignSystem.space2XL),
+            
+            // Nota informativa
+            Container(
+              padding: const EdgeInsets.all(AppDesignSystem.spaceLG),
+              decoration: BoxDecoration(
+                color: AppDesignSystem.primaryColor.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(AppDesignSystem.borderRadius),
+                border: Border.all(
+                  color: AppDesignSystem.primaryColor.withOpacity(0.3),
+                ),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    Icons.info_outline,
+                    color: AppDesignSystem.primaryColor,
+                    size: 20,
+                  ),
+                  const SizedBox(width: AppDesignSystem.spaceMD),
+                  Expanded(
+                    child: Text(
+                      'As referências são opcionais, mas ajudam a validar sua experiência profissional.',
+                      style: AppDesignSystem.captionStyle.copyWith(
+                        color: AppDesignSystem.primaryColor,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
-}
 
-class _DateInputFormatter extends TextInputFormatter {
-  @override
-  TextEditingValue formatEditUpdate(TextEditingValue oldValue, TextEditingValue newValue) {
-    final text = newValue.text.replaceAll(RegExp(r'[^0-9]'), '');
-    if (text.length > 8) return oldValue;
-    
-    String formatted = '';
-    if (text.length >= 1) {
-      formatted = text.substring(0, text.length >= 2 ? 2 : text.length);
-      if (text.length >= 3) {
-        formatted += '/${text.substring(2, text.length >= 4 ? 4 : text.length)}';
-        if (text.length >= 5) {
-          formatted += '/${text.substring(4)}';
-        }
-      }
-    }
-    
-    return TextEditingValue(
-      text: formatted,
-      selection: TextSelection.collapsed(offset: formatted.length),
+  Widget _buildStep4Professional() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(AppDesignSystem.space2XL),
+      child: AppDesignSystem.styledCard(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Endereço
+            _buildFormField(
+              label: 'Endereço Completo',
+              controller: _addressController,
+              hintText: 'Rua, número, bairro',
+              prefixIcon: Icons.location_on_outlined,
+              keyboardType: TextInputType.streetAddress,
+            ),
+            
+            const SizedBox(height: AppDesignSystem.spaceLG),
+            
+            // Cidade
+            _buildFormField(
+              label: 'Cidade',
+              controller: _cityController,
+              hintText: 'Digite sua cidade',
+              prefixIcon: Icons.location_city_outlined,
+              keyboardType: TextInputType.text,
+            ),
+            
+            const SizedBox(height: AppDesignSystem.spaceLG),
+            
+            // Estado
+            _buildStateSelector(),
+            
+            const SizedBox(height: AppDesignSystem.space2XL),
+            
+            // Termos de uso
+            _buildTermsCheckbox(),
+          ],
+        ),
+      ),
     );
+  }
+
+  Widget _buildEducationSelector() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Escolaridade',
+          style: AppDesignSystem.captionStyle.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(height: AppDesignSystem.spaceXS),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: AppDesignSystem.spaceLG),
+          decoration: BoxDecoration(
+            color: AppDesignSystem.surfaceColor,
+            borderRadius: BorderRadius.circular(AppDesignSystem.borderRadius),
+            border: Border.all(color: AppDesignSystem.borderColor),
+          ),
+          child: DropdownButtonHideUnderline(
+            child: DropdownButton<String>(
+              value: _selectedEducation,
+              hint: Text(
+                'Selecione sua escolaridade',
+                style: AppDesignSystem.bodyStyle.copyWith(
+                  color: AppDesignSystem.textSecondaryColor,
+                ),
+              ),
+              isExpanded: true,
+              onChanged: (String? newValue) {
+                setState(() {
+                  _selectedEducation = newValue;
+                });
+              },
+              items: _educationOptions.map<DropdownMenuItem<String>>((String value) {
+                return DropdownMenuItem<String>(
+                  value: value,
+                  child: Text(value),
+                );
+              }).toList(),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildExperienceYearsSelector() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Anos de Experiência',
+          style: AppDesignSystem.captionStyle.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(height: AppDesignSystem.spaceXS),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: AppDesignSystem.spaceLG),
+          decoration: BoxDecoration(
+            color: AppDesignSystem.surfaceColor,
+            borderRadius: BorderRadius.circular(AppDesignSystem.borderRadius),
+            border: Border.all(color: AppDesignSystem.borderColor),
+          ),
+          child: DropdownButtonHideUnderline(
+            child: DropdownButton<String>(
+              value: _selectedExperienceYears,
+              hint: Text(
+                'Selecione sua experiência',
+                style: AppDesignSystem.bodyStyle.copyWith(
+                  color: AppDesignSystem.textSecondaryColor,
+                ),
+              ),
+              isExpanded: true,
+              onChanged: (String? newValue) {
+                setState(() {
+                  _selectedExperienceYears = newValue;
+                });
+              },
+              items: _experienceYearsOptions.map<DropdownMenuItem<String>>((String value) {
+                return DropdownMenuItem<String>(
+                  value: value,
+                  child: Text(value),
+                );
+              }).toList(),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCareAreasSelector() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Áreas de Cuidado',
+          style: AppDesignSystem.captionStyle.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(height: AppDesignSystem.spaceMD),
+        Text(
+          'Selecione as áreas em que você tem experiência:',
+          style: AppDesignSystem.bodySmallStyle.copyWith(
+            color: AppDesignSystem.textSecondaryColor,
+          ),
+        ),
+        const SizedBox(height: AppDesignSystem.spaceLG),
+        Wrap(
+          spacing: AppDesignSystem.spaceMD,
+          runSpacing: AppDesignSystem.spaceMD,
+          children: _careAreas.map((area) {
+            final isSelected = _selectedCareAreas.contains(area['id']);
+            return GestureDetector(
+              onTap: () {
+                setState(() {
+                  if (isSelected) {
+                    _selectedCareAreas.remove(area['id']);
+                  } else {
+                    _selectedCareAreas.add(area['id']);
+                  }
+                });
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppDesignSystem.spaceLG,
+                  vertical: AppDesignSystem.spaceMD,
+                ),
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? AppDesignSystem.primaryColor.withOpacity(0.1)
+                      : AppDesignSystem.surfaceColor,
+                  borderRadius: BorderRadius.circular(AppDesignSystem.borderRadius),
+                  border: Border.all(
+                    color: isSelected
+                        ? AppDesignSystem.primaryColor
+                        : AppDesignSystem.borderColor,
+                    width: 2,
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      area['icon'],
+                      color: isSelected
+                          ? AppDesignSystem.primaryColor
+                          : AppDesignSystem.textSecondaryColor,
+                      size: 20,
+                    ),
+                    const SizedBox(width: AppDesignSystem.spaceSM),
+                    Text(
+                      area['title'],
+                      style: AppDesignSystem.bodySmallStyle.copyWith(
+                        color: isSelected
+                            ? AppDesignSystem.primaryColor
+                            : AppDesignSystem.textPrimaryColor,
+                        fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }).toList(),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMobilityLevelSelector() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Nível de Mobilidade',
+          style: AppDesignSystem.captionStyle.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(height: AppDesignSystem.spaceXS),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: AppDesignSystem.spaceLG),
+          decoration: BoxDecoration(
+            color: AppDesignSystem.surfaceColor,
+            borderRadius: BorderRadius.circular(AppDesignSystem.borderRadius),
+            border: Border.all(color: AppDesignSystem.borderColor),
+          ),
+          child: DropdownButtonHideUnderline(
+            child: DropdownButton<String>(
+              value: _selectedMobilityLevel,
+              hint: Text(
+                'Selecione o nível de mobilidade',
+                style: AppDesignSystem.bodyStyle.copyWith(
+                  color: AppDesignSystem.textSecondaryColor,
+                ),
+              ),
+              isExpanded: true,
+              onChanged: (String? newValue) {
+                setState(() {
+                  _selectedMobilityLevel = newValue;
+                });
+              },
+              items: _mobilityLevels.map<DropdownMenuItem<String>>((String value) {
+                return DropdownMenuItem<String>(
+                  value: value,
+                  child: Text(value),
+                );
+              }).toList(),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCareTypeSelector() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Tipo de Cuidado Necessário',
+          style: AppDesignSystem.captionStyle.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(height: AppDesignSystem.spaceXS),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: AppDesignSystem.spaceLG),
+          decoration: BoxDecoration(
+            color: AppDesignSystem.surfaceColor,
+            borderRadius: BorderRadius.circular(AppDesignSystem.borderRadius),
+            border: Border.all(color: AppDesignSystem.borderColor),
+          ),
+          child: DropdownButtonHideUnderline(
+            child: DropdownButton<String>(
+              value: _selectedCareType,
+              hint: Text(
+                'Selecione o tipo de cuidado',
+                style: AppDesignSystem.bodyStyle.copyWith(
+                  color: AppDesignSystem.textSecondaryColor,
+                ),
+              ),
+              isExpanded: true,
+              onChanged: (String? newValue) {
+                setState(() {
+                  _selectedCareType = newValue;
+                });
+              },
+              items: _careTypes.map<DropdownMenuItem<String>>((String value) {
+                return DropdownMenuItem<String>(
+                  value: value,
+                  child: Text(value),
+                );
+              }).toList(),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPatientNeedsSelector() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Necessidades de Cuidado',
+          style: AppDesignSystem.captionStyle.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(height: AppDesignSystem.spaceMD),
+        Text(
+          'Selecione as necessidades de cuidado:',
+          style: AppDesignSystem.bodySmallStyle.copyWith(
+            color: AppDesignSystem.textSecondaryColor,
+          ),
+        ),
+        const SizedBox(height: AppDesignSystem.spaceLG),
+        Wrap(
+          spacing: AppDesignSystem.spaceMD,
+          runSpacing: AppDesignSystem.spaceMD,
+          children: _patientNeeds.map((need) {
+            final isSelected = _selectedPatientNeeds.contains(need['id']);
+            return GestureDetector(
+              onTap: () {
+                setState(() {
+                  if (isSelected) {
+                    _selectedPatientNeeds.remove(need['id']);
+                  } else {
+                    _selectedPatientNeeds.add(need['id']);
+                  }
+                });
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppDesignSystem.spaceLG,
+                  vertical: AppDesignSystem.spaceMD,
+                ),
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? AppDesignSystem.primaryColor.withOpacity(0.1)
+                      : AppDesignSystem.surfaceColor,
+                  borderRadius: BorderRadius.circular(AppDesignSystem.borderRadius),
+                  border: Border.all(
+                    color: isSelected
+                        ? AppDesignSystem.primaryColor
+                        : AppDesignSystem.borderColor,
+                    width: 2,
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      need['icon'],
+                      color: isSelected
+                          ? AppDesignSystem.primaryColor
+                          : AppDesignSystem.textSecondaryColor,
+                      size: 20,
+                    ),
+                    const SizedBox(width: AppDesignSystem.spaceSM),
+                    Text(
+                      need['title'],
+                      style: AppDesignSystem.bodySmallStyle.copyWith(
+                        color: isSelected
+                            ? AppDesignSystem.primaryColor
+                            : AppDesignSystem.textPrimaryColor,
+                        fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }).toList(),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPersonalityTraitsSelector() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Características de Personalidade',
+          style: AppDesignSystem.captionStyle.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(height: AppDesignSystem.spaceMD),
+        Text(
+          'Selecione as características que descrevem a personalidade:',
+          style: AppDesignSystem.bodySmallStyle.copyWith(
+            color: AppDesignSystem.textSecondaryColor,
+          ),
+        ),
+        const SizedBox(height: AppDesignSystem.spaceLG),
+        Wrap(
+          spacing: AppDesignSystem.spaceMD,
+          runSpacing: AppDesignSystem.spaceMD,
+          children: _personalityTraits.map((trait) {
+            final isSelected = _selectedPersonalityTraits.contains(trait['id']);
+            return GestureDetector(
+              onTap: () {
+                setState(() {
+                  if (isSelected) {
+                    _selectedPersonalityTraits.remove(trait['id']);
+                  } else {
+                    _selectedPersonalityTraits.add(trait['id']);
+                  }
+                });
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppDesignSystem.spaceLG,
+                  vertical: AppDesignSystem.spaceMD,
+                ),
+                decoration: BoxDecoration(
+                  color: isSelected
+                      ? AppDesignSystem.accentColor.withOpacity(0.1)
+                      : AppDesignSystem.surfaceColor,
+                  borderRadius: BorderRadius.circular(AppDesignSystem.borderRadius),
+                  border: Border.all(
+                    color: isSelected
+                        ? AppDesignSystem.accentColor
+                        : AppDesignSystem.borderColor,
+                    width: 2,
+                  ),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      trait['icon'],
+                      color: isSelected
+                          ? AppDesignSystem.accentColor
+                          : AppDesignSystem.textSecondaryColor,
+                      size: 20,
+                    ),
+                    const SizedBox(width: AppDesignSystem.spaceSM),
+                    Text(
+                      trait['title'],
+                      style: AppDesignSystem.bodySmallStyle.copyWith(
+                        color: isSelected
+                            ? AppDesignSystem.accentColor
+                            : AppDesignSystem.textPrimaryColor,
+                        fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }).toList(),
+        ),
+      ],
+    );
+  }
+
+  Future<void> _selectDate() async {
+    final DateTime? picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now().subtract(const Duration(days: 6570)), // 18 anos atrás
+      firstDate: DateTime(1900),
+      lastDate: DateTime.now(),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.light(
+              primary: AppDesignSystem.primaryColor,
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+    if (picked != null) {
+      setState(() {
+        _birthDateController.text = '${picked.day.toString().padLeft(2, '0')}/${picked.month.toString().padLeft(2, '0')}/${picked.year}';
+      });
+    }
   }
 }
