@@ -45,8 +45,83 @@ class AppDesignSystem {
   
   // Aliases de spacing para manter compatibilidade
   static const double spacing2 = spaceSM;    // 8px
-  static const double spacing3 = spaceMD;    // 12px  
+  static const double spacing3 = spaceMD;    // 12px
   static const double spacing4 = spaceLG;    // 16px
+
+  // ============================================================================
+  // RESPONSIVIDADE - Breakpoints e adaptações
+  // ============================================================================
+
+  /// Breakpoints para diferentes tamanhos de tela
+  static const double breakpointMobile = 480;
+  static const double breakpointTablet = 768;
+  static const double breakpointDesktop = 1024;
+  static const double breakpointLarge = 1440;
+
+  /// Verifica se está em modo mobile
+  static bool isMobile(BuildContext context) =>
+      MediaQuery.of(context).size.width < breakpointTablet;
+
+  /// Verifica se está em modo tablet
+  static bool isTablet(BuildContext context) =>
+      MediaQuery.of(context).size.width >= breakpointTablet &&
+      MediaQuery.of(context).size.width < breakpointDesktop;
+
+  /// Verifica se está em modo desktop
+  static bool isDesktop(BuildContext context) =>
+      MediaQuery.of(context).size.width >= breakpointDesktop;
+
+  /// Retorna espaçamento responsivo baseado no tamanho da tela
+  static double responsiveSpacing(BuildContext context, double mobile, double tablet, double desktop) {
+    if (isDesktop(context)) return desktop;
+    if (isTablet(context)) return tablet;
+    return mobile;
+  }
+
+  /// Retorna tamanho de fonte responsivo
+  static double responsiveFontSize(BuildContext context, double mobile, double tablet, double desktop) {
+    if (isDesktop(context)) return desktop;
+    if (isTablet(context)) return tablet;
+    return mobile;
+  }
+
+  /// Padding responsivo para telas
+  static EdgeInsets responsivePadding(BuildContext context) {
+    final width = MediaQuery.of(context).size.width;
+    if (width >= breakpointLarge) {
+      return const EdgeInsets.symmetric(horizontal: space6XL, vertical: space2XL);
+    } else if (width >= breakpointDesktop) {
+      return const EdgeInsets.symmetric(horizontal: space4XL, vertical: spaceLG);
+    } else if (width >= breakpointTablet) {
+      return const EdgeInsets.symmetric(horizontal: space2XL, vertical: spaceLG);
+    } else {
+      return const EdgeInsets.symmetric(horizontal: spaceLG, vertical: spaceMD);
+    }
+  }
+
+  /// Widget wrapper para responsividade automática
+  static Widget responsiveWrapper({
+    required BuildContext context,
+    required Widget child,
+    double? maxWidth,
+  }) {
+    return Center(
+      child: ConstrainedBox(
+        constraints: BoxConstraints(
+          maxWidth: maxWidth ?? (isDesktop(context) ? 1200 : double.infinity),
+        ),
+        child: Padding(
+          padding: responsivePadding(context),
+          child: child,
+        ),
+      ),
+    );
+  }
+
+  /// Altura da AppBar responsiva
+  static double responsiveAppBarHeight(BuildContext context) {
+    return isMobile(context) ? kToolbarHeight : kToolbarHeight + 8;
+  }
   
   // ============================================================================
   // ESTILOS DE TEXTO PRÉ-DEFINIDOS

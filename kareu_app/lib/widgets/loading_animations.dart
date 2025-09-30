@@ -520,3 +520,345 @@ class _LoadingButtonState extends State<LoadingButton>
     );
   }
 }
+
+/// Estado vazio elegante com ilustração e ação
+class EmptyState extends StatelessWidget {
+  final String title;
+  final String message;
+  final String? actionText;
+  final VoidCallback? onActionPressed;
+  final IconData? icon;
+
+  const EmptyState({
+    super.key,
+    required this.title,
+    required this.message,
+    this.actionText,
+    this.onActionPressed,
+    this.icon,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              icon ?? Icons.search_off_rounded,
+              size: 80,
+              color: AppDesignSystem.textSecondaryColor.withOpacity(0.5),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              title,
+              style: AppDesignSystem.h3Style.copyWith(
+                color: AppDesignSystem.textPrimaryColor,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 12),
+            Text(
+              message,
+              style: AppDesignSystem.bodyStyle.copyWith(
+                color: AppDesignSystem.textSecondaryColor,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            if (actionText != null && onActionPressed != null) ...[
+              const SizedBox(height: 24),
+              ElevatedButton.icon(
+                onPressed: onActionPressed,
+                icon: const Icon(Icons.add),
+                label: Text(actionText!),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppDesignSystem.primaryColor,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Indicador de carregamento com contexto
+class LoadingState extends StatelessWidget {
+  final String? message;
+  final double size;
+
+  const LoadingState({
+    super.key,
+    this.message,
+    this.size = 40,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          SizedBox(
+            width: size,
+            height: size,
+            child: const CircularProgressIndicator(
+              strokeWidth: 3,
+              valueColor: AlwaysStoppedAnimation<Color>(AppDesignSystem.primaryColor),
+            ),
+          ),
+          if (message != null) ...[
+            const SizedBox(height: 16),
+            Text(
+              message!,
+              style: AppDesignSystem.bodyStyle.copyWith(
+                color: AppDesignSystem.textSecondaryColor,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+/// Estado de erro com opção de retry
+class ErrorState extends StatelessWidget {
+  final String title;
+  final String message;
+  final String? retryText;
+  final VoidCallback? onRetry;
+
+  const ErrorState({
+    super.key,
+    required this.title,
+    required this.message,
+    this.retryText,
+    this.onRetry,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.error_outline_rounded,
+              size: 80,
+              color: AppDesignSystem.errorColor.withOpacity(0.7),
+            ),
+            const SizedBox(height: 24),
+            Text(
+              title,
+              style: AppDesignSystem.h3Style.copyWith(
+                color: AppDesignSystem.textPrimaryColor,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 12),
+            Text(
+              message,
+              style: AppDesignSystem.bodyStyle.copyWith(
+                color: AppDesignSystem.textSecondaryColor,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            if (onRetry != null) ...[
+              const SizedBox(height: 24),
+              OutlinedButton.icon(
+                onPressed: onRetry,
+                icon: const Icon(Icons.refresh),
+                label: Text(retryText ?? 'Tentar novamente'),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppDesignSystem.primaryColor,
+                  side: const BorderSide(color: AppDesignSystem.primaryColor),
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Botão com feedback tátil e animações
+class TactileButton extends StatefulWidget {
+  final String text;
+  final VoidCallback? onPressed;
+  final bool isLoading;
+  final bool isSuccess;
+  final IconData? icon;
+  final double width;
+  final double height;
+  final bool enableHaptic;
+
+  const TactileButton({
+    super.key,
+    required this.text,
+    this.onPressed,
+    this.isLoading = false,
+    this.isSuccess = false,
+    this.icon,
+    this.width = double.infinity,
+    this.height = 56.0,
+    this.enableHaptic = true,
+  });
+
+  @override
+  State<TactileButton> createState() => _TactileButtonState();
+}
+
+class _TactileButtonState extends State<TactileButton>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _scaleAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 150),
+      vsync: this,
+    );
+
+    _scaleAnimation = Tween<double>(
+      begin: 1.0,
+      end: 0.95,
+    ).animate(CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeInOut,
+    ));
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _onTapDown(TapDownDetails details) {
+    if (!widget.isLoading && !widget.isSuccess && widget.onPressed != null) {
+      _controller.forward();
+    }
+  }
+
+  void _onTapUp(TapUpDetails details) {
+    _controller.reverse();
+  }
+
+  void _onTapCancel() {
+    _controller.reverse();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: widget.isLoading || widget.isSuccess ? null : widget.onPressed,
+      onTapDown: _onTapDown,
+      onTapUp: _onTapUp,
+      onTapCancel: _onTapCancel,
+      child: AnimatedBuilder(
+        animation: _controller,
+        builder: (context, child) {
+          return Transform.scale(
+            scale: _scaleAnimation.value,
+            child: Container(
+              width: widget.width,
+              height: widget.height,
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: _getButtonColors(),
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: _getButtonShadow(),
+              ),
+              child: Center(
+                child: _buildButtonContent(),
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  List<Color> _getButtonColors() {
+    if (widget.isSuccess) {
+      return [AppDesignSystem.successColor, AppDesignSystem.successColor.withOpacity(0.8)];
+    }
+    if (widget.isLoading) {
+      return [Colors.grey[400]!, Colors.grey[300]!];
+    }
+    return [AppDesignSystem.primaryColor, AppDesignSystem.primaryColor.withOpacity(0.8)];
+  }
+
+  List<BoxShadow>? _getButtonShadow() {
+    if (widget.isLoading || widget.isSuccess) return null;
+
+    return [
+      BoxShadow(
+        color: AppDesignSystem.primaryColor.withOpacity(0.3),
+        blurRadius: 12,
+        offset: const Offset(0, 4),
+      ),
+    ];
+  }
+
+  Widget _buildButtonContent() {
+    if (widget.isLoading) {
+      return const SizedBox(
+        width: 20,
+        height: 20,
+        child: CircularProgressIndicator(
+          color: Colors.white,
+          strokeWidth: 2,
+        ),
+      );
+    }
+
+    if (widget.isSuccess) {
+      return Icon(
+        Icons.check,
+        color: Colors.white,
+        size: 24,
+      );
+    }
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        if (widget.icon != null) ...[
+          Icon(widget.icon, color: Colors.white, size: 20),
+          const SizedBox(width: 8),
+        ],
+        Text(
+          widget.text,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ],
+    );
+  }
+}
