@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:provider/provider.dart';
+import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'screens/login_screen.dart';
 import 'screens/user_type_selection_screen.dart';
 import 'screens/register_screen.dart';
@@ -13,7 +15,6 @@ import 'screens/patients_list_screen.dart';
 import 'screens/account_settings_screen.dart';
 import 'screens/caregiver_profile_screen.dart';
 import 'screens/family_address_screen.dart';
-
 
 import 'screens/add_family_member_screen.dart';
 import 'screens/family_member_form_screen.dart';
@@ -32,10 +33,27 @@ import 'screens/hire_caregiver_screen.dart';
 import 'screens/patient_account_screen.dart';
 import 'screens/professional_account_screen.dart';
 import 'screens/patient_schedule_screen.dart';
+import 'screens/admin_dashboard_screen.dart';
+import 'screens/improved_hire_screen.dart';
+import 'screens/real_payment_screen.dart';
+import 'screens/kareu_financial_dashboard.dart';
+import 'screens/animations_demo_screen.dart';
+
+// Providers
+import 'providers/app_state_provider.dart';
 
 
-void main() {
-  runApp(const KareuApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => AppStateProvider()),
+      ],
+      child: const KareuApp(),
+    ),
+  );
 }
 
 class KareuApp extends StatelessWidget {
@@ -65,7 +83,13 @@ class KareuApp extends StatelessWidget {
           secondary: _KareuColors.accentYellow,
           surface: Colors.white,
         ),
-        fontFamily: 'Roboto',
+        fontFamily: 'Poppins',
+        pageTransitionsTheme: const PageTransitionsTheme(
+          builders: {
+            TargetPlatform.android: FadeUpwardsPageTransitionsBuilder(),
+            TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+          },
+        ),
         inputDecorationTheme: InputDecorationTheme(
           filled: true,
           fillColor: const Color(0xFFF6F6F6),
@@ -78,6 +102,22 @@ class KareuApp extends StatelessWidget {
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
             borderSide: const BorderSide(color: _KareuColors.primaryBlue, width: 1.6),
+          ),
+        ),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            elevation: 2,
+            shadowColor: _KareuColors.primaryBlue.withOpacity(0.3),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+          ),
+        ),
+        cardTheme: const CardThemeData(
+          elevation: 4,
+          shadowColor: Color(0x1A000000),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(16)),
           ),
         ),
       ),
@@ -110,10 +150,14 @@ class KareuApp extends StatelessWidget {
           '/caregiver-payment': (context) => const CaregiverPaymentScreen(),
           '/subscription-management': (context) => const SubscriptionManagementScreen(),
           '/contracts': (context) => const ContractsScreen(),
-          '/hire-caregiver': (context) => const HireCaregiverScreen(),
+          '/hire-caregiver': (context) => const ImprovedHireScreen(),
           '/patient-account': (context) => const PatientAccountScreen(),
           '/professional-account': (context) => const ProfessionalAccountScreen(),
           '/patient-schedule': (context) => const PatientScheduleScreen(),
+          '/admin-dashboard': (context) => const AdminDashboardScreen(),
+          '/real-payment': (context) => const RealPaymentScreen(),
+          '/kareu-financial': (context) => const KareuFinancialDashboard(),
+          '/animations-demo': (context) => const AnimationsDemoScreen(),
       },
     );
   }

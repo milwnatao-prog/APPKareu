@@ -17,10 +17,13 @@ class _ProfessionalAccountScreenState extends State<ProfessionalAccountScreen> {
   final TextEditingController _emailController = TextEditingController(text: 'maria.santos@email.com');
   final TextEditingController _phoneController = TextEditingController(text: '+55 (84) 99999-9999');
   final TextEditingController _professionalRegistrationController = TextEditingController(text: 'COREN-RN 12345');
+  final TextEditingController _specializationController = TextEditingController(text: 'Cuidados com Idosos, Administração de Medicamentos, Fisioterapia Domiciliar');
   final TextEditingController _professionalDescriptionController = TextEditingController(
     text: 'Profissional dedicada com 8 anos de experiência em cuidados domiciliares. Especializada em cuidados com idosos, administração de medicamentos e acompanhamento médico. Tenho paixão por proporcionar qualidade de vida e bem-estar aos pacientes.'
   );
   final TextEditingController _hourlyRateController = TextEditingController(text: '45,00');
+  final TextEditingController _experienceController = TextEditingController(text: '8 anos de experiência em cuidados domiciliares');
+  final TextEditingController _certificationsController = TextEditingController(text: 'Curso de Primeiros Socorros, Certificação em Cuidados com Idosos, Curso de Administração de Medicamentos');
   
   // Características de personalidade
   final Set<String> _selectedPersonalityTraits = {
@@ -39,6 +42,9 @@ class _ProfessionalAccountScreenState extends State<ProfessionalAccountScreen> {
   bool _shareLocationEnabled = true;
   bool _acceptUrgentCalls = true;
   bool _availableWeekendsEnabled = false;
+  bool _availableHolidaysEnabled = false;
+  bool _backgroundCheckVerified = true;
+  bool _referencesVerified = true;
   
   // Estado do gênero selecionado
   String _selectedGender = 'Feminino';
@@ -76,6 +82,27 @@ class _ProfessionalAccountScreenState extends State<ProfessionalAccountScreen> {
     'Noite (18h-24h)'
   };
 
+  // Áreas de atuação
+  final Set<String> _selectedWorkAreas = {
+    'Cuidados com Idosos',
+    'Cuidados Pós-Operatórios',
+    'Reabilitação',
+    'Cuidados Paliativos'
+  };
+
+  // Idiomas falados
+  final Set<String> _selectedLanguages = {
+    'Português',
+    'Inglês Básico'
+  };
+
+  // Certificações e cursos
+  final Set<String> _selectedCertifications = {
+    'Curso de Primeiros Socorros',
+    'Certificação em Cuidados com Idosos',
+    'Curso de Administração de Medicamentos'
+  };
+
   @override
   void dispose() {
     _nameController.dispose();
@@ -85,7 +112,11 @@ class _ProfessionalAccountScreenState extends State<ProfessionalAccountScreen> {
     _emailController.dispose();
     _phoneController.dispose();
     _professionalRegistrationController.dispose();
+    _specializationController.dispose();
     _professionalDescriptionController.dispose();
+    _hourlyRateController.dispose();
+    _experienceController.dispose();
+    _certificationsController.dispose();
     super.dispose();
   }
 
@@ -164,10 +195,37 @@ class _ProfessionalAccountScreenState extends State<ProfessionalAccountScreen> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              _buildStatItem('Avaliação', '4.8'),
-              _buildStatItem('Pacientes', '47'),
-              _buildStatItem('Atendimentos', '234'),
+              _buildStatItem('⭐ Avaliação', '4.8'),
+              _buildStatItem('👥 Pacientes', '47'),
+              _buildStatItem('✅ Atendimentos', '234'),
             ],
+          ),
+          AppDesignSystem.verticalSpace(1),
+          Container(
+            padding: const EdgeInsets.all(AppDesignSystem.spaceMD),
+            decoration: BoxDecoration(
+              color: AppDesignSystem.successColor.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(AppDesignSystem.borderRadius),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.verified,
+                  color: AppDesignSystem.successColor,
+                  size: 20,
+                ),
+                AppDesignSystem.horizontalSpace(0.5),
+                Expanded(
+                  child: Text(
+                    'Perfil Verificado • ${_selectedCertifications.length} Certificações',
+                    style: AppDesignSystem.bodySmallStyle.copyWith(
+                      color: AppDesignSystem.successColor,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -288,16 +346,16 @@ class _ProfessionalAccountScreenState extends State<ProfessionalAccountScreen> {
             style: AppDesignSystem.sectionTitleStyle,
           ),
           AppDesignSystem.verticalSpace(1),
-          
+
           AppDesignSystem.styledTextField(
             label: 'Descrição Profissional',
             hint: 'Conte sobre sua experiência e especialidades',
             controller: _professionalDescriptionController,
             maxLines: 4,
           ),
-          
+
           AppDesignSystem.verticalSpace(1),
-          
+
           _buildMultiSelectSection(
             'Especialidades',
             _selectedSpecialties,
@@ -312,9 +370,9 @@ class _ProfessionalAccountScreenState extends State<ProfessionalAccountScreen> {
               'Reabilitação',
             ],
           ),
-          
+
           AppDesignSystem.verticalSpace(1),
-          
+
           _buildMultiSelectSection(
             'Nível de Experiência',
             _selectedExperienceLevels,
@@ -327,11 +385,217 @@ class _ProfessionalAccountScreenState extends State<ProfessionalAccountScreen> {
               'Especialização Técnica',
             ],
           ),
-          
+        ],
+      ),
+    );
+  }
+
+  Widget _buildWorkProfile() {
+    return AppDesignSystem.styledCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.work,
+                color: AppDesignSystem.primaryColor,
+                size: 24,
+              ),
+              AppDesignSystem.horizontalSpace(0.5),
+              Text(
+                'Perfil de Trabalho',
+                style: AppDesignSystem.h3Style,
+              ),
+            ],
+          ),
           AppDesignSystem.verticalSpace(1),
-          
+          Text(
+            'Áreas de atuação e competências profissionais',
+            style: AppDesignSystem.bodySmallStyle.copyWith(
+              color: AppDesignSystem.textSecondaryColor,
+            ),
+          ),
+          AppDesignSystem.verticalSpace(1),
+
+          AppDesignSystem.styledTextField(
+            label: 'Especializações',
+            hint: 'Liste suas principais especializações',
+            controller: _specializationController,
+            maxLines: 2,
+          ),
+
+          AppDesignSystem.verticalSpace(1),
+
+          AppDesignSystem.styledTextField(
+            label: 'Experiência Profissional',
+            hint: 'Descreva sua experiência na área',
+            controller: _experienceController,
+            maxLines: 3,
+          ),
+
+          AppDesignSystem.verticalSpace(1),
+
           _buildMultiSelectSection(
-            'Disponibilidade de Horários',
+            'Áreas de Atuação',
+            _selectedWorkAreas,
+            [
+              'Cuidados com Idosos',
+              'Cuidados Pós-Operatórios',
+              'Reabilitação',
+              'Cuidados Paliativos',
+              'Cuidados com Crianças',
+              'Cuidados com Pessoas com Deficiência',
+              'Acompanhamento Psicológico',
+              'Cuidados Hospitalares',
+            ],
+          ),
+
+          AppDesignSystem.verticalSpace(1),
+
+          _buildMultiSelectSection(
+            'Idiomas',
+            _selectedLanguages,
+            [
+              'Português',
+              'Inglês',
+              'Espanhol',
+              'Francês',
+              'Italiano',
+              'Libras',
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCertificationsSection() {
+    return AppDesignSystem.styledCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.school,
+                color: AppDesignSystem.primaryColor,
+                size: 24,
+              ),
+              AppDesignSystem.horizontalSpace(0.5),
+              Text(
+                'Certificações e Cursos',
+                style: AppDesignSystem.h3Style,
+              ),
+            ],
+          ),
+          AppDesignSystem.verticalSpace(1),
+          Text(
+            'Suas qualificações e certificações profissionais',
+            style: AppDesignSystem.bodySmallStyle.copyWith(
+              color: AppDesignSystem.textSecondaryColor,
+            ),
+          ),
+          AppDesignSystem.verticalSpace(1),
+
+          AppDesignSystem.styledTextField(
+            label: 'Certificações',
+            hint: 'Liste suas certificações e cursos realizados',
+            controller: _certificationsController,
+            maxLines: 3,
+          ),
+
+          AppDesignSystem.verticalSpace(1),
+
+          _buildMultiSelectSection(
+            'Certificações Selecionadas',
+            _selectedCertifications,
+            [
+              'Curso de Primeiros Socorros',
+              'Certificação em Cuidados com Idosos',
+              'Curso de Administração de Medicamentos',
+              'Certificação em Fisioterapia',
+              'Curso de Enfermagem',
+              'Certificação em Psicologia',
+              'Curso de Nutrição',
+              'Certificação em Segurança do Trabalho',
+            ],
+          ),
+
+          AppDesignSystem.verticalSpace(1),
+
+          Container(
+            padding: const EdgeInsets.all(AppDesignSystem.spaceMD),
+            decoration: BoxDecoration(
+              color: AppDesignSystem.successColor.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(AppDesignSystem.borderRadius),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.verified_user,
+                  color: AppDesignSystem.successColor,
+                  size: 20,
+                ),
+                AppDesignSystem.horizontalSpace(0.5),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Verificação de Antecedentes',
+                        style: AppDesignSystem.bodySmallStyle.copyWith(
+                          color: AppDesignSystem.successColor,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      Text(
+                        'Verificado em ${DateTime.now().day}/${DateTime.now().month}/${DateTime.now().year}',
+                        style: AppDesignSystem.captionStyle.copyWith(
+                          color: AppDesignSystem.successColor.withValues(alpha: 0.8),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAvailabilitySection() {
+    return AppDesignSystem.styledCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.schedule,
+                color: AppDesignSystem.primaryColor,
+                size: 24,
+              ),
+              AppDesignSystem.horizontalSpace(0.5),
+              Text(
+                'Disponibilidade',
+                style: AppDesignSystem.h3Style,
+              ),
+            ],
+          ),
+          AppDesignSystem.verticalSpace(1),
+          Text(
+            'Configure sua disponibilidade para receber propostas de trabalho',
+            style: AppDesignSystem.bodySmallStyle.copyWith(
+              color: AppDesignSystem.textSecondaryColor,
+            ),
+          ),
+          AppDesignSystem.verticalSpace(1),
+
+          _buildMultiSelectSection(
+            'Horários Disponíveis',
             _selectedAvailability,
             [
               'Madrugada (0h-6h)',
@@ -341,6 +605,34 @@ class _ProfessionalAccountScreenState extends State<ProfessionalAccountScreen> {
               'Finais de Semana',
               'Feriados',
             ],
+          ),
+
+          AppDesignSystem.verticalSpace(1),
+
+          _buildSwitchTile(
+            'Disponível nos Finais de Semana',
+            'Aceitar trabalhos nos finais de semana',
+            _availableWeekendsEnabled,
+            (value) {
+              setState(() {
+                _availableWeekendsEnabled = value;
+              });
+            },
+            Icons.weekend_outlined,
+          ),
+
+          AppDesignSystem.verticalSpace(1),
+
+          _buildSwitchTile(
+            'Disponível em Feriados',
+            'Aceitar trabalhos em feriados',
+            _availableHolidaysEnabled,
+            (value) {
+              setState(() {
+                _availableHolidaysEnabled = value;
+              });
+            },
+            Icons.celebration_outlined,
           ),
         ],
       ),
@@ -667,7 +959,7 @@ class _ProfessionalAccountScreenState extends State<ProfessionalAccountScreen> {
       backgroundColor: AppDesignSystem.backgroundColor,
       appBar: AppDesignSystem.styledAppBar(
         context: context,
-        title: 'Minha Conta - Profissional',
+        title: 'Perfil Profissional',
         onBackPressed: () => Navigator.of(context).pop(),
         actions: [
           IconButton(
@@ -692,17 +984,15 @@ class _ProfessionalAccountScreenState extends State<ProfessionalAccountScreen> {
             AppDesignSystem.verticalSpace(2),
             _buildProfessionalInfo(),
             AppDesignSystem.verticalSpace(2),
-            _buildPersonalityTraitsSection(),
+            _buildWorkProfile(),
+            AppDesignSystem.verticalSpace(2),
+            _buildCertificationsSection(),
+            AppDesignSystem.verticalSpace(2),
+            _buildAvailabilitySection(),
             AppDesignSystem.verticalSpace(2),
             _buildPricingSection(),
             AppDesignSystem.verticalSpace(2),
             _buildSubscriptionSection(),
-            AppDesignSystem.verticalSpace(2),
-            _buildAccessSecurity(),
-            AppDesignSystem.verticalSpace(2),
-            _buildSocialLogin(),
-            AppDesignSystem.verticalSpace(2),
-            _buildPreferences(),
             AppDesignSystem.verticalSpace(2),
             _buildLogoutSection(),
             AppDesignSystem.verticalSpace(3),
@@ -1219,12 +1509,22 @@ class _ProfessionalAccountScreenState extends State<ProfessionalAccountScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Preferências de Trabalho',
-            style: AppDesignSystem.h3Style,
+          Row(
+            children: [
+              Icon(
+                Icons.settings,
+                color: AppDesignSystem.primaryColor,
+                size: 24,
+              ),
+              AppDesignSystem.horizontalSpace(0.5),
+              Text(
+                'Preferências Profissionais',
+                style: AppDesignSystem.h3Style,
+              ),
+            ],
           ),
           AppDesignSystem.verticalSpace(1.5),
-          _buildSwitchRow(
+          _buildSwitchTile(
             'Aceitar Chamadas de Emergência',
             'Disponível para atendimentos urgentes',
             _acceptUrgentCalls,
@@ -1232,12 +1532,20 @@ class _ProfessionalAccountScreenState extends State<ProfessionalAccountScreen> {
             Icons.emergency,
           ),
           AppDesignSystem.verticalSpace(1),
-          _buildSwitchRow(
+          _buildSwitchTile(
             'Integração com Calendário',
             'Sincronizar agenda com calendário do dispositivo',
             _calendarIntegrationEnabled,
             (value) => setState(() => _calendarIntegrationEnabled = value),
             Icons.calendar_today,
+          ),
+          AppDesignSystem.verticalSpace(1),
+          _buildSwitchTile(
+            'Compartilhar Localização',
+            'Permitir que pacientes vejam sua localização aproximada',
+            _shareLocationEnabled,
+            (value) => setState(() => _shareLocationEnabled = value),
+            Icons.location_on_outlined,
           ),
         ],
       ),

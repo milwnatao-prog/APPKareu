@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:table_calendar/table_calendar.dart';
 import '../constants/app_design_system.dart';
+import '../widgets/custom_calendar.dart';
 
 class PatientScheduleScreen extends StatefulWidget {
   const PatientScheduleScreen({super.key});
@@ -8,95 +10,140 @@ class PatientScheduleScreen extends StatefulWidget {
   State<PatientScheduleScreen> createState() => _PatientScheduleScreenState();
 }
 
-class _PatientScheduleScreenState extends State<PatientScheduleScreen> with TickerProviderStateMixin {
-  late TabController _tabController;
-  DateTime _selectedDate = DateTime.now();
+class _PatientScheduleScreenState extends State<PatientScheduleScreen> {
+  // CalendarFormat removido - será usado pelo CustomCalendar
+  DateTime _focusedDay = DateTime.now();
+  DateTime? _selectedDay;
+  DateTime _firstDay = DateTime.now().subtract(const Duration(days: 365));
+  DateTime _lastDay = DateTime.now().add(const Duration(days: 365));
+
+  // Variáveis para controle do calendário
+  CalendarFormat _calendarFormat = CalendarFormat.month;
+
   int _currentIndex = 3; // Índice da agenda na navegação
 
-  @override
-  void initState() {
-    super.initState();
-    _tabController = TabController(length: 3, vsync: this);
-  }
+  // Mock data para agendamentos com mais detalhes sobre cuidados
+  final Map<DateTime, List<ScheduleAppointment>> _appointments = {
+    DateTime.now(): [
+      ScheduleAppointment(
+        id: '1',
+        caregiverName: 'Maria Santos',
+        caregiverPhoto: null,
+        serviceType: 'Cuidados Gerais',
+        date: DateTime.now(),
+        startTime: '08:00',
+        endTime: '12:00',
+        status: AppointmentStatus.confirmed,
+        location: 'Domicílio',
+        description: 'Cuidados matinais, administração de medicamentos e atividades de vida diária',
+        careTypes: ['Higiene pessoal', 'Administração de medicamentos', 'Atividades de vida diária'],
+        isRecurring: true,
+        recurrencePattern: 'Segunda a Sexta',
+      ),
+    ],
+    DateTime.now().add(const Duration(days: 1)): [
+      ScheduleAppointment(
+        id: '2',
+        caregiverName: 'Ana Costa',
+        caregiverPhoto: null,
+        serviceType: 'Fisioterapia',
+        date: DateTime.now().add(const Duration(days: 1)),
+        startTime: '14:00',
+        endTime: '15:30',
+        status: AppointmentStatus.pending,
+        location: 'Domicílio',
+        description: 'Sessão de fisioterapia para reabilitação motora',
+        careTypes: ['Fisioterapia', 'Exercícios de mobilidade'],
+        isRecurring: false,
+      ),
+    ],
+    DateTime.now().add(const Duration(days: 2)): [
+      ScheduleAppointment(
+        id: '3',
+        caregiverName: 'João Silva',
+        caregiverPhoto: null,
+        serviceType: 'Acompanhamento Médico',
+        date: DateTime.now().add(const Duration(days: 2)),
+        startTime: '10:00',
+        endTime: '11:00',
+        status: AppointmentStatus.confirmed,
+        location: 'Hospital do Coração',
+        description: 'Acompanhamento em consulta cardiológica',
+        careTypes: ['Consulta médica', 'Exames de rotina'],
+        isRecurring: false,
+      ),
+    ],
+    DateTime.now().add(const Duration(days: 3)): [
+      ScheduleAppointment(
+        id: '4',
+        caregiverName: 'Maria Santos',
+        caregiverPhoto: null,
+        serviceType: 'Cuidados Gerais',
+        date: DateTime.now().add(const Duration(days: 3)),
+        startTime: '08:00',
+        endTime: '12:00',
+        status: AppointmentStatus.confirmed,
+        location: 'Domicílio',
+        description: 'Cuidados matinais realizados com sucesso',
+        careTypes: ['Higiene pessoal', 'Administração de medicamentos'],
+        isRecurring: true,
+        recurrencePattern: 'Segunda a Sexta',
+      ),
+    ],
+    DateTime.now().add(const Duration(days: 4)): [
+      ScheduleAppointment(
+        id: '5',
+        caregiverName: 'Carlos Oliveira',
+        caregiverPhoto: null,
+        serviceType: 'Enfermagem',
+        date: DateTime.now().add(const Duration(days: 4)),
+        startTime: '16:00',
+        endTime: '18:00',
+        status: AppointmentStatus.confirmed,
+        location: 'Domicílio',
+        description: 'Cuidados de enfermagem especializados',
+        careTypes: ['Curativos', 'Monitoramento de sinais vitais', 'Administração de medicamentos injetáveis'],
+        isRecurring: true,
+        recurrencePattern: 'Segunda, Quarta, Sexta',
+      ),
+    ],
+  };
 
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
-  }
-
-  // Mock data para agendamentos
-  final List<ScheduleAppointment> _appointments = [
-    ScheduleAppointment(
-      id: '1',
-      caregiverName: 'Maria Santos',
-      caregiverPhoto: null,
-      serviceType: 'Cuidados Gerais',
-      date: DateTime.now(),
-      startTime: '08:00',
-      endTime: '12:00',
-      status: AppointmentStatus.confirmed,
-      location: 'Domicílio',
-      description: 'Cuidados matinais, administração de medicamentos e atividades de vida diária',
-    ),
-    ScheduleAppointment(
-      id: '2',
-      caregiverName: 'Ana Costa',
-      caregiverPhoto: null,
-      serviceType: 'Fisioterapia',
-      date: DateTime.now().add(const Duration(days: 1)),
-      startTime: '14:00',
-      endTime: '15:30',
-      status: AppointmentStatus.pending,
-      location: 'Domicílio',
-      description: 'Sessão de fisioterapia para reabilitação motora',
-    ),
-    ScheduleAppointment(
-      id: '3',
-      caregiverName: 'João Silva',
-      caregiverPhoto: null,
-      serviceType: 'Acompanhamento Médico',
-      date: DateTime.now().add(const Duration(days: 2)),
-      startTime: '10:00',
-      endTime: '11:00',
-      status: AppointmentStatus.confirmed,
-      location: 'Hospital do Coração',
-      description: 'Acompanhamento em consulta cardiológica',
-    ),
-    ScheduleAppointment(
-      id: '4',
-      caregiverName: 'Maria Santos',
-      caregiverPhoto: null,
-      serviceType: 'Cuidados Gerais',
-      date: DateTime.now().subtract(const Duration(days: 1)),
-      startTime: '08:00',
-      endTime: '12:00',
-      status: AppointmentStatus.completed,
-      location: 'Domicílio',
-      description: 'Cuidados matinais realizados com sucesso',
-    ),
-  ];
-
-  List<ScheduleAppointment> get _todayAppointments {
-    return _appointments.where((apt) => 
-      apt.date.year == DateTime.now().year &&
-      apt.date.month == DateTime.now().month &&
-      apt.date.day == DateTime.now().day
-    ).toList();
+  List<ScheduleAppointment> _getAppointmentsForDay(DateTime day) {
+    final normalizedDay = DateTime(day.year, day.month, day.day);
+    return _appointments[normalizedDay] ?? [];
   }
 
   List<ScheduleAppointment> get _upcomingAppointments {
-    return _appointments.where((apt) => 
-      apt.date.isAfter(DateTime.now()) &&
-      apt.status != AppointmentStatus.completed
-    ).toList();
+    final today = DateTime.now();
+    final upcoming = <ScheduleAppointment>[];
+
+    for (var entry in _appointments.entries) {
+      if (entry.key.isAfter(today) || (entry.key.isAtSameMomentAs(today))) {
+        upcoming.addAll(entry.value.where((apt) => apt.status != AppointmentStatus.completed));
+      }
+    }
+
+    upcoming.sort((a, b) => a.date.compareTo(b.date));
+    return upcoming;
   }
 
   List<ScheduleAppointment> get _pastAppointments {
-    return _appointments.where((apt) => 
-      apt.date.isBefore(DateTime.now()) ||
-      apt.status == AppointmentStatus.completed
-    ).toList();
+    final today = DateTime.now();
+    final past = <ScheduleAppointment>[];
+
+    for (var entry in _appointments.entries) {
+      if (entry.key.isBefore(today)) {
+        past.addAll(entry.value.where((apt) => apt.status == AppointmentStatus.completed));
+      }
+    }
+
+    past.sort((a, b) => b.date.compareTo(a.date));
+    return past;
+  }
+
+  int _getAppointmentCountForDay(DateTime day) {
+    return _getAppointmentsForDay(day).length;
   }
 
   void _onBottomNavTap(int index) {
@@ -126,6 +173,10 @@ class _PatientScheduleScreenState extends State<PatientScheduleScreen> with Tick
   }
 
   Widget _buildHeader() {
+    final todayCount = _getAppointmentCountForDay(DateTime.now());
+    final upcomingCount = _upcomingAppointments.length;
+    final totalCount = _appointments.values.fold(0, (sum, list) => sum + list.length);
+
     return Container(
       padding: const EdgeInsets.all(AppDesignSystem.spaceLG),
       decoration: const BoxDecoration(
@@ -182,7 +233,7 @@ class _PatientScheduleScreenState extends State<PatientScheduleScreen> with Tick
                 Expanded(
                   child: _buildQuickStat(
                     'Hoje',
-                    _todayAppointments.length.toString(),
+                    todayCount.toString(),
                     Icons.today,
                   ),
                 ),
@@ -190,15 +241,15 @@ class _PatientScheduleScreenState extends State<PatientScheduleScreen> with Tick
                 Expanded(
                   child: _buildQuickStat(
                     'Próximos',
-                    _upcomingAppointments.length.toString(),
+                    upcomingCount.toString(),
                     Icons.schedule,
                   ),
                 ),
                 AppDesignSystem.horizontalSpace(1),
                 Expanded(
                   child: _buildQuickStat(
-                    'Este Mês',
-                    _appointments.length.toString(),
+                    'Total',
+                    totalCount.toString(),
                     Icons.calendar_month,
                   ),
                 ),
@@ -245,79 +296,7 @@ class _PatientScheduleScreenState extends State<PatientScheduleScreen> with Tick
     );
   }
 
-  Widget _buildTabView() {
-    return Expanded(
-      child: Column(
-        children: [
-          Container(
-            margin: const EdgeInsets.all(AppDesignSystem.spaceLG),
-            decoration: BoxDecoration(
-              color: AppDesignSystem.surfaceColor,
-              borderRadius: BorderRadius.circular(AppDesignSystem.borderRadius),
-            ),
-            child: TabBar(
-              controller: _tabController,
-              labelColor: AppDesignSystem.primaryColor,
-              unselectedLabelColor: AppDesignSystem.textSecondaryColor,
-              indicatorColor: AppDesignSystem.primaryColor,
-              indicatorWeight: 3,
-              labelStyle: const TextStyle(
-                fontSize: AppDesignSystem.fontSizeBodySmall,
-                fontWeight: FontWeight.w600,
-              ),
-              tabs: const [
-                Tab(text: 'Hoje'),
-                Tab(text: 'Próximos'),
-                Tab(text: 'Histórico'),
-              ],
-            ),
-          ),
-          Expanded(
-            child: TabBarView(
-              controller: _tabController,
-              children: [
-                _buildAppointmentsList(_todayAppointments, 'Nenhum agendamento para hoje'),
-                _buildAppointmentsList(_upcomingAppointments, 'Nenhum agendamento próximo'),
-                _buildAppointmentsList(_pastAppointments, 'Nenhum histórico disponível'),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
-  Widget _buildAppointmentsList(List<ScheduleAppointment> appointments, String emptyMessage) {
-    if (appointments.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.event_busy,
-              size: 64,
-              color: AppDesignSystem.textSecondaryColor.withValues(alpha: 0.5),
-            ),
-            AppDesignSystem.verticalSpace(1),
-            Text(
-              emptyMessage,
-              style: AppDesignSystem.bodyStyle.copyWith(
-                color: AppDesignSystem.textSecondaryColor,
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
-    return ListView.builder(
-      padding: const EdgeInsets.symmetric(horizontal: AppDesignSystem.spaceLG),
-      itemCount: appointments.length,
-      itemBuilder: (context, index) {
-        return _buildAppointmentCard(appointments[index]);
-      },
-    );
-  }
 
   Widget _buildAppointmentCard(ScheduleAppointment appointment) {
     return Container(
@@ -326,6 +305,7 @@ class _PatientScheduleScreenState extends State<PatientScheduleScreen> with Tick
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Header com cuidador e status
             Row(
               children: [
                 CircleAvatar(
@@ -362,10 +342,35 @@ class _PatientScheduleScreenState extends State<PatientScheduleScreen> with Tick
                     ],
                   ),
                 ),
-                _buildStatusChip(appointment.status),
+                Column(
+                  children: [
+                    _buildStatusChip(appointment.status),
+                    if (appointment.isRecurring && appointment.recurrencePattern != null) ...[
+                      const SizedBox(height: 4),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: AppDesignSystem.accentColor.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          'Recorrente',
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.w600,
+                            color: AppDesignSystem.accentColor,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
               ],
             ),
+
             AppDesignSystem.verticalSpace(1),
+
+            // Horário e localização
             Container(
               padding: const EdgeInsets.all(AppDesignSystem.spaceMD),
               decoration: BoxDecoration(
@@ -399,17 +404,100 @@ class _PatientScheduleScreenState extends State<PatientScheduleScreen> with Tick
                       ),
                     ],
                   ),
-                  if (appointment.description.isNotEmpty) ...[
+                  if (appointment.recurrencePattern != null) ...[
                     const SizedBox(height: 8),
-                    Text(
-                      appointment.description,
-                      style: AppDesignSystem.captionStyle,
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.repeat,
+                          size: 14,
+                          color: AppDesignSystem.accentColor,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          appointment.recurrencePattern!,
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                            color: AppDesignSystem.accentColor,
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ],
               ),
             ),
+
+            // Tipos de cuidados
+            if (appointment.careTypes.isNotEmpty) ...[
+              AppDesignSystem.verticalSpace(1),
+              Container(
+                padding: const EdgeInsets.all(AppDesignSystem.spaceMD),
+                decoration: BoxDecoration(
+                  color: AppDesignSystem.primaryColor.withValues(alpha: 0.05),
+                  borderRadius: BorderRadius.circular(AppDesignSystem.borderRadius),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.medical_services,
+                          size: 16,
+                          color: AppDesignSystem.primaryColor,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Cuidados Prestados',
+                          style: TextStyle(
+                            fontSize: AppDesignSystem.fontSizeBodySmall,
+                            fontWeight: FontWeight.w600,
+                            color: AppDesignSystem.primaryColor,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Wrap(
+                      spacing: 6,
+                      runSpacing: 6,
+                      children: appointment.careTypes.map((careType) {
+                        return Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: AppDesignSystem.primaryColor.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            careType,
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w500,
+                              color: AppDesignSystem.primaryColor,
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+
+            // Descrição
+            if (appointment.description.isNotEmpty) ...[
+              AppDesignSystem.verticalSpace(1),
+              Text(
+                appointment.description,
+                style: AppDesignSystem.captionStyle,
+              ),
+            ],
+
             AppDesignSystem.verticalSpace(1),
+
+            // Botões de ação
             Row(
               children: [
                 if (appointment.status == AppointmentStatus.pending) ...[
@@ -670,6 +758,125 @@ class _PatientScheduleScreenState extends State<PatientScheduleScreen> with Tick
     );
   }
 
+  Widget _buildCalendarView() {
+    return Column(
+      children: [
+        CustomCalendar(
+          viewType: CalendarViewType.patient,
+          selectedDay: _selectedDay,
+          focusedDay: _focusedDay,
+          calendarFormat: CalendarFormat.month,
+          events: _appointments,
+          onDaySelected: (selectedDay, focusedDay) {
+            setState(() {
+              _selectedDay = selectedDay;
+              _focusedDay = focusedDay;
+            });
+          },
+          onFormatChanged: (format) {
+            if (_calendarFormat != format) {
+              setState(() {
+                _calendarFormat = format;
+              });
+            }
+          },
+          onPageChanged: (focusedDay) {
+            _focusedDay = focusedDay;
+          },
+        ),
+
+        // Legenda do calendário
+        _buildCalendarLegend(),
+      ],
+    );
+  }
+
+  Widget _buildCalendarLegend() {
+    return Padding(
+      padding: const EdgeInsets.only(top: 8, bottom: 16),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 8,
+                height: 8,
+                decoration: BoxDecoration(
+                  color: AppDesignSystem.successColor,
+                  shape: BoxShape.circle,
+                ),
+              ),
+              const SizedBox(width: 4),
+              Text(
+                'Agendado',
+                style: AppDesignSystem.captionStyle,
+              ),
+            ],
+          ),
+          const SizedBox(width: 16),
+          Row(
+            children: [
+              Container(
+                width: 8,
+                height: 8,
+                decoration: BoxDecoration(
+                  color: AppDesignSystem.warningColor,
+                  shape: BoxShape.circle,
+                ),
+              ),
+              const SizedBox(width: 4),
+              Text(
+                'Pendente',
+                style: AppDesignSystem.captionStyle,
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAppointmentsList() {
+    final selectedAppointments = _selectedDay != null
+        ? _getAppointmentsForDay(_selectedDay!)
+        : _getAppointmentsForDay(DateTime.now());
+
+    if (selectedAppointments.isEmpty) {
+      return Expanded(
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(
+                Icons.event_note,
+                size: 64,
+                color: AppDesignSystem.textSecondaryColor.withValues(alpha: 0.5),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Nenhum agendamento para este dia',
+                style: AppDesignSystem.bodyStyle.copyWith(
+                  color: AppDesignSystem.textSecondaryColor,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return Expanded(
+      child: ListView.builder(
+        padding: const EdgeInsets.all(AppDesignSystem.spaceLG),
+        itemCount: selectedAppointments.length,
+        itemBuilder: (context, index) {
+          return _buildAppointmentCard(selectedAppointments[index]);
+        },
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -677,11 +884,18 @@ class _PatientScheduleScreenState extends State<PatientScheduleScreen> with Tick
       body: Column(
         children: [
           _buildHeader(),
-          _buildTabView(),
+          _buildCalendarView(),
+          _buildAppointmentsList(),
         ],
       ),
       bottomNavigationBar: _buildBottomNavigationBar(),
     );
+  }
+
+  // Método para obter eventos do dia para o calendário
+  List<dynamic> _getEventsForDay(DateTime day) {
+    final normalizedDay = DateTime(day.year, day.month, day.day);
+    return _appointments[normalizedDay] ?? [];
   }
 }
 
@@ -697,6 +911,9 @@ class ScheduleAppointment {
   AppointmentStatus status;
   final String location;
   final String description;
+  final List<String> careTypes;
+  final bool isRecurring;
+  final String? recurrencePattern;
 
   ScheduleAppointment({
     required this.id,
@@ -709,6 +926,9 @@ class ScheduleAppointment {
     required this.status,
     required this.location,
     required this.description,
+    this.careTypes = const [],
+    this.isRecurring = false,
+    this.recurrencePattern,
   });
 }
 

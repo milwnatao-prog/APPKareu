@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../constants/app_design_system.dart';
+import '../models/user_model.dart';
 import '../services/user_service.dart';
 import '../services/reputation_service.dart';
 import 'caregiver_payment_screen.dart';

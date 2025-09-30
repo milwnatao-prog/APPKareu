@@ -1,22 +1,44 @@
+import '../models/user_model.dart';
+
 class UserService {
-  static UserType _currentUserType = UserType.patient; // Default para teste
+  static UserModel? _currentUser;
+  static UserType _currentUserType = UserType.needCaregiver; // Default para teste
   static SubscriptionTier _currentSubscriptionTier = SubscriptionTier.free;
-  static final String _currentUserId = 'user_001'; // Simulação
-  
-  static UserType get currentUserType => _currentUserType;
-  static SubscriptionTier get currentSubscriptionTier => _currentSubscriptionTier;
-  static String get currentUserId => _currentUserId;
-  
+
+  static UserModel? get currentUser => _currentUser;
+  static UserType get currentUserType {
+    if (_currentUser != null) {
+      return _currentUser!.userType;
+    }
+    return _currentUserType;
+  }
+
+  static SubscriptionTier get currentSubscriptionTier {
+    if (_currentUser != null) {
+      return _currentUser!.subscriptionTier;
+    }
+    return _currentSubscriptionTier;
+  }
+  static String get currentUserId => _currentUser?.id ?? 'user_001'; // Fallback para simulação
+
+  static void setCurrentUser(UserModel? user) {
+    _currentUser = user;
+  }
+
   static void setUserType(UserType type) {
     _currentUserType = type;
   }
-  
+
   static void setSubscriptionTier(SubscriptionTier tier) {
     _currentSubscriptionTier = tier;
   }
+
+  static void clearCurrentUser() {
+    _currentUser = null;
+  }
   
-  static bool get isCaregiver => _currentUserType == UserType.caregiver;
-  static bool get isPatient => _currentUserType == UserType.patient;
+  static bool get isCaregiver => _currentUserType == UserType.amCaregiver;
+  static bool get isPatient => _currentUserType == UserType.needCaregiver;
   
   static String getAccountRoute() {
     return isCaregiver ? '/professional-account' : '/patient-account';
@@ -87,16 +109,4 @@ class UserService {
         return 79.90;
     }
   }
-}
-
-enum UserType {
-  caregiver,
-  patient,
-}
-
-enum SubscriptionTier {
-  free,     // Perfil limitado - apenas visualização
-  basic,    // R$ 29,90 - Perfil ativo + 5 agendamentos/mês
-  plus,     // R$ 49,90 - Ilimitado + destaque na busca
-  premium,  // R$ 79,90 - Tudo + posição top + badge premium
 }

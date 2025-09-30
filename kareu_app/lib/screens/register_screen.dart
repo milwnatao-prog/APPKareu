@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'user_type_selection_screen.dart' as selection_screen;
 import '../constants/app_design_system.dart';
+import '../models/user_model.dart';
+import '../services/user_service.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -27,7 +28,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   // Estado
   String _selectedGender = 'Feminino';
   String? _selectedState;
-  selection_screen.UserType? _userType;
+  UserType? _userType;
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
   bool _acceptTerms = false;
@@ -233,7 +234,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _userType = ModalRoute.of(context)?.settings.arguments as selection_screen.UserType?;
+    _userType = ModalRoute.of(context)?.settings.arguments as UserType?;
   }
 
   @override
@@ -262,7 +263,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   void _nextStep() {
-    int maxSteps = _userType == selection_screen.UserType.amCaregiver ? 3 : 3; // Agora pacientes também têm 4 etapas
+    int maxSteps = _userType == UserType.amCaregiver ? 3 : 3; // Agora pacientes também têm 4 etapas
     if (_currentStep < maxSteps) {
       if (_validateCurrentStep()) {
         setState(() {
@@ -304,7 +305,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               _birthDateController.text.isNotEmpty;
         
         // Validação adicional para profissionais
-        if (_userType == selection_screen.UserType.amCaregiver) {
+        if (_userType == UserType.amCaregiver) {
           return basicValidation &&
                  _selectedSpecialty != null &&
                  _selectedEducation != null &&
@@ -316,7 +317,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         return basicValidation;
       case 2:
         // Para profissionais: validação das referências (opcional)
-        if (_userType == selection_screen.UserType.amCaregiver) {
+        if (_userType == UserType.amCaregiver) {
           return true; // Referências são opcionais
         }
         // Para pacientes: validação das informações de saúde e necessidades
@@ -341,7 +342,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       // Simular criação de conta
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Conta criada com sucesso como ${_userType == selection_screen.UserType.needCaregiver ? 'Paciente' : 'Profissional'}!'),
+          content: Text('Conta criada com sucesso como ${_userType == UserType.needCaregiver ? 'Paciente' : 'Profissional'}!'),
           backgroundColor: AppDesignSystem.successColor,
         ),
       );
@@ -356,7 +357,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     return Scaffold(
       backgroundColor: AppDesignSystem.backgroundColor,
       appBar: AppDesignSystem.styledAppBar(
-        title: _userType == selection_screen.UserType.amCaregiver 
+        title: _userType == UserType.amCaregiver 
             ? 'Cadastro Profissional' 
             : 'Cadastro Paciente/Família',
         context: context,
@@ -372,7 +373,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             child: PageView(
               controller: _pageController,
               physics: const NeverScrollableScrollPhysics(),
-              children: _userType == selection_screen.UserType.amCaregiver
+              children: _userType == UserType.amCaregiver
                   ? [
                       _buildStep1(),
                       _buildStep2(),
@@ -447,7 +448,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   String _getStepTitle() {
-    if (_userType == selection_screen.UserType.amCaregiver) {
+    if (_userType == UserType.amCaregiver) {
       switch (_currentStep) {
         case 0:
           return 'Informações Básicas';
@@ -477,7 +478,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   String _getStepSubtitle() {
-    if (_userType == selection_screen.UserType.amCaregiver) {
+    if (_userType == UserType.amCaregiver) {
       switch (_currentStep) {
         case 0:
           return 'Vamos começar com suas informações de acesso';
@@ -655,7 +656,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
             _buildGenderSelector(),
             
             // Campos específicos para profissionais
-            if (_userType == selection_screen.UserType.amCaregiver) ...[
+            if (_userType == UserType.amCaregiver) ...[
               const SizedBox(height: AppDesignSystem.space2XL),
               
               // Título da seção profissional
@@ -775,7 +776,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
-            _userType == selection_screen.UserType.needCaregiver
+            _userType == UserType.needCaregiver
                 ? Icons.family_restroom
                 : Icons.medical_services,
             color: AppDesignSystem.primaryColor,
@@ -783,7 +784,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           ),
           const SizedBox(width: AppDesignSystem.spaceSM),
           Text(
-            _userType == selection_screen.UserType.needCaregiver
+            _userType == UserType.needCaregiver
                 ? 'Cadastro como Paciente/Família'
                 : 'Cadastro como Profissional',
             style: AppDesignSystem.bodyStyle.copyWith(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../constants/app_design_system.dart';
+import '../models/user_model.dart';
 import '../services/user_service.dart';
 
 class CaregiverChatScreen extends StatefulWidget {
@@ -19,7 +20,7 @@ class _CaregiverChatScreenState extends State<CaregiverChatScreen>
   void initState() {
     super.initState();
     // Definir tipo de usuário como cuidador
-    UserService.setUserType(UserType.caregiver);
+    UserService.setUserType(UserType.amCaregiver);
   }
   
   // Lista de conversas para cuidadores (com pacientes/famílias)

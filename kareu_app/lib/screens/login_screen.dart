@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../constants/app_design_system.dart';
+import '../models/user_model.dart';
 import '../services/user_service.dart';
+import '../widgets/animated_list.dart';
 
 enum Role { familiar, profissional }
 
@@ -40,7 +42,7 @@ class _LoginScreenState extends State<LoginScreen> {
     // Navegar para a tela apropriada baseada no tipo de usuário
     if (_selected == Role.familiar) {
       // Usuário logou como paciente/familiar
-      UserService.setUserType(UserType.patient);
+      UserService.setUserType(UserType.needCaregiver);
       Navigator.pushNamedAndRemoveUntil(
         context,
         '/home-patient',
@@ -48,7 +50,7 @@ class _LoginScreenState extends State<LoginScreen> {
       );
     } else {
       // Usuário logou como profissional
-      UserService.setUserType(UserType.caregiver);
+      UserService.setUserType(UserType.amCaregiver);
       Navigator.pushNamedAndRemoveUntil(
         context,
         '/home-professional',
@@ -75,8 +77,11 @@ class _LoginScreenState extends State<LoginScreen> {
                 children: [
                   const SizedBox(height: AppDesignSystem.spaceLG),
                   
-                  // Card principal de login
-                  _buildLoginCard(),
+                  // Card principal de login com animação
+                  FadeInUpAnimation(
+                    duration: const Duration(milliseconds: 800),
+                    child: _buildLoginCard(),
+                  ),
                   
                   const SizedBox(height: AppDesignSystem.space2XL),
                   
@@ -366,9 +371,40 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Widget _buildLoginButton() {
-    return AppDesignSystem.primaryButton(
-      text: 'Entrar',
-      onPressed: _performLogin,
+    return AnimatedCard(
+      onTap: _performLogin,
+      elevation: 8.0,
+      child: Container(
+        width: double.infinity,
+        height: 56,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              AppDesignSystem.primaryColor,
+              AppDesignSystem.primaryColor.withOpacity(0.8),
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: AppDesignSystem.primaryColor.withOpacity(0.3),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Center(
+          child: Text(
+            'Entrar',
+            style: AppDesignSystem.buttonStyle.copyWith(
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+      ),
     );
   }
 

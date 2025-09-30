@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:kareu_app/constants/app_design_system.dart';
+import '../constants/app_design_system.dart';
 import '../services/user_service.dart';
+import '../widgets/animated_list.dart';
 
 class HomePatientScreen extends StatefulWidget {
   const HomePatientScreen({super.key});
@@ -18,33 +19,48 @@ class _HomePatientScreenState extends State<HomePatientScreen> {
       body: SafeArea(
         child: Column(
           children: [
-            // Header com saudação
-            _buildHeader(),
-            
+            // Header com saudação e animação
+            FadeInUpAnimation(
+              duration: const Duration(milliseconds: 600),
+              child: _buildHeader(),
+            ),
+
             Expanded(
               child: SingleChildScrollView(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const SizedBox(height: 24),
-                    
-                    // Search Bar com filtro integrado
-                    _buildEnhancedSearchBar(),
-                    
+
+                    // Search Bar com filtro integrado e animação
+                    FadeInUpAnimation(
+                      duration: const Duration(milliseconds: 800),
+                      child: _buildEnhancedSearchBar(),
+                    ),
+
                     const SizedBox(height: 32),
-                    
-                    // Quick Actions
-                    _buildQuickActions(),
-                    
+
+                    // Quick Actions com animação
+                    FadeInUpAnimation(
+                      duration: const Duration(milliseconds: 1000),
+                      child: _buildQuickActions(),
+                    ),
+
                     const SizedBox(height: 32),
-                    
-                    // Cities Section
-                    _buildCitiesSection(),
-                    
+
+                    // Cities Section com animação
+                    FadeInUpAnimation(
+                      duration: const Duration(milliseconds: 1200),
+                      child: _buildCitiesSection(),
+                    ),
+
                     const SizedBox(height: 32),
-                    
-                    // Services Section
-                    _buildServicesSection(),
+
+                    // Services Section com animação
+                    FadeInUpAnimation(
+                      duration: const Duration(milliseconds: 1400),
+                      child: _buildServicesSection(),
+                    ),
                     
                     const SizedBox(height: 32),
                     

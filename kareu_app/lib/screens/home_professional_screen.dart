@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../constants/app_design_system.dart';
+import '../models/user_model.dart';
 import '../services/user_service.dart';
+import '../widgets/animated_list.dart';
 import 'caregiver_chat_screen.dart';
 
 class HomeProfessionalScreen extends StatefulWidget {
@@ -20,7 +22,7 @@ class _HomeProfessionalScreenState extends State<HomeProfessionalScreen>
   void initState() {
     super.initState();
     // Definir tipo de usuário como cuidador
-    UserService.setUserType(UserType.caregiver);
+    UserService.setUserType(UserType.amCaregiver);
     _calculateStatistics();
   }
   
@@ -180,6 +182,7 @@ class _HomeProfessionalScreenState extends State<HomeProfessionalScreen>
     );
   }
 
+
   Widget _buildHeader() {
     return Padding(
       padding: const EdgeInsets.all(AppDesignSystem.spaceLG),
@@ -226,6 +229,7 @@ class _HomeProfessionalScreenState extends State<HomeProfessionalScreen>
               ],
             ),
           ),
+          
           
           // Notifications
           Stack(
@@ -573,7 +577,12 @@ class _HomeProfessionalScreenState extends State<HomeProfessionalScreen>
           ],
         ),
         AppDesignSystem.verticalSpace(1),
-        ...activePatients.take(3).map((patient) => _buildPatientCard(patient)).toList(),
+        ...activePatients.take(3).map((patient) {
+          return AnimatedCard(
+            onTap: () => _openPatientChat(patient),
+            child: _buildPatientCard(patient),
+          );
+        }).toList(),
       ],
     );
   }

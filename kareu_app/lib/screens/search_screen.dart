@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:kareu_app/constants/app_design_system.dart';
-import '../services/user_service.dart';
+import 'package:table_calendar/table_calendar.dart';
+import '../constants/app_design_system.dart';
+import '../models/user_model.dart';
 import '../services/reputation_service.dart';
 
 class SearchScreen extends StatefulWidget {
@@ -15,6 +16,12 @@ class _SearchScreenState extends State<SearchScreen> {
   final FocusNode _focusNode = FocusNode();
   List<Map<String, dynamic>> _searchResults = [];
   bool _isSearching = false;
+
+  // Variáveis para controle de localização e busca
+  String _locationError = '';
+  bool _isLoadingLocation = false;
+  double _searchRadius = 10.0;
+  CalendarFormat _calendarFormat = CalendarFormat.month;
 
   // Dados simulados de cuidadores com informações de assinatura
   final List<Map<String, dynamic>> _allCaregivers = [
@@ -89,7 +96,7 @@ class _SearchScreenState extends State<SearchScreen> {
   void initState() {
     super.initState();
     _focusNode.requestFocus();
-    _searchResults = _sortCaregiversByPriority(_allCaregivers);
+    _searchResults = _allCaregivers;
   }
 
   @override
@@ -107,21 +114,135 @@ class _SearchScreenState extends State<SearchScreen> {
     // Simular delay de busca
     Future.delayed(const Duration(milliseconds: 500), () {
       setState(() {
-        List<Map<String, dynamic>> filteredResults;
         if (query.isEmpty) {
-          filteredResults = _allCaregivers;
+          _searchResults = _allCaregivers;
         } else {
-          filteredResults = _allCaregivers.where((caregiver) {
-            return caregiver['name'].toLowerCase().contains(query.toLowerCase()) ||
-                   caregiver['specialty'].toLowerCase().contains(query.toLowerCase()) ||
-                   caregiver['location'].toLowerCase().contains(query.toLowerCase());
+          _searchResults = _allCaregivers.where((caregiver) {
+            return caregiver['name'].toString().toLowerCase().contains(query.toLowerCase()) ||
+                   caregiver['specialty'].toString().toLowerCase().contains(query.toLowerCase()) ||
+                   caregiver['location'].toString().toLowerCase().contains(query.toLowerCase());
           }).toList();
         }
-        // Sempre aplicar ordenação por prioridade de assinatura
-        _searchResults = _sortCaregiversByPriority(filteredResults);
         _isSearching = false;
       });
     });
+  }
+
+  Widget _buildLocationLoadingIndicator() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      child: Row(
+        children: [
+          const SizedBox(
+            width: 20,
+            height: 20,
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              color: AppDesignSystem.primaryColor,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Text(
+            'Obtendo sua localização...',
+            style: AppDesignSystem.bodyStyle.copyWith(
+              color: AppDesignSystem.textSecondaryColor,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLocationError() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: AppDesignSystem.errorColor.withOpacity(0.1),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            Icons.location_off,
+            color: AppDesignSystem.errorColor,
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              _locationError,
+              style: AppDesignSystem.bodyStyle.copyWith(
+                color: AppDesignSystem.errorColor,
+              ),
+            ),
+          ),
+          TextButton(
+            onPressed: _retryLocationSearch,
+            child: Text(
+              'Tentar novamente',
+              style: AppDesignSystem.linkStyle.copyWith(
+                color: AppDesignSystem.primaryColor,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLocationControls() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Raio de busca',
+                  style: AppDesignSystem.captionStyle.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                Text(
+                  '${_searchRadius.toInt()} km',
+                  style: AppDesignSystem.bodyStyle.copyWith(
+                    color: AppDesignSystem.primaryColor,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                Slider(
+                  value: _searchRadius,
+                  min: 1,
+                  max: 50,
+                  divisions: 49,
+                  activeColor: AppDesignSystem.primaryColor,
+                  onChanged: (value) => _updateSearchRadius(value),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 16),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Encontrados',
+                style: AppDesignSystem.captionStyle.copyWith(
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              Text(
+                '${_searchResults.length}',
+                style: AppDesignSystem.h3Style.copyWith(
+                  color: AppDesignSystem.primaryColor,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
   }
 
   /// Ordena cuidadores por prioridade de assinatura e reputação
@@ -165,9 +286,19 @@ class _SearchScreenState extends State<SearchScreen> {
         children: [
           // Barra de busca
           _buildSearchInput(),
-          
+
           const SizedBox(height: 16),
-          
+
+          // Controles de distância e filtros
+          if (_isLoadingLocation)
+            _buildLocationLoadingIndicator()
+          else if (_locationError.isNotEmpty)
+            _buildLocationError()
+          else
+            _buildLocationControls(),
+
+          const SizedBox(height: 16),
+
           // Resultados
           Expanded(
             child: _isSearching
@@ -321,7 +452,7 @@ class _SearchScreenState extends State<SearchScreen> {
                       ),
                       const SizedBox(width: 4),
                       Text(
-                        caregiver['rating'].toString(),
+                        caregiver['rating']?.toStringAsFixed(1) ?? 'N/A',
                         style: AppDesignSystem.infoStyle,
                       ),
                       const SizedBox(width: AppDesignSystem.spaceLG),
@@ -354,8 +485,52 @@ class _SearchScreenState extends State<SearchScreen> {
                       ),
                       const Spacer(),
                       Text(
-                        caregiver['price'],
+                        'R\$ ${caregiver['hourlyRate']?.toStringAsFixed(0) ?? 'N/A'}/hora',
                         style: AppDesignSystem.priceStyle,
+                      ),
+                    ],
+                  ),
+                  
+                  const SizedBox(height: AppDesignSystem.spaceMD),
+                  
+                  // Botão de contratação rápida
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton(
+                          onPressed: () => _navigateToCaregiverProfile(caregiver),
+                          style: OutlinedButton.styleFrom(
+                            side: BorderSide(color: AppDesignSystem.primaryColor),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          child: Text(
+                            'Ver Perfil',
+                            style: AppDesignSystem.captionStyle.copyWith(
+                              color: AppDesignSystem.primaryColor,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: AppDesignSystem.spaceMD),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () => _navigateToImprovedHire(caregiver),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppDesignSystem.primaryColor,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          child: Text(
+                            'Contratar',
+                            style: AppDesignSystem.captionStyle.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
                       ),
                     ],
                   ),
@@ -371,8 +546,8 @@ class _SearchScreenState extends State<SearchScreen> {
   /// Constrói os badges de assinatura e verificação para um cuidador
   List<Widget> _buildCaregiverBadges(Map<String, dynamic> caregiver) {
     final List<Widget> badges = [];
-    final subscriptionTier = caregiver['subscriptionTier'] as SubscriptionTier;
-    final reputationLevel = caregiver['reputationLevel'] as ReputationLevel;
+    final SubscriptionTier subscriptionTier = caregiver['subscriptionTier'] as SubscriptionTier;
+    final ReputationLevel reputationLevel = caregiver['reputationLevel'] as ReputationLevel;
 
     // Badge de assinatura Premium
     if (subscriptionTier == SubscriptionTier.premium) {
@@ -441,6 +616,14 @@ class _SearchScreenState extends State<SearchScreen> {
           ),
         ],
       ),
+    );
+  }
+
+  void _navigateToImprovedHire(Map<String, dynamic> caregiverData) {
+    Navigator.pushNamed(
+      context,
+      '/improved-hire',
+      arguments: caregiverData,
     );
   }
 
@@ -545,5 +728,33 @@ class _SearchScreenState extends State<SearchScreen> {
     final regex = RegExp(r'R\$ (\d+)');
     final match = regex.firstMatch(priceString);
     return match != null ? double.parse(match.group(1)!) : 25.0;
+  }
+
+  // Métodos para controle de localização e busca
+  void _retryLocationSearch() {
+    setState(() {
+      _locationError = '';
+      _isLoadingLocation = true;
+    });
+
+    // Simula busca de localização
+    Future.delayed(const Duration(seconds: 2), () {
+      setState(() {
+        _isLoadingLocation = false;
+        // Simula erro de localização (pode ser removido quando implementar localização real)
+        _locationError = 'Não foi possível obter localização. Verifique permissões.';
+      });
+    });
+  }
+
+  void _updateSearchRadius(double value) {
+    setState(() {
+      _searchRadius = value;
+    });
+  }
+
+  List<dynamic> _getEventsForDay(DateTime day) {
+    // Retorna eventos vazios (pode ser implementado quando necessário)
+    return [];
   }
 }

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import '../constants/app_design_system.dart';
+import '../models/user_model.dart';
 import '../services/user_service.dart';
+import '../widgets/custom_calendar.dart';
 
 class CaregiverScheduleScreen extends StatefulWidget {
   const CaregiverScheduleScreen({super.key});
@@ -20,7 +22,7 @@ class _CaregiverScheduleScreenState extends State<CaregiverScheduleScreen> {
   void initState() {
     super.initState();
     // Definir tipo de usuário como cuidador
-    UserService.setUserType(UserType.caregiver);
+    UserService.setUserType(UserType.amCaregiver);
     _initializeSchedule();
   }
 
@@ -94,21 +96,42 @@ class _CaregiverScheduleScreenState extends State<CaregiverScheduleScreen> {
             // Header
             _buildHeader(),
             
-            // Calendar Header
-            _buildCalendarHeader(),
-            
-            // Calendar
+            // Calendário melhorado
             Expanded(
               child: SingleChildScrollView(
                 child: Column(
                   children: [
-                    _buildCalendar(),
-                    
+                    // Calendário profissional com disponibilidade
+                    Padding(
+                      padding: const EdgeInsets.all(AppDesignSystem.spaceLG),
+                      child: CustomCalendar(
+                        viewType: CalendarViewType.professional,
+                        focusedDay: _currentMonth,
+                        scheduleData: _schedule,
+                        onDaySelected: (selectedDay, focusedDay) {
+                          setState(() {
+                            _selectedDate = selectedDay;
+                          });
+                        },
+                        onPageChanged: (focusedDay) {
+                          setState(() {
+                            _currentMonth = DateTime(focusedDay.year, focusedDay.month, 1);
+                            _generateScheduleForMonth(_currentMonth);
+                            if (_currentMonth.month != DateTime.now().month) {
+                              _generateScheduleForMonth(DateTime(_currentMonth.year, _currentMonth.month + 1));
+                            }
+                          });
+                        },
+                        showTodayButton: false, // Profissionais não precisam do botão "Hoje"
+                        showNavigation: false, // Usamos controles customizados
+                      ),
+                    ),
+
                     AppDesignSystem.verticalSpace(1),
-                    
+
                     // Day Details
                     _buildDayDetails(),
-                    
+
                     AppDesignSystem.verticalSpace(2),
                   ],
                 ),
@@ -851,11 +874,6 @@ class _CaregiverScheduleScreenState extends State<CaregiverScheduleScreen> {
 }
 
 // Classes de modelo
-enum ScheduleType {
-  available,
-  patient,
-  unavailable,
-}
 
 enum AppointmentStatus {
   confirmed,
@@ -863,17 +881,6 @@ enum AppointmentStatus {
   cancelled,
 }
 
-class ScheduleDay {
-  final DateTime date;
-  final ScheduleType type;
-  final List<Appointment> appointments;
-
-  ScheduleDay({
-    required this.date,
-    required this.type,
-    required this.appointments,
-  });
-}
 
 class Appointment {
   final String patientName;

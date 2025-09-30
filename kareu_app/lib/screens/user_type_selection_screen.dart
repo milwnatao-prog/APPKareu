@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../constants/app_design_system.dart';
-
-enum UserType { needCaregiver, amCaregiver }
+import '../models/user_model.dart';
+import '../services/user_service.dart';
 
 class UserTypeSelectionScreen extends StatefulWidget {
   const UserTypeSelectionScreen({super.key});

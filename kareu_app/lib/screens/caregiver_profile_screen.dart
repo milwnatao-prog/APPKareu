@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../constants/app_design_system.dart';
+import '../models/user_model.dart';
 import '../services/user_service.dart';
 
 class CaregiverProfileScreen extends StatefulWidget {
@@ -23,7 +24,7 @@ class _CaregiverProfileScreenState extends State<CaregiverProfileScreen> {
     super.initState();
     caregiver = widget.caregiverData ?? _getDefaultCaregiverData();
     // Definir tipo de usuário como cuidador (perfil do próprio cuidador)
-    UserService.setUserType(UserType.caregiver);
+    UserService.setUserType(UserType.amCaregiver);
   }
   
   @override

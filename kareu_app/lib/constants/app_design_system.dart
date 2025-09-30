@@ -246,6 +246,11 @@ class AppDesignSystem {
   static const Color successColor = Color(0xFF10B981);
   static const Color warningColor = Color(0xFFF59E0B);
   static const Color infoColor = Color(0xFF3B82F6);
+
+  // Cores específicas para funcionalidades
+  static const Color goldColor = Color(0xFFFFD700); // Dourado para badges premium
+  static const Color verifiedColor = Color(0xFF10B981); // Verde para badges verificados
+  static const Color ratingColor = Color(0xFFFFAD00); // Amarelo para estrelas de avaliação
   
   // Aliases para compatibilidade
   static const Color textColor = textPrimaryColor;
