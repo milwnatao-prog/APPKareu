@@ -21,8 +21,6 @@ class _CaregiverScheduleScreenState extends State<CaregiverScheduleScreen> {
   @override
   void initState() {
     super.initState();
-    // Definir tipo de usuário como cuidador
-    UserService.setUserType(UserType.amCaregiver);
     _initializeSchedule();
   }
 

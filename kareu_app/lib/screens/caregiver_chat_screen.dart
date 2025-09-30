@@ -19,8 +19,6 @@ class _CaregiverChatScreenState extends State<CaregiverChatScreen>
   @override
   void initState() {
     super.initState();
-    // Definir tipo de usuário como cuidador
-    UserService.setUserType(UserType.amCaregiver);
   }
   
   // Lista de conversas para cuidadores (com pacientes/famílias)

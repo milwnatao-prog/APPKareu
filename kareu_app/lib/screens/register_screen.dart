@@ -235,6 +235,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     _userType = ModalRoute.of(context)?.settings.arguments as UserType?;
+
+    // Definir o tipo de usuário no serviço global
+    if (_userType != null) {
+      UserService.setUserType(_userType!);
+    }
   }
 
   @override

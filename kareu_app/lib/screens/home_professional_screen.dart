@@ -21,8 +21,6 @@ class _HomeProfessionalScreenState extends State<HomeProfessionalScreen>
   @override
   void initState() {
     super.initState();
-    // Definir tipo de usuário como cuidador
-    UserService.setUserType(UserType.amCaregiver);
     _calculateStatistics();
   }
   
